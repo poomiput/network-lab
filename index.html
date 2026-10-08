@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>G06 Config Map</title>
+<meta name="description" content="G06 NBK — ภาพรวมเครือข่ายและคอนฟิกแยกเครื่อง พร้อมปุ่ม Copy ทีละ BLOCK">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Thai:wght@400;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="style.css?v=20261008235352">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <h1>G06 NBK · Config Map</h1>
+    <p class="sub">กดที่อุปกรณ์เพื่อดูสายที่ต้องเสียบ คอนฟิกทีละ BLOCK และผลที่ต้องเห็น</p>
+  </div>
+  <div class="set-switch" role="tablist" aria-label="เลือกชุดสคริปต์ตามรุ่นสวิตช์">
+    <button role="tab" data-set="hsrp">C9300 · HSRP</button>
+    <button role="tab" data-set="vrrp">C9200L · VRRP</button>
+  </div>
+</header>
+
+<main class="layout">
+  <section class="topo-wrap" aria-label="Topology">
+    <div class="rack-note" id="rackNote"></div>
+    <svg id="topo" viewBox="0 -50 960 650" role="img" aria-label="แผนภาพเครือข่าย G06"></svg>
+    <div class="legend">
+      <span><i class="lg routed"></i>Routed / OSPF</span>
+      <span><i class="lg po"></i>LACP Po1 (trunk)</span>
+      <span><i class="lg wan"></i>WAN / ISP (ยังไม่ทดสอบ)</span>
+      <span><i class="lg gre"></i>GRE T1/T2 (ยังไม่ทดสอบ)</span>
+    </div>
+  </section>
+
+  <section class="detail" id="detail" aria-live="polite"></section>
+</main>
+
+<footer class="foot">
+  สร้างจาก <code>G06_Device_Scripts/</code> · ส่วนที่ติดป้าย “ยังไม่ทดสอบ” ยังไม่เคยลงเครื่องจริง ตรวจผลทุก BLOCK ก่อนเชื่อ
+</footer>
+
+<script src="data/configs.js?v=20261008235352"></script>
+<script src="data/devices.js?v=20261008235352"></script>
+<script src="app.js?v=20261008235352"></script>
+</body>
+</html>
