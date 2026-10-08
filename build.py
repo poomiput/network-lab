@@ -8,6 +8,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, "..", "G06_Device_Scripts")
 SETS = {"hsrp": SRC, "vrrp": os.path.join(SRC, "C9200L-VRRP")}
 DEVICES = ["CE01", "CE02", "MLS01", "MLS02", "R01", "SW01"]
+WEB_HOSTNAMES = {d: f"G06-{'BR' if d in ('R01', 'SW01') else 'HQ'}-{d}" for d in DEVICES}
 MARK = re.compile(r"^! -{3,} (.*?) -{3,}\s*$")
 
 
@@ -17,6 +18,11 @@ def strip(line):
 
 def public_command(line, path):
     """Keep the shared website free of literal credentials and lab key hashes."""
+    # Use worksheet hostnames in website copies; leave the source TXT untouched.
+    hostname = re.match(r"^(\s*hostname\s+)\S+\s*$", line)
+    if hostname:
+        device = os.path.splitext(os.path.basename(path))[0]
+        return hostname.group(1) + WEB_HOSTNAMES[device]
     if re.match(r"^\s*(?:enable secret|username\b.*\bsecret)\s", line):
         if not re.search(r"<[^>]+>", line):
             raise ValueError(f"{path}: replace the credential with a placeholder before generating the website")

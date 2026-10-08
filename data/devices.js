@@ -17,6 +17,7 @@ window.G06_SETS = {
 
 window.G06_DEVICES = {
   CE01: {
+    hostname: "G06-HQ-CE01",
     role: "HQ Router หลัก (ทางออก ISP หลัก G01)", model: "C8200L-1N-4T", loopback: "10.6.255.1 / Lo1 198.51.100.1",
     console: { hsrp: "P1", vrrp: "T1" },
     cables: {
@@ -38,6 +39,7 @@ window.G06_DEVICES = {
     ],
   },
   CE02: {
+    hostname: "G06-HQ-CE02",
     role: "HQ Router สำรอง (ทางออก ISP สำรอง G02)", model: "C8200L-1N-4T", loopback: "10.6.255.2 / Lo1 198.51.100.2",
     console: { hsrp: "P4", vrrp: "T4" },
     cables: {
@@ -59,6 +61,7 @@ window.G06_DEVICES = {
     ],
   },
   MLS01: {
+    hostname: "G06-HQ-MLS01",
     role: "HQ Core Switch หลัก — Gateway ตัวหลัก (pri 110) + DHCP", model: { hsrp: "C9300L-24T-4G", vrrp: "C9200L-24T-4G" }, loopback: "10.6.255.11",
     console: { hsrp: "P11", vrrp: "T14" },
     cables: {
@@ -83,6 +86,7 @@ window.G06_DEVICES = {
     ],
   },
   MLS02: {
+    hostname: "G06-HQ-MLS02",
     role: "HQ Core Switch สำรอง — Gateway ตัวสำรอง (pri 100)", model: { hsrp: "C9300L-24T-4G", vrrp: "C9200L-24T-4G" }, loopback: "10.6.255.12",
     console: { hsrp: "P15", vrrp: "B2 (rack 8: สาย Console/MGMT หลังเครื่องเคยสลับ — Console = รูบน)" },
     cables: {
@@ -107,6 +111,7 @@ window.G06_DEVICES = {
     ],
   },
   R01: {
+    hostname: "G06-BR-R01",
     role: "Branch Router (ทางออก ISP G01 สาขา)", model: "C8200L-1N-4T", loopback: "Lo1 198.51.100.161",
     console: { hsrp: "P7", vrrp: "T7" },
     cables: {
@@ -126,6 +131,7 @@ window.G06_DEVICES = {
     ],
   },
   SW01: {
+    hostname: "G06-BR-SW01",
     role: "Branch Switch (VLAN110)", model: "C9200L-24T-4G", loopback: "Vlan110 10.6.16.2 (MGMT)",
     console: { hsrp: "P19", vrrp: "B14" },
     cables: {

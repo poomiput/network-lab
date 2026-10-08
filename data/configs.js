@@ -18,7 +18,7 @@ window.G06_CONFIGS = {
      "status": "tested",
      "notes": [],
      "commands": [
-      "hostname CE01",
+      "hostname G06-HQ-CE01",
       "no ip domain lookup",
       "router ospf 10",
       " router-id 10.6.255.1",
@@ -305,7 +305,7 @@ window.G06_CONFIGS = {
      "status": "tested",
      "notes": [],
      "commands": [
-      "hostname CE02",
+      "hostname G06-HQ-CE02",
       "no ip domain lookup",
       "router ospf 10",
       " router-id 10.6.255.2",
@@ -595,7 +595,7 @@ window.G06_CONFIGS = {
      "status": "tested",
      "notes": [],
      "commands": [
-      "hostname MLS01",
+      "hostname G06-HQ-MLS01",
       "no ip domain lookup",
       "vtp mode off",
       "vtp domain G06",
@@ -972,7 +972,7 @@ window.G06_CONFIGS = {
      "status": "tested",
      "notes": [],
      "commands": [
-      "hostname MLS02",
+      "hostname G06-HQ-MLS02",
       "no ip domain lookup",
       "vtp mode off",
       "vtp domain G06",
@@ -1324,7 +1324,7 @@ window.G06_CONFIGS = {
      "status": "tested",
      "notes": [],
      "commands": [
-      "hostname R01",
+      "hostname G06-BR-R01",
       "no ip domain lookup"
      ],
      "verify": []
@@ -1536,7 +1536,7 @@ window.G06_CONFIGS = {
      "commands": [
       "vtp mode off",
       "vtp domain G06",
-      "hostname SW01",
+      "hostname G06-BR-SW01",
       "no ip domain lookup",
       "vlan 110",
       " name BRANCH-LAN",
@@ -1683,7 +1683,7 @@ window.G06_CONFIGS = {
      "status": "tested",
      "notes": [],
      "commands": [
-      "hostname CE01",
+      "hostname G06-HQ-CE01",
       "no ip domain lookup",
       "router ospf 10",
       " router-id 10.6.255.1",
@@ -1971,7 +1971,7 @@ window.G06_CONFIGS = {
      "status": "tested",
      "notes": [],
      "commands": [
-      "hostname CE02",
+      "hostname G06-HQ-CE02",
       "no ip domain lookup",
       "router ospf 10",
       " router-id 10.6.255.2",
@@ -2262,7 +2262,7 @@ window.G06_CONFIGS = {
      "status": "tested",
      "notes": [],
      "commands": [
-      "hostname MLS01",
+      "hostname G06-HQ-MLS01",
       "no ip domain lookup",
       "vtp mode off",
       "vtp domain G06",
@@ -2647,7 +2647,7 @@ window.G06_CONFIGS = {
      "status": "tested",
      "notes": [],
      "commands": [
-      "hostname MLS02",
+      "hostname G06-HQ-MLS02",
       "no ip domain lookup",
       "vtp mode off",
       "vtp domain G06",
@@ -3007,7 +3007,7 @@ window.G06_CONFIGS = {
      "status": "tested",
      "notes": [],
      "commands": [
-      "hostname R01",
+      "hostname G06-BR-R01",
       "no ip domain lookup"
      ],
      "verify": []
@@ -3221,7 +3221,7 @@ window.G06_CONFIGS = {
      "commands": [
       "vtp mode off",
       "vtp domain G06",
-      "hostname SW01",
+      "hostname G06-BR-SW01",
       "line con 0",
       " exec-timeout 60 0",
       " logging synchronous",

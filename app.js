@@ -5,10 +5,27 @@
   const detail = document.getElementById("detail");
   const state = { set: "vrrp", dev: null };
 
+  /* ---------- theme ---------- */
+  const themeToggle = document.getElementById("themeToggle");
+  function updateThemeButton() {
+    const dark = document.documentElement.dataset.theme === "dark";
+    themeToggle.textContent = dark ? "☀ Light" : "☾ Dark";
+    themeToggle.setAttribute("aria-label", dark ? "เปลี่ยนเป็น Light theme" : "เปลี่ยนเป็น Dark theme");
+  }
+  themeToggle.addEventListener("click", () => {
+    const theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = theme;
+    try { localStorage.setItem("g06-config-site-theme", theme); } catch (e) {}
+    updateThemeButton();
+  });
+  updateThemeButton();
+
   /* ---------- helpers ---------- */
   const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const hl = (s) => esc(s).replace(/&lt;(?!-&gt;)([^&]*?)&gt;/g, '<span class="ph">&lt;$1&gt;</span>');
   const pick = (v) => (v && typeof v === "object" && !Array.isArray(v) ? v[state.set] : v);
+  const deviceName = (id) => DEV[id]?.hostname || id;
+  const peerNames = (text) => String(text).replace(/\b(?:CE01|CE02|MLS01|MLS02|R01|SW01)\b/g, deviceName);
   const NS = "http://www.w3.org/2000/svg";
   const el = (tag, attrs, text) => {
     const n = document.createElementNS(NS, tag);
@@ -103,9 +120,9 @@
     });
 
     Object.entries(NODES).forEach(([name, n]) => {
-      const g = el("g", { class: "node" + (n.isp ? " isp" : "") + (state.dev === name ? " sel" : ""), tabindex: n.isp ? -1 : 0, role: n.isp ? "img" : "button", "aria-label": name });
+      const g = el("g", { class: "node" + (n.isp ? " isp" : "") + (state.dev === name ? " sel" : ""), tabindex: n.isp ? -1 : 0, role: n.isp ? "img" : "button", "aria-label": deviceName(name), "data-device": name });
       g.append(el("rect", { x: n.x - W / 2, y: n.y - H / 2, width: W, height: H }));
-      g.append(el("text", { x: n.x, y: n.y - 5, "text-anchor": "middle", class: "nm" }, name));
+      g.append(el("text", { x: n.x, y: n.y - 5, "text-anchor": "middle", class: "nm" + (n.isp ? "" : " hostname") }, deviceName(name)));
       const md = n.isp ? n.md : pick(DEV[name].model);
       g.append(el("text", { x: n.x, y: n.y + 14, "text-anchor": "middle", class: "md" }, md));
       if (!n.isp) {
@@ -138,7 +155,7 @@
     let n = 0;
     const reg = (b) => { const id = "b" + n++; copyMap[id] = b.commands.join("\n") + "\n"; return id; };
 
-    const cables = d.cables[state.set].map((r) => "<tr><td class=\"mono\">" + hl(r[0]) + "</td><td>" + esc(r[1]) + "</td><td>" + esc(r[2]) + "</td><td>" + esc(r[3]) + "</td><td class=\"mono\">" + esc(r[4]) + "</td></tr>").join("");
+    const cables = d.cables[state.set].map((r) => "<tr><td class=\"mono\">" + hl(r[0]) + "</td><td>" + esc(r[1]) + "</td><td>" + esc(peerNames(r[2])) + "</td><td>" + esc(r[3]) + "</td><td class=\"mono\">" + esc(r[4]) + "</td></tr>").join("");
     const expects = d.expect.map(pick).map((e) => "<li><code>" + esc(e[0]) + "</code><span>" + esc(e[1]) + "</span></li>").join("");
     const verifyBlock = c.blocks.find((b) => b.kind === "verify");
     const seen = new Set(d.expect.map(pick).map((e) => e[0].replace(/\s+/g, " ").trim()));
@@ -154,9 +171,12 @@
     const tested = c.blocks.filter((b) => b.kind === "config" && b.status === "tested");
     const later = c.blocks.filter((b) => b.kind === "config" && b.status !== "tested");
     const prelude = { title: "เริ่มที่นี่: เข้าโหมดตั้งค่า (วางก่อน BLOCK 1)", status: "tested", notes: [], commands: c.prelude, verify: [] };
+    const hostnameCommand = c.blocks.flatMap((b) => b.commands).find((line) => /^\s*hostname\s+/.test(line));
+    const scriptHostname = hostnameCommand ? hostnameCommand.trim().split(/\s+/)[1] : null;
 
     let html = '<button class="back" data-back>← ภาพรวม</button>' +
-      "<h2>" + name + "</h2><p class=\"meta\">" + esc(d.role) + "</p>" +
+      "<h2>" + esc(deviceName(name)) + "</h2><p class=\"meta\">" + esc(d.role) + "</p>" +
+      '<p class="meta">ชื่อย่อ: ' + esc(name) + (scriptHostname ? ' · Hostname ในสคริปต์เว็บ: <code>' + esc(scriptHostname) + '</code>' : "") + '</p>' +
       '<div class="chips"><span class="chip">' + esc(pick(d.model)) + '</span><span class="chip">' + esc(d.loopback) + '</span><span class="chip">Console: แผง ' + esc(d.console[state.set]) + '</span><span class="chip">ชุด ' + esc(SETS[state.set].label) + "</span></div>";
     if (warns.length) html += '<div class="notice">' + warns.map((w) => "<p>" + hl(w.replace(/^!!\s*/, "")) + "</p>").join("") + "</div>";
     html += "<h3>เสียบสาย</h3><div class=\"table-wrap\"><table><thead><tr><th>พอร์ต</th><th>แผง</th><th>ไปที่</th><th>แผงปลาย</th><th>IP / หน้าที่</th></tr></thead><tbody>" + cables + "</tbody></table></div>";
@@ -189,9 +209,9 @@
       "<li>วางพร้อมกันได้ทุกเครื่อง ทุกคู่ต่อกันเองเมื่ออีกฝั่งเสร็จ แล้วเช็ก “ผลที่ต้องเห็น”</li></ol>" +
       '<div class="notice"><p>ทั้งทีมตกลงรหัสผ่านเดียวกันก่อนเริ่ม (enable secret ที่เครื่องใหม่บังคับตั้ง + บรรทัด username ใน U-SSH) — ห้ามเขียนรหัสจริงลงไฟล์หรือเว็บ</p><p>สวิตช์ C9200L รับตัวอักษรเร็วไม่ทัน: วางทีละ BLOCK หรือตั้ง paste delay ~20 ms/ตัว</p></div>' +
       "<h3>แบ่งงาน</h3><div class=\"table-wrap\"><table><thead><tr><th>คน</th><th>เครื่อง</th><th>หมายเหตุ</th></tr></thead><tbody>" +
-      "<tr><td>1</td><td>MLS01</td><td>มี DHCP · คนตรวจผลรวมตอนท้าย</td></tr><tr><td>2</td><td>MLS02</td><td></td></tr>" +
-      "<tr><td>3</td><td>CE01</td><td>WAN ทางหลัก</td></tr><tr><td>4</td><td>CE02</td><td>WAN ทางสำรอง</td></tr>" +
-      "<tr><td>5</td><td>R01 + SW01</td><td>สาขา สั้นทั้งคู่</td></tr></tbody></table></div>" +
+      "<tr><td>1</td><td>" + esc(deviceName("MLS01")) + "</td><td>มี DHCP · คนตรวจผลรวมตอนท้าย</td></tr><tr><td>2</td><td>" + esc(deviceName("MLS02")) + "</td><td></td></tr>" +
+      "<tr><td>3</td><td>" + esc(deviceName("CE01")) + "</td><td>WAN ทางหลัก</td></tr><tr><td>4</td><td>" + esc(deviceName("CE02")) + "</td><td>WAN ทางสำรอง</td></tr>" +
+      "<tr><td>5</td><td>" + esc(deviceName("R01")) + " + " + esc(deviceName("SW01")) + "</td><td>สาขา สั้นทั้งคู่</td></tr></tbody></table></div>" +
       "<h3>VLAN / Gateway</h3><div class=\"table-wrap\"><table><thead><tr><th>VLAN</th><th>ชื่อ</th><th>วง</th><th>Gateway</th><th>เครื่องในวง</th><th>ช่อง</th></tr></thead><tbody>" + rows + "</tbody></table></div>" +
       '<p class="meta" style="margin-top:10px">Loopback0: CE01 .1 · CE02 .2 · MLS01 .11 · MLS02 .12 (10.6.255.x) · AS65106 · ISP G01 AS65001 (หลัก) / G02 AS65002 (สำรอง)</p>' +
       "</div>";
