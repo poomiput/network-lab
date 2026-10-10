@@ -590,39 +590,83 @@
       "<pre>" + b.commands.map(hl).join("\n") + "</pre>" + verify + "</div>";
   }
 
-  // Picture of the patch panel (as seen from the front of the rack) with this device's slots lit up.
+  // Picture of the patch panel (front of the rack): this device's slots, the far-end slots, and the patch cables between them.
+  const CABLE_COLORS = ["#2f6fd6", "#1f9d6b", "#8a4fd6", "#d6336c", "#0b8a9e", "#c2410c", "#9a7b00", "#4b5563"];
   function panelHTML(name) {
-    const d = DEV[name], used = new Map();
-    const mark = (slot, kind, text) => { const k = slot.row + slot.n; if (!used.has(k)) used.set(k, { kind, text: [] }); used.get(k).text.push(text); };
-    slotsOf(String(d.console[state.set]).split(" ")[0]).slice(0, 1).forEach((sl) => mark(sl, "con", "สาย Console ของ " + name));
+    const d = DEV[name], cables = [];
+    const con = slotsOf(String(d.console[state.set]).split(" ")[0])[0];
+    if (con) cables.push({ from: con, to: null, kind: "con", text: "สาย Console → คอมที่ใช้ตั้งค่า", stub: "คอม" });
     d.cables[state.set].forEach((r) => {
-      const slots = slotsOf(r[1]);
-      let ports = [r[0]];
-      try { ports = IF.parse(mapped(r[0], name)).map((p) => IF.format([p], "Gi")); } catch (e) {}
-      let originals = [];
-      try { originals = IF.parse(r[0]); } catch (e) {}
-      slots.forEach((sl, i) => {
-        const own = ports.length === slots.length ? ports[i] : mapped(r[0], name);
-        // Access ports: name the actual PC (Teller, ATM, ...) instead of the generic "PC" text.
+      const own = slotsOf(r[1]), far = slotsOf(r[3]);
+      if (!own.length) return;
+      let originals = [], ports = [], peerPorts = [];
+      try { originals = IF.parse(r[0]); ports = IF.parse(mapped(r[0], name)).map((p) => IF.format([p], "Gi")); } catch (e) {}
+      const pm = r[2].match(/^(CE01|CE02|MLS01|MLS02|R01|SW01)\s+(.*)$/);
+      if (pm) try { peerPorts = IF.parse(mapped(pm[2], pm[1])).map((p) => IF.format([p], "Gi")); } catch (e) {}
+      own.forEach((sl, i) => {
+        const ownPort = ports.length === own.length ? ports[i] : mapped(r[0], name);
         const n = Number((originals[i] || "").match(/^GigabitEthernet1\/0\/(\d+)$/)?.[1]);
-        const host = /^PC/.test(r[2]) && (name === "SW01" ? BR_HOSTS : HQ_HOSTS).find((h) => h.port === n);
-        mark(sl, "lan", own + " → " + (host ? "PC " + host.label + " (VLAN " + host.vlan + ")" : /^PC/.test(r[2]) ? "PC สำรอง (ว่างได้)" : peerNames(r[2])));
+        const isPC = /^PC/.test(r[2]), host = isPC && (name === "SW01" ? BR_HOSTS : HQ_HOSTS).find((h) => h.port === n);
+        const peer = host ? "PC " + host.label + " (VLAN " + host.vlan + ")" : isPC ? "PC สำรอง (ว่างได้)"
+          : pm ? deviceName(pm[1]) + " " + (peerPorts.length === own.length ? peerPorts[i] : mapped(pm[2], pm[1])) : peerNames(r[2]);
+        cables.push({ from: sl, to: far.length === own.length ? far[i] : null, kind: "lan", text: ownPort + " → " + peer,
+          stub: host ? host.label : isPC ? "สำรอง" : pm ? pm[1] : r[2].split(" ")[0] });
       });
     });
-    if (!used.size) return '<p class="meta">ไม่มีเลขช่องแผงของชุดนี้ — สายเสียบตรงที่ตัวเครื่อง</p>';
+    if (!cables.length) return '<p class="meta">ไม่มีเลขช่องแผงของชุดนี้ — สายเสียบตรงที่ตัวเครื่อง</p>';
+    let colorIndex = 0;
+    cables.forEach((c) => { c.color = c.kind === "con" ? "var(--warn-ink)" : CABLE_COLORS[colorIndex++ % CABLE_COLORS.length]; });
+
     const rows = state.set === "vrrp" ? [["T", "แถวบน"], ["B", "แถวล่าง"]] : [["P", "แผง"]];
-    let html = '<div class="panel"><div class="panel-title">แผงเสียบสาย (มองจากหน้า rack) · ช่องที่มีสีคือช่องของเครื่องนี้</div>';
-    rows.forEach(([r, label]) => {
-      html += '<div class="panel-row"><span class="panel-label"><span class="long">' + label + '</span><span class="short">' + label.replace("แถว", "") + '</span></span><div class="panel-cells">';
-      for (let i = 1; i <= 24; i++) {
-        const u = used.get(r + i);
-        html += '<span class="cell' + (u ? " " + u.kind : "") + '"' + (u ? ' title="' + esc(label + " ช่อง " + i + ": " + u.text.join(", ")) + '"' : "") + ">" + i + "</span>";
+    const isTop = (sl) => sl.row !== "B";
+    // Leave room above/below the rows only where cables actually loop out.
+    const outside = (up) => cables.some((c) => isTop(c.from) === up && (!c.to || c.to.row === c.from.row));
+    const cw = 26, ch = 22, step = 29, lx = 54, top = outside(true) ? 64 : 12, bottom = rows.length > 1 && outside(false) ? 64 : 12, rowGap = 56;
+    const rowY = {};
+    rows.forEach(([r], i) => { rowY[r] = top + i * (ch + rowGap); });
+    const height = top + rows.length * ch + (rows.length - 1) * rowGap + bottom, width = lx + 24 * step + 50;
+    const cx = (sl) => lx + (sl.n - 1) * step + cw / 2;
+    const own = new Map(), far = new Map();
+    cables.forEach((c) => { own.set(c.from.row + c.from.n, c); if (c.to) far.set(c.to.row + c.to.n, c); });
+
+    let lines = "", stubs = "", cells = "";
+    cables.forEach((c) => {
+      const x1 = cx(c.from), y1 = rowY[c.from.row];
+      if (c.to) {
+        const x2 = cx(c.to), y2 = rowY[c.to.row];
+        let dPath;
+        if (c.from.row === c.to.row) {
+          const up = isTop(c.from), h = Math.min(16 + Math.abs(x2 - x1) * 0.12, (up ? top : bottom) - 10);
+          const ya = up ? y1 : y1 + ch, yc = up ? ya - h * 2 : ya + h * 2;
+          dPath = "M" + x1 + " " + ya + " Q" + (x1 + x2) / 2 + " " + yc + " " + x2 + " " + ya;
+        } else {
+          const [a, b] = isTop(c.from) ? [[x1, y1 + ch], [x2, y2]] : [[x1, y1], [x2, y2 + ch]];
+          const dir = b[1] > a[1] ? 1 : -1;
+          dPath = "M" + a[0] + " " + a[1] + " C" + a[0] + " " + (a[1] + dir * 34) + " " + b[0] + " " + (b[1] - dir * 34) + " " + b[0] + " " + b[1];
+        }
+        lines += '<path d="' + dPath + '" class="cable" style="stroke:' + c.color + '"><title>' + esc(c.text) + "</title></path>";
+      } else {
+        const up = isTop(c.from), ya = up ? y1 : y1 + ch, yb = up ? ya - 16 : ya + 16;
+        stubs += '<path d="M' + x1 + " " + ya + " V" + yb + '" class="cable stub" style="stroke:' + c.color + '"/>' +
+          '<text x="' + (x1 + 2) + '" y="' + (yb + (up ? -3 : 9)) + '" class="stub-t" transform="rotate(' + (up ? -40 : 40) + " " + (x1 + 2) + " " + (yb + (up ? -3 : 9)) + ')">' + esc(c.stub) + "</text>";
       }
-      html += "</div></div>";
     });
-    html += '<ul class="panel-key">' + [...used.entries()].sort((a, b) => (a[0][0] === b[0][0] ? Number(a[0].slice(1)) - Number(b[0].slice(1)) : a[0][0] === "T" ? -1 : 1))
-      .map(([k, u]) => '<li><span class="cell ' + u.kind + '">' + k.slice(1) + "</span>" + esc(slotText(k)) + " — " + esc(u.text.join(", ")) + "</li>").join("") + "</ul>";
-    return html + '<p class="panel-legend"><span class="cell con"></span> Console <span class="cell lan"></span> สาย LAN</p></div>';
+    rows.forEach(([r, label]) => {
+      const y = rowY[r];
+      cells += '<text x="0" y="' + (y + ch / 2 + 4) + '" class="row-t">' + label + "</text>";
+      for (let i = 1; i <= 24; i++) {
+        const x = lx + (i - 1) * step, o = own.get(r + i), f = far.get(r + i);
+        const tip = o ? label + " ช่อง " + i + " (เครื่องนี้): " + o.text : f ? label + " ช่อง " + i + " (ปลายสาย): " + f.text : "";
+        cells += '<g class="slot' + (o ? " own" : f ? " far" : "") + '">' + (tip ? "<title>" + esc(tip) + "</title>" : "") +
+          '<rect x="' + x + '" y="' + y + '" width="' + cw + '" height="' + ch + '" rx="4"' + (o ? ' style="fill:' + o.color + ";stroke:" + o.color + '"' : f ? ' style="stroke:' + f.color + '"' : "") + "/>" +
+          '<text x="' + (x + cw / 2) + '" y="' + (y + ch / 2 + 4) + '" text-anchor="middle"' + (f && !o ? ' style="fill:' + f.color + '"' : "") + ">" + i + "</text></g>";
+      }
+    });
+    const key = cables.map((c) => '<li><svg width="30" height="10" aria-hidden="true"><line x1="1" y1="5" x2="29" y2="5" style="stroke:' + c.color + '" stroke-width="4" stroke-linecap="round"' + (c.to ? "" : ' stroke-dasharray="3 3"') + "/></svg><span><b>" + esc(slotText(c.from.row + c.from.n)) + "</b>" +
+      (c.to ? " ⟷ <b>" + esc(slotText(c.to.row + c.to.n)) + "</b>" : "") + ' <small>' + esc(c.text) + "</small></span></li>").join("");
+    return '<div class="panel"><div class="panel-title">แผงเสียบสาย (มองจากหน้า rack) · <b>เส้นสี = สายแลน 1 เส้น</b> เสียบจากช่องทึบ (เครื่องนี้) ไปช่องขอบสี (ปลายสาย)</div>' +
+      '<div class="panel-scroll"><svg class="panel-svg" viewBox="0 0 ' + width + " " + height + '" role="img" aria-label="แผงเสียบสายของ ' + esc(deviceName(name)) + '">' + cells + lines + stubs + "</svg></div>" +
+      '<ul class="panel-key">' + key + "</ul></div>";
   }
   function renderDevice() {
     const name = state.dev, d = DEV[name], originalConfig = CFG[state.set][name], c = mapData(originalConfig, name);

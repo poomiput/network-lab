@@ -203,27 +203,22 @@ details.untested .intro p { margin: 2px 0; }
 
 /* patch panel picture on the device page */
 .panel { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin: 0 0 12px; background: var(--code-bg); }
-.panel-title { font-size: 12.5px; color: var(--muted); margin-bottom: 8px; }
-.panel-row { display: grid; grid-template-columns: 52px minmax(0, 1fr); align-items: center; gap: 6px; margin: 4px 0; }
-.panel-label { font-size: 12px; font-weight: 600; }
-.panel-cells { display: grid; grid-template-columns: repeat(24, minmax(0, 1fr)); gap: 2px; }
-.cell { display: inline-grid; place-items: center; min-width: 0; height: 22px; border-radius: 4px; border: 1px solid var(--line); background: var(--panel); color: var(--muted); font-size: 10px; font-family: "IBM Plex Mono", monospace; }
-.cell.lan { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
-.cell.con { background: var(--warn-ink); border-color: var(--warn-ink); color: #fff; font-weight: 700; }
-.panel-key { list-style: none; padding: 0; margin: 10px 0 4px; font-size: 13px; }
-.panel-key li { display: flex; align-items: center; gap: 8px; padding: 2px 0; }
-.panel-key .cell, .panel-legend .cell { width: 26px; flex: none; }
-.panel-legend { margin: 6px 0 0; font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
-.panel-legend .cell { height: 12px; width: 16px; }
-.panel-label { white-space: nowrap; }
-.panel-label .short { display: none; }
-@media (max-width: 560px) {
-  .panel { padding: 8px; }
-  .panel-cells { gap: 1px; }
-  .panel-cells .cell { height: 18px; font-size: 7px; letter-spacing: -.4px; border-radius: 3px; }
-  .panel-row { grid-template-columns: 26px minmax(0, 1fr); gap: 4px; }
-  .panel-label .long { display: none; }
-  .panel-label .short { display: inline; }
-}
+.panel-title { font-size: 12.5px; color: var(--muted); margin-bottom: 6px; }
+.panel-title b { color: var(--ink); font-weight: 600; }
+.panel-scroll { overflow-x: auto; }
+.panel-svg { display: block; width: 100%; min-width: 560px; height: auto; }
+.panel-svg .row-t { font-size: 12px; font-weight: 600; fill: var(--ink); }
+.panel-svg .slot rect { fill: var(--panel); stroke: var(--line); stroke-width: 1; }
+.panel-svg .slot text { font-size: 10.5px; fill: var(--muted); font-family: "IBM Plex Mono", monospace; }
+.panel-svg .slot.own text { fill: #fff; font-weight: 700; }
+.panel-svg .slot.far rect { stroke-width: 2.5; }
+.panel-svg .slot.far text { font-weight: 700; }
+.panel-svg .cable { fill: none; stroke-width: 3; stroke-linecap: round; opacity: .9; }
+.panel-svg .cable.stub { stroke-dasharray: 3 3; }
+.panel-svg .stub-t { font-size: 10px; fill: var(--muted); }
+.panel-key { list-style: none; padding: 0; margin: 8px 0 0; font-size: 13px; }
+.panel-key li { display: flex; align-items: center; gap: 8px; padding: 3px 0; }
+.panel-key svg { flex: none; }
+.panel-key small { color: var(--muted); font-size: 12px; }
 .node .md.who { fill: var(--accent); font-weight: 600; font-size: 11.5px; }
 .node.occupied rect { stroke: var(--accent); stroke-dasharray: none; }
