@@ -431,7 +431,7 @@
       g.append(el("rect", { x: n.x - W / 2, y: n.y - H / 2, width: W, height: H }));
       g.append(el("text", { x: n.x, y: n.y - 5, "text-anchor": "middle", class: "nm" + (n.isp ? "" : " hostname") }, deviceName(name)));
       const md = n.isp ? n.md : pick(DEV[name].model);
-      g.append(el("text", { x: n.x, y: n.y + 14, "text-anchor": "middle", class: "md" }, md));
+      g.append(el("text", { x: n.x, y: n.y + 14, "text-anchor": "middle", class: "md", "data-model": md }, md));
       if (!n.isp) {
         const progress = deviceProgress(name), complete = progress.done === progress.total;
         if (complete) g.classList.add("copied");
@@ -521,36 +521,28 @@
     drawHostRow(HQ_HOSTS, 140, 580, ["MLS01", "MLS02"], bg);
     drawHostRow(BR_HOSTS, 740, 200, ["SW01"], bg);
   }
+  // Names go inside the device box (in place of the model line) so they never cover port or subnet labels.
   function drawPresence() {
-    svg.querySelector(".presence")?.remove();
-    const layer = el("g", { class: "presence" });
-    svg.append(layer);
     Object.entries(NODES).forEach(([name, n]) => {
       if (n.isp) return;
+      const g = svg.querySelector('.node[data-device="' + name + '"]'), md = g?.querySelector(".md");
+      if (!md) return;
       const list = people.filter((p) => p.key !== presenceKey && p.dev === name)
         .map((p) => ({ animal: p.animal, text: p.name + (p.set && p.set !== state.set ? " (" + p.set.toUpperCase() + ")" : "") }));
-      if (state.dev === name) list.unshift({ animal: myAnimal, text: displayName() + " (คุณ)" });
-      if (!list.length) return;
-      const shown = list.slice(0, 3);
-      if (list.length > 3) shown.push({ animal: "", text: "+" + (list.length - 3) });
-      // Lay out avatar + name chips in a row centred under the node.
-      const row = el("g", {}), y = n.y + H / 2 + 13;
-      layer.append(row);
-      let x = 0;
-      shown.forEach((p) => {
-        const a = animalOf(p.animal), chip = el("g", { class: "who-chip" });
-        row.append(chip);
-        let w = 0;
-        if (a?.img) { chip.append(el("image", { href: a.img, x, y: y - 9, width: 18, height: 18, class: "who-img" })); w = 21; }
-        else if (a) { chip.append(el("text", { x, y, "dominant-baseline": "middle", class: "who-emoji" }, a.emoji)); w = chip.getBBox().width + 3; }
-        const t = el("text", { x: x + w, y, "dominant-baseline": "middle", class: "lbl who" }, p.text);
-        chip.append(t);
-        const bb = chip.getBBox();
-        chip.insertBefore(el("rect", { x: bb.x - 4, y: bb.y - 1, width: bb.width + 8, height: bb.height + 2, rx: 9, class: "lbl-bg who-bg" }), chip.firstChild);
-        x += bb.width + 12;
-      });
-      const total = row.getBBox();
-      row.setAttribute("transform", "translate(" + (n.x - total.x - total.width / 2) + ",0)");
+      if (state.dev === name) list.unshift({ animal: myAnimal, text: displayName() + (list.length ? "" : " (คุณ)") });
+      md.classList.toggle("who", list.length > 0);
+      g.classList.toggle("occupied", list.length > 0);
+      if (!list.length) { md.textContent = md.dataset.model; return; }
+      const emoji = (p) => animalOf(p.animal)?.emoji || "👤";
+      md.textContent = list.map((p) => emoji(p) + " " + p.text).join(" · ");
+      const max = W - 12;
+      if (md.getComputedTextLength() > max) {
+        if (list.length === 1) {
+          let t = list[0].text;
+          while (t.length > 1 && md.getComputedTextLength() > max) { t = t.slice(0, -1); md.textContent = emoji(list[0]) + " " + t + "…"; }
+        } else md.textContent = list.map(emoji).join(" ") + " · " + list.length + " คน";
+      }
+      md.replaceChildren(md.textContent, el("title", {}, list.map((p) => emoji(p) + " " + p.text).join("\n")));
     });
   }
   function updateOnline() {
