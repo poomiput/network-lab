@@ -355,17 +355,18 @@
     CE01: { x: 300, y: 200 }, CE02: { x: 560, y: 200 }, R01: { x: 840, y: 200 },
     MLS01: { x: 300, y: 370 }, MLS02: { x: 560, y: 370 }, SW01: { x: 840, y: 370 },
   };
-  // [from, to, class, subnet label, {hsrp:[aPort,bPort], vrrp:[aPort,bPort]}, label offset]
+  // [from, to, class, subnet label, show port labels?, label offset, label position]
+  // Port labels come from data/devices.js, so a new rack only needs that file (and the TXT scripts) updated.
   const LINKS = [
     ["G01", "G02", "wan", "G01 ↔ G02 (ISP)", null, [0, -10]],
-    ["CE01", "G01", "wan", "172.31.1.24/30", { hsrp: ["<WAN>", ""], vrrp: ["<WAN>", ""] }, [8, 0]],
-    ["CE02", "G02", "wan", "172.31.2.24/30", { hsrp: ["<WAN>", ""], vrrp: ["<WAN>", ""] }, [8, 0]],
-    ["CE01", "MLS01", "routed", "10.6.240.0/30", { hsrp: ["Gi0/0/0 · P02", "Gi1/0/1 · P12"], vrrp: ["Gi0/0/0 · T02", "Gi1/0/1 · T15"] }, [-58, 0]],
-    ["CE01", "MLS02", "routed", "10.6.240.4/30", { hsrp: ["Gi0/0/1 · P03", "Gi1/0/1 · P16"], vrrp: ["Gi0/0/1 · T03", "Gi1/0/1 · B03"] }, [0, -9], 0.2],
-    ["CE02", "MLS01", "routed", "10.6.240.8/30", { hsrp: ["Gi0/0/0 · P05", "Gi1/0/2 · P13"], vrrp: ["Gi0/0/0 · T05", "Gi1/0/2 · T16"] }, [0, -9], 0.2],
-    ["CE02", "MLS02", "routed", "10.6.240.12/30", { hsrp: ["Gi0/0/1 · P06", "Gi1/0/2 · P17"], vrrp: ["Gi0/0/1 · T06", "Gi1/0/2 · B04"] }, [62, 0]],
-    ["MLS01", "MLS02", "po", "Po1 trunk VLAN10–60", { hsrp: ["Gi1/0/21–22", "Gi1/0/21–22"], vrrp: ["Gi1/0/3–4 · T17/18", "Gi1/0/3–4 · B05/06"] }, [0, 22]],
-    ["R01", "SW01", "routed", "10.6.16.0/20", { hsrp: ["Gi0/0/0 · P08", "Gi1/0/1 · P20"], vrrp: ["Gi0/0/0 · T08", "Gi1/0/1 · B15"] }, [52, 0]],
+    ["CE01", "G01", "wan", "172.31.1.24/30", true, [8, 0]],
+    ["CE02", "G02", "wan", "172.31.2.24/30", true, [8, 0]],
+    ["CE01", "MLS01", "routed", "10.6.240.0/30", true, [-58, 0]],
+    ["CE01", "MLS02", "routed", "10.6.240.4/30", true, [0, -9], 0.2],
+    ["CE02", "MLS01", "routed", "10.6.240.8/30", true, [0, -9], 0.2],
+    ["CE02", "MLS02", "routed", "10.6.240.12/30", true, [62, 0]],
+    ["MLS01", "MLS02", "po", "Po1 trunk VLAN10–60", true, [0, 22]],
+    ["R01", "SW01", "routed", "10.6.16.0/20", true, [52, 0]],
   ];
 
   function anchor(a, b) {
@@ -392,6 +393,12 @@
     g.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); editPort(owner, port); } });
   }
 
+  // "port · panel slot" of dev's cable toward peer, read from the cable table.
+  function cableLabel(dev, peer) {
+    const r = DEV[dev]?.cables[state.set].find((row) => row[2] === peer || row[2].startsWith(peer + " "));
+    if (!r) return "";
+    return (r[0] === "<WAN_PORT>" ? "<WAN>" : r[0]) + (slotsOf(r[1]).length ? " · " + r[1] : "");
+  }
   function drawTopo() {
     svg.textContent = "";
     const gLinks = el("g", {}), gLabels = el("g", {}), gNodes = el("g", {});
@@ -400,7 +407,7 @@
     // WAN G01 -> R01 (curve over the top)
     gLinks.append(el("path", { d: "M300 32 Q 650 -90 840 174", class: "link wan" }));
     label(gLabels, 760, 40, "172.31.11.24/30");
-    if (state.dev === "R01") portLabel(gLabels, 868, 152, "Gi0/0/1 · " + (state.set === "vrrp" ? "T09" : "P09"), "R01");
+    if (state.dev === "R01" && cableLabel("R01", "G01")) portLabel(gLabels, 868, 152, cableLabel("R01", "G01"), "R01");
     // GRE overlay
     gLinks.append(el("path", { d: "M340 174 Q 560 108 800 174", class: "link gre" }));
     gLinks.append(el("path", { d: "M600 174 Q 700 140 790 176", class: "link gre" }));
@@ -418,7 +425,7 @@
       const tp = tpos || 0.5, mx = x1 + (x2 - x1) * tp + off[0], my = y1 + (y2 - y1) * tp + off[1];
       label(gLabels, mx, my, sub);
       if (ports && (state.dev === a || state.dev === b)) {
-        const [pa, pb] = ports[state.set];
+        const [pa, pb] = [cableLabel(a, b), cableLabel(b, a)];
         const near = (xa, ya, xb, yb, f) => [xa + (xb - xa) * f, ya + (yb - ya) * f];
         const vx = x1 === x2 ? -50 : 0;
         if (pa && state.dev === a) { const [px, py] = near(x1, y1, x2, y2, cls === "po" ? 0.02 : 0.2); portLabel(gLabels, px + (cls === "po" ? 52 : vx), py + (cls === "po" ? -18 : 0), pa, a); }
@@ -591,6 +598,15 @@
   }
 
   // Picture of the patch panel (front of the rack): this device's slots, the far-end slots, and the patch cables between them.
+  // Which panel rows this set uses (T/B two-row panel, P single row), from the data rather than the set name.
+  function panelRows() {
+    const letters = new Set();
+    Object.values(DEV).forEach((d) => {
+      slotsOf(String(d.console[state.set]).split(" ")[0]).forEach((sl) => letters.add(sl.row));
+      d.cables[state.set].forEach((r) => slotsOf(r[1] + " " + r[3]).forEach((sl) => letters.add(sl.row)));
+    });
+    return [["T", "แถวบน"], ["B", "แถวล่าง"], ["P", "แผง"]].filter(([r]) => letters.has(r));
+  }
   const CABLE_COLORS = ["#2f6fd6", "#1f9d6b", "#8a4fd6", "#d6336c", "#0b8a9e", "#c2410c", "#9a7b00", "#4b5563"];
   function panelHTML(name) {
     const d = DEV[name], cables = [];
@@ -617,7 +633,7 @@
     let colorIndex = 0;
     cables.forEach((c) => { c.color = c.kind === "con" ? "var(--warn-ink)" : CABLE_COLORS[colorIndex++ % CABLE_COLORS.length]; });
 
-    const rows = state.set === "vrrp" ? [["T", "แถวบน"], ["B", "แถวล่าง"]] : [["P", "แผง"]];
+    const rows = panelRows();
     const isTop = (sl) => sl.row !== "B";
     // Leave room above/below the rows only where cables actually loop out.
     const outside = (up) => cables.some((c) => isTop(c.from) === up && (!c.to || c.to.row === c.from.row));
