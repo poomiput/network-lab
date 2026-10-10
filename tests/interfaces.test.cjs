@@ -10,6 +10,20 @@ test('normalizes short/full port names and ranges', () => {
   assert.deepEqual(M.parse('GigabitEthernet1/0/3 - 4'), M.parse('Gi1/0/3–4'));
   assert.deepEqual(M.parse('Et0/1'), ['Ethernet0/1']);
 });
+test('accepts EVE Ethernet aliases in edits, ranges, peer labels and duplicate checks', () => {
+  for (const name of ['e0/1', 'E0/1', 'Et0/1', 'Ethernet0/1']) {
+    assert.deepEqual(M.parse(name), ['Ethernet0/1']);
+  }
+  assert.deepEqual(M.parse('e0/1–2'), ['Ethernet0/1', 'Ethernet0/2']);
+  const maps = M.update({}, 'CE01', 'Gi0/0/0', 'e0/1', M.parse('Gi0/0/0–1'));
+  assert.equal(M.remap('interface GigabitEthernet0/0/0', 'CE01', maps), 'interface Ethernet0/1');
+  assert.throws(() => M.update(maps, 'CE01', 'Gi0/0/1', 'Et0/1', M.parse('Gi0/0/0–1')), /ใช้อยู่แล้ว/);
+  const eveMaps = { CE01: { 'Ethernet0/1': 'Ethernet0/2' }, MLS01: { 'Ethernet0/1': 'Ethernet0/3' } };
+  assert.equal(M.remap('interface e0/1', 'CE01', eveMaps), 'interface Et0/2');
+  assert.equal(M.remap('description TO-MLS01-e0/1 | e0/1', 'CE01', eveMaps), 'description TO-MLS01-Et0/3 | Et0/2');
+  assert.deepEqual(M.ownPorts('interface e0/1\ndescription TO-MLS01-e0/2', 'CE01'), ['Ethernet0/1']);
+  assert.equal(M.remap('route-map rule0/1', 'CE01', eveMaps), 'route-map rule0/1');
+});
 test('substitutions use original identity once and do not cascade or affect similar numbers', () => {
   const maps = { CE01: { GigabitEthernet0: 'Ethernet0' } };
   maps.CE01['GigabitEthernet0/0/1'] = 'GigabitEthernet0/0/2';

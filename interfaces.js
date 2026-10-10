@@ -3,12 +3,12 @@
   const families = {
     gi: "GigabitEthernet", gigabitethernet: "GigabitEthernet",
     fa: "FastEthernet", fastethernet: "FastEthernet",
-    et: "Ethernet", ethernet: "Ethernet",
+    e: "Ethernet", et: "Ethernet", ethernet: "Ethernet",
     te: "TenGigabitEthernet", tengigabitethernet: "TenGigabitEthernet",
     se: "Serial", serial: "Serial"
   };
   const short = { GigabitEthernet: "Gi", FastEthernet: "Fa", Ethernet: "Et", TenGigabitEthernet: "Te", Serial: "Se" };
-  const portPattern = "(?:GigabitEthernet|FastEthernet|TenGigabitEthernet|Ethernet|Serial|Gi|Fa|Te|Et|Se)\\d+(?:/\\d+){0,3}(?:\\s*[-–]\\s*\\d+)?";
+  const portPattern = "(?:GigabitEthernet|FastEthernet|TenGigabitEthernet|Ethernet|Serial|Gi|Fa|Te|Et|Se|\\bE)\\d+(?:/\\d+){0,3}(?:\\s*[-–]\\s*\\d+)?";
   const peerPattern = "(?:G06-(?:HQ|BR)-)?(?:CE01|CE02|MLS01|MLS02|R01|SW01)";
   const tokens = new RegExp("(?:(" + peerPattern + ")([\\s-]+))?(" + portPattern + "|<WAN_PORT>|<WAN>)(?![\\w/])", "gi");
 
@@ -16,7 +16,7 @@
     const text = String(value).trim();
     if (/^<WAN(?:_PORT)?>$/i.test(text)) return ["<WAN_PORT>"];
     const m = text.match(/^([a-z]+)(\d+(?:\/\d+){0,3})(?:\s*[-–]\s*(\d+))?$/i);
-    if (!m || !families[m[1].toLowerCase()]) throw new Error("ใส่ชื่อพอร์ต เช่น Gi0/0/2 หรือ Gi1/0/7–8");
+    if (!m || !families[m[1].toLowerCase()]) throw new Error("ใส่ชื่อพอร์ต เช่น e0/1, Gi0/0/2 หรือ Gi1/0/7–8");
     const family = families[m[1].toLowerCase()], parts = m[2].split("/").map(Number);
     const first = parts.pop(), last = m[3] == null ? first : Number(m[3]);
     if (last < first || last - first > 47) throw new Error("ช่วงพอร์ตต้องเรียงจากน้อยไปมาก และไม่เกิน 48 พอร์ต");

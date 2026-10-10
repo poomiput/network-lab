@@ -259,7 +259,7 @@
   }
   async function editPort(owner, original) {
     const set = state.set;
-    const value = window.prompt(deviceName(owner) + " — เปลี่ยนพอร์ต " + mapped(original, owner) + "\nบันทึกค่าใหม่และประวัติ (ต้นฉบับ " + original + ")\nใส่ชื่อพอร์ต เช่น Gi0/0/2 หรือ Gi1/0/7–8\nเว้นว่างเพื่อคืนค่าเดิม", mapped(original, owner));
+    const value = window.prompt(deviceName(owner) + " — เปลี่ยนพอร์ต " + mapped(original, owner) + "\nบันทึกค่าใหม่และประวัติ (ต้นฉบับ " + original + ")\nใส่ชื่อพอร์ต เช่น e0/1, Gi0/0/2 หรือ Gi1/0/7–8\nเว้นว่างเพื่อคืนค่าเดิม", mapped(original, owner));
     if (value === null) return;
     try {
       const c = CFG[set][owner], d = DEV[owner];
