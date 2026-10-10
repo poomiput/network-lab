@@ -4,6 +4,48 @@
   const svg = document.getElementById("topo");
   const detail = document.getElementById("detail");
   const state = { set: "vrrp", dev: null };
+  const IF = window.G06InterfaceMap;
+  const TEMP_KEY = "g06-temporary-interfaces-v1";
+  const COPY_KEY = "g06-copy-progress-v1";
+  const SHARE = window.G06SharedProgress;
+  let room = null, roomError = "";
+  try { room = SHARE.roomFromURL(location.href); } catch (e) { roomError = e.message; }
+  const progressKey = room ? COPY_KEY + ":room:" + room.id : COPY_KEY;
+  const outboxKey = progressKey + ":pending";
+  const interfaceKey = "g06-interface-map-v2" + (room ? ":room:" + room.id : "");
+  const historyKey = interfaceKey + ":history";
+  let interfaceHistory = [];
+  let sharedController = null, pending = {}, revision = 0, flushing = false, realtimeState = "connecting";
+  let copied = {};
+  try {
+    const saved = JSON.parse(localStorage.getItem(progressKey));
+    if (saved && typeof saved === "object" && !Array.isArray(saved)) copied = saved;
+    if (room) {
+      const savedPending = JSON.parse(localStorage.getItem(outboxKey));
+      if (savedPending && typeof savedPending === "object" && !Array.isArray(savedPending)) {
+        for (const [key, value] of Object.entries(savedPending)) {
+          if (/^(hsrp|vrrp):(CE01|CE02|MLS01|MLS02|R01|SW01):.{1,255}$/.test(key) && (value?.signature === null || /^\d{1,6}:[0-9a-f]{1,8}$/.test(value?.signature || ""))) pending[key] = { signature: value.signature, revision: ++revision };
+        }
+      }
+    }
+  } catch (e) {}
+  let temporary = { hsrp: {}, vrrp: {} };
+  try {
+    const saved = JSON.parse(localStorage.getItem(interfaceKey) || (!room && sessionStorage.getItem(TEMP_KEY)) || "null");
+    for (const set of Object.keys(temporary)) {
+      for (const [device, ports] of Object.entries(saved?.[set] || {})) {
+        if (!DEV[device]) continue;
+        const clean = {};
+        for (const [old, next] of Object.entries(ports)) {
+          const a = IF.parse(old), b = IF.parse(next);
+          if (a.length === 1 && b.length === 1) clean[a[0]] = b[0];
+        }
+        temporary[set][device] = clean;
+      }
+    }
+    const savedHistory = JSON.parse(localStorage.getItem(historyKey));
+    if (Array.isArray(savedHistory)) interfaceHistory = savedHistory.filter((v) => SETS[v?.set] && DEV[v?.device] && Array.isArray(v.changes));
+  } catch (e) { temporary = { hsrp: {}, vrrp: {} }; }
 
   /* ---------- theme ---------- */
   const themeToggle = document.getElementById("themeToggle");
@@ -21,11 +63,210 @@
   updateThemeButton();
 
   /* ---------- helpers ---------- */
-  const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   const hl = (s) => esc(s).replace(/&lt;(?!-&gt;)([^&]*?)&gt;/g, '<span class="ph">&lt;$1&gt;</span>');
   const pick = (v) => (v && typeof v === "object" && !Array.isArray(v) ? v[state.set] : v);
   const deviceName = (id) => DEV[id]?.hostname || id;
+  function saveProgress() {
+    try {
+      localStorage.setItem(progressKey, JSON.stringify(copied));
+      if (room) localStorage.setItem(outboxKey, JSON.stringify(pending));
+    } catch (e) {}
+  }
+  function updateProgressView() {
+    const opened = detail.querySelector("details.untested")?.open;
+    refresh();
+    const later = detail.querySelector("details.untested");
+    if (later && opened) later.open = true;
+  }
+  function sharingStatus(kind, message) {
+    const status = document.getElementById("sharingStatus");
+    const waiting = Object.keys(pending).length;
+    status.dataset.state = kind;
+    status.textContent = room ? "ห้อง " + room.id.slice(0, 8) + " · " + (message || (waiting ? "มี " + waiting + " รายการรอบันทึก" : kind === "live" ? "แชร์กับทีมแล้ว" : "กำลังเชื่อมต่อ")) : (message || "สถานะ Copy · เก็บในเบราว์เซอร์นี้");
+    document.getElementById("retrySharing").hidden = !room || !["error", "offline"].includes(kind);
+  }
+  async function flushPending() {
+    if (!room || !sharedController || !Object.keys(pending).length || flushing) return;
+    flushing = true;
+    const controller = sharedController;
+    try {
+      while (Object.keys(pending).length && controller === sharedController) {
+        const batch = { ...pending };
+        try {
+          await controller.write(Object.fromEntries(Object.entries(batch).map(([key, value]) => [key, value.signature])));
+          for (const [key, value] of Object.entries(batch)) if (pending[key]?.revision === value.revision) delete pending[key];
+          saveProgress(); sharingStatus(realtimeState);
+        } catch (e) {
+          sharingStatus("error", "Copy แล้ว แต่ยังไม่บันทึกให้ทีม · " + e.message);
+          break;
+        }
+      }
+    } finally {
+      flushing = false;
+      // A reconnect may have replaced the controller while an old write ran.
+      if (controller !== sharedController) flushPending();
+    }
+  }
+  function persistChanges(changes) {
+    if (room) {
+      for (const [key, signature] of Object.entries(changes)) pending[key] = { signature, revision: ++revision };
+      sharingStatus("saving");
+    }
+    saveProgress();
+    flushPending();
+  }
+  async function connectSharing() {
+    if (!room) return;
+    if (!SHARE.configured()) { sharingStatus("error", "เว็บยังไม่ได้ตั้งค่า Supabase · ใช้ข้อมูลที่เก็บไว้ในเครื่องชั่วคราว"); return; }
+    sharingStatus("connecting");
+    realtimeState = "connecting";
+    if (sharedController) { sharedController.close(); sharedController = null; }
+    try {
+      sharedController = await SHARE.connect(room, (values) => {
+        copied = { ...values.copied };
+        for (const [key, value] of Object.entries(pending)) {
+          if (value.signature === null) delete copied[key]; else copied[key] = value.signature;
+        }
+        const maps = { hsrp: {}, vrrp: {} };
+        for (const row of values.ports || []) {
+          if (!SETS[row.set_id] || !DEV[row.device_id]) continue;
+          try {
+            const a = IF.parse(row.original), b = IF.parse(row.replacement);
+            if (a.length !== 1 || b.length !== 1 || a[0] === b[0]) continue;
+            (maps[row.set_id][row.device_id] ||= {})[a[0]] = b[0];
+          } catch (e) {}
+        }
+        temporary = maps;
+        interfaceHistory = (values.history || []).map((row) => ({ id: row.id, set: row.set_id, device: row.device_id, changes: row.changes, at: row.changed_at }));
+        saveInterfaces();
+        saveProgress(); updateProgressView();
+      }, (kind) => {
+        realtimeState = kind;
+        sharingStatus(kind, kind === "offline" ? "การเชื่อมต่อสดขาด · ลองเชื่อมอีกครั้ง" : kind === "error" ? "อ่านสถานะร่วมไม่สำเร็จ · ลองเชื่อมอีกครั้ง" : "");
+      });
+      flushPending();
+    } catch (e) { sharingStatus("error", "ยังเชื่อมห้องไม่ได้ · " + e.message); }
+  }
+  document.getElementById("createRoom").disabled = !SHARE.configured();
+  document.getElementById("createRoom").title = SHARE.configured() ? "สร้างห้องพร้อมสถานะ Copy ที่มีอยู่ แล้วส่งลิงก์ให้ทีม" : "ตั้งค่า Supabase ก่อนเพื่อแชร์สถานะกับทีม";
+  document.getElementById("shareRoom").hidden = !room;
+  document.getElementById("leaveRoom").hidden = !(room || roomError);
+  document.getElementById("createRoom").addEventListener("click", async (event) => {
+    const btn = event.currentTarget; btn.disabled = true;
+    sharingStatus("connecting", "กำลังสร้างห้องทีม");
+    try {
+      const next = await SHARE.createRoom();
+      if (interfaceHistory.length || Object.values(temporary).some((maps) => Object.values(maps).some((ports) => Object.keys(ports).length))) {
+        const controller = await SHARE.connect(next, () => {}, () => {});
+        try {
+          for (const item of interfaceHistory) await controller.setInterfaces(item.set, item.device, item.changes.map((v) => v.original), item.changes.map((v) => v.to));
+          for (const [set, devices] of Object.entries(temporary)) {
+            for (const [device, ports] of Object.entries(devices)) if (Object.keys(ports).length) await controller.setInterfaces(set, device, Object.keys(ports), Object.values(ports));
+          }
+        } finally { controller.close(); }
+      }
+      // A new room starts with this browser's current Copy marks.
+      const nextKey = COPY_KEY + ":room:" + next.id;
+      try {
+        localStorage.setItem(nextKey, JSON.stringify(copied));
+        localStorage.setItem(nextKey + ":pending", JSON.stringify(Object.fromEntries(Object.entries(copied).map(([key, signature]) => [key, { signature }]))));
+      } catch (e) {}
+      location.href = SHARE.roomURL(location.href, next);
+    } catch (e) { btn.disabled = false; sharingStatus("error", "สร้างห้องไม่สำเร็จ · " + e.message); }
+  });
+  document.getElementById("shareRoom").addEventListener("click", async () => {
+    const link = SHARE.roomURL(location.href, room);
+    try {
+      await navigator.clipboard.writeText(link);
+      const btn = document.getElementById("shareRoom"); btn.textContent = "Copied ✓";
+      setTimeout(() => { btn.textContent = "Copy ลิงก์ห้อง"; }, 1600);
+    } catch (e) { window.prompt("คัดลอกลิงก์นี้ให้ทีม", link); }
+  });
+  document.getElementById("leaveRoom").addEventListener("click", () => { location.href = SHARE.roomURL(location.href, null); });
+  document.getElementById("retrySharing").addEventListener("click", connectSharing);
   const peerNames = (text) => String(text).replace(/\b(?:CE01|CE02|MLS01|MLS02|R01|SW01)\b/g, deviceName);
+  function copySignature(text) {
+    let hash = 2166136261;
+    for (let i = 0; i < text.length; i++) hash = Math.imul(hash ^ text.charCodeAt(i), 16777619);
+    return text.length + ":" + (hash >>> 0).toString(16);
+  }
+  function copyIdentity(set, device, block) { return set + ":" + device + ":" + block.title; }
+  function isCopied(set, device, block) { return copied[copyIdentity(set, device, block)] === copySignature(block.commands.join("\n") + "\n"); }
+  function deviceProgress(device) {
+    const cfg = mapData(CFG[state.set][device], device);
+    const blocks = [{ title: "เริ่มที่นี่: เข้าโหมดตั้งค่า (วางก่อน BLOCK 1)", commands: cfg.prelude }, ...cfg.blocks.filter((b) => b.kind === "config")];
+    return { total: blocks.length, done: blocks.filter((b) => isCopied(state.set, device, b)).length };
+  }
+  const mapped = (text, owner = state.dev) => IF.remap(text, owner, temporary[state.set]);
+  const mapData = (data, owner) => Array.isArray(data) ? data.map((v) => mapData(v, owner))
+    : data && typeof data === "object" ? Object.fromEntries(Object.entries(data).map(([k, v]) => [k, mapData(v, owner)]))
+    : typeof data === "string" ? mapped(data, owner) : data;
+  function portButton(owner, original) {
+    const text = mapped(original, owner), changed = text !== original;
+    return '<button type="button" class="interface-edit' + (changed ? ' interface-edited' : '') + '" data-interface-device="' + esc(owner) + '" data-interface-original="' + esc(original) + '" title="จิ้มเพื่อเปลี่ยนพอร์ต · บันทึกและเก็บประวัติ">' + hl(text) + '</button>';
+  }
+  function peerCell(text) {
+    const m = text.match(/^(CE01|CE02|MLS01|MLS02|R01|SW01)\s+(.*)$/);
+    return m ? esc(deviceName(m[1])) + ' ' + portButton(m[1], m[2]) : esc(peerNames(text));
+  }
+  function saveInterfaces() {
+    try {
+      localStorage.setItem(interfaceKey, JSON.stringify(temporary));
+      localStorage.setItem(historyKey, JSON.stringify(interfaceHistory));
+    } catch (e) {}
+  }
+  async function applyPortMap(set, owner, nextMap) {
+    const previous = temporary[set][owner] || {};
+    const changes = [...new Set(Object.keys(previous).concat(Object.keys(nextMap)))].map((original) => ({ original, from: previous[original] || original, to: nextMap[original] || original })).filter((v) => v.from !== v.to);
+    if (!changes.length) return;
+    if (room) {
+      if (!sharedController) throw new Error("ห้องยังไม่พร้อมบันทึกพอร์ต กรุณาตั้งค่า Supabase แล้วลองเชื่อมอีกครั้ง");
+      sharingStatus("saving", "กำลังบันทึกพอร์ตและประวัติให้ทีม");
+      await sharedController.setInterfaces(set, owner, changes.map((v) => v.original), changes.map((v) => v.to));
+      sharingStatus(realtimeState);
+    } else {
+      temporary[set][owner] = nextMap;
+      interfaceHistory.push({ id: crypto.randomUUID(), set, device: owner, changes, at: new Date().toISOString() });
+      saveInterfaces(); refresh();
+    }
+  }
+  async function editPort(owner, original) {
+    const set = state.set;
+    const value = window.prompt(deviceName(owner) + " — เปลี่ยนพอร์ต " + mapped(original, owner) + "\nบันทึกค่าใหม่และประวัติ (ต้นฉบับ " + original + ")\nใส่ชื่อพอร์ต เช่น Gi0/0/2 หรือ Gi1/0/7–8\nเว้นว่างเพื่อคืนค่าเดิม", mapped(original, owner));
+    if (value === null) return;
+    try {
+      const c = CFG[set][owner], d = DEV[owner];
+      const reserved = IF.ownPorts(c.prelude.concat(c.blocks.flatMap((b) => b.commands)).join("\n"), owner)
+        .concat(d.cables[set].flatMap((r) => IF.parse(r[0])));
+      const wanRow = d.cables[set].find((r) => /^G0[12] ISP/.test(r[2]));
+      const updated = IF.update(temporary[set], owner, original, value.trim() || original, reserved, wanRow && IF.parse(wanRow[0])[0]);
+      // R01's table names its physical WAN port; its script uses a placeholder.
+      const wan = d.cables[set].find((r) => r[0] === original && /^G0[12] ISP/.test(r[2]));
+      if (wan && original !== "<WAN_PORT>") {
+        const map = updated[owner];
+        if (value.trim() && value.trim() !== original) map["<WAN_PORT>"] = IF.parse(value)[0];
+        else delete map["<WAN_PORT>"];
+      }
+      await applyPortMap(set, owner, updated[owner]);
+    } catch (e) { window.alert(e.message); }
+  }
+  function updateInterfaceStatus() {
+    const count = Object.values(temporary[state.set]).reduce((n, ports) => n + Object.keys(ports).length, 0);
+    document.getElementById("interfaceStatus").textContent = count
+      ? "เปลี่ยนพอร์ต " + count + " จุด · บันทึกแล้ว · ภาพและ Copy ใช้ค่าใหม่"
+      : "จิ้มเลขพอร์ตในภาพหรือตาราง · บันทึกค่าใหม่และประวัติ";
+    document.getElementById("resetInterfaces").hidden = count === 0;
+    const records = interfaceHistory.filter((v) => v.set === state.set);
+    document.getElementById("interfaceHistoryCount").textContent = "ประวัติเปลี่ยนพอร์ต (" + records.length + ")";
+    document.getElementById("interfaceHistoryList").innerHTML = records.length ? records.slice().reverse().map((v) => '<li><b>' + esc(deviceName(v.device)) + '</b> <time>' + esc(new Date(v.at).toLocaleString("th-TH")) + '</time>' + v.changes.map((p) => '<div><code>' + esc(IF.format([p.from], "Gi")) + '</code> → <code>' + esc(IF.format([p.to], "Gi")) + '</code><small>ต้นฉบับ ' + esc(IF.format([p.original], "Gi")) + '</small></div>').join("") + '</li>').join("") : '<li>ยังไม่มีการเปลี่ยนพอร์ตในชุดนี้</li>';
+  }
+  document.getElementById("resetInterfaces").addEventListener("click", async () => {
+    const set = state.set;
+    try {
+      for (const owner of Object.keys(temporary[set])) await applyPortMap(set, owner, {});
+    } catch (e) { window.alert(e.message); }
+  });
   const NS = "http://www.w3.org/2000/svg";
   const el = (tag, attrs, text) => {
     const n = document.createElementNS(NS, tag);
@@ -69,6 +310,15 @@
     const r = el("rect", { x: bb.x - 3, y: bb.y - 1, width: bb.width + 6, height: bb.height + 2, rx: 4, class: "lbl-bg" });
     g.insertBefore(r, t);
   }
+  function portLabel(parent, x, y, original, owner) {
+    const port = original.split(" · ")[0], text = mapped(original, owner);
+    const g = el("g", { class: "port-edit" + (text !== original ? " changed" : ""), tabindex: 0, role: "button", "aria-label": "แก้พอร์ต " + deviceName(owner) + " " + mapped(port, owner), "data-interface-device": owner, "data-interface-original": port });
+    parent.append(g);
+    label(g, x, y, text, "port");
+    g.append(el("title", {}, "จิ้มเพื่อเปลี่ยนพอร์ต · บันทึกและเก็บประวัติ"));
+    g.addEventListener("click", () => editPort(owner, port));
+    g.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); editPort(owner, port); } });
+  }
 
   function drawTopo() {
     svg.textContent = "";
@@ -93,7 +343,7 @@
     // WAN G01 -> R01 (curve over the top)
     gLinks.append(el("path", { d: "M300 32 Q 650 -90 840 174", class: "link wan" }));
     label(gLabels, 760, 40, "172.31.11.24/30");
-    if (state.dev === "R01") label(gLabels, 868, 152, "Gi0/0/1 · " + (state.set === "vrrp" ? "T09" : "P09"), "port");
+    if (state.dev === "R01") portLabel(gLabels, 868, 152, "Gi0/0/1 · " + (state.set === "vrrp" ? "T09" : "P09"), "R01");
     // GRE overlay
     gLinks.append(el("path", { d: "M340 174 Q 560 108 800 174", class: "link gre" }));
     gLinks.append(el("path", { d: "M600 174 Q 700 140 790 176", class: "link gre" }));
@@ -114,8 +364,8 @@
         const [pa, pb] = ports[state.set];
         const near = (xa, ya, xb, yb, f) => [xa + (xb - xa) * f, ya + (yb - ya) * f];
         const vx = x1 === x2 ? -50 : 0;
-        if (pa && state.dev === a) { const [px, py] = near(x1, y1, x2, y2, cls === "po" ? 0.02 : 0.2); label(gLabels, px + (cls === "po" ? 52 : vx), py + (cls === "po" ? -18 : 0), pa, "port"); }
-        if (pb && state.dev === b) { const [px, py] = near(x2, y2, x1, y1, cls === "po" ? 0.02 : 0.2); label(gLabels, px - (cls === "po" ? 52 : -vx), py + (cls === "po" ? -18 : 0), pb, "port"); }
+        if (pa && state.dev === a) { const [px, py] = near(x1, y1, x2, y2, cls === "po" ? 0.02 : 0.2); portLabel(gLabels, px + (cls === "po" ? 52 : vx), py + (cls === "po" ? -18 : 0), pa, a); }
+        if (pb && state.dev === b) { const [px, py] = near(x2, y2, x1, y1, cls === "po" ? 0.02 : 0.2); portLabel(gLabels, px - (cls === "po" ? 52 : -vx), py + (cls === "po" ? -18 : 0), pb, b); }
       }
     });
 
@@ -126,6 +376,12 @@
       const md = n.isp ? n.md : pick(DEV[name].model);
       g.append(el("text", { x: n.x, y: n.y + 14, "text-anchor": "middle", class: "md" }, md));
       if (!n.isp) {
+        const progress = deviceProgress(name), complete = progress.done === progress.total;
+        if (complete) g.classList.add("copied");
+        if (progress.done) {
+          g.append(el("circle", { cx: n.x + W / 2 - 10, cy: n.y - H / 2 + 10, r: 5, class: complete ? "copy-dot complete" : "copy-dot" }));
+        }
+        g.append(el("title", {}, "Copy " + progress.done + "/" + progress.total + " BLOCK · สถานะการคัดลอก"));
         g.addEventListener("click", () => go(state.set, name));
         g.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(state.set, name); } });
       }
@@ -136,27 +392,29 @@
 
   /* ---------- detail ---------- */
   function blockHTML(b, id) {
-    const status = b.status === "tested" ? '<span class="chip ok">ผ่านบน Rack</span>'
+    const done = isCopied(state.set, state.dev, b);
+    const status = b.interfaceChanged ? '<span class="chip warn">ปรับพอร์ตแล้ว · รอตรวจ</span>' : b.status === "tested" ? '<span class="chip ok">ผ่านบน Rack</span>'
       : b.status === "passed" ? '<span class="chip ok">ผ่านบน Rack (ดูหมายเหตุ)</span>'
       : '<span class="chip warn">ยังไม่ทดสอบ</span>';
     const notes = b.notes.length ? '<div class="notes">' + b.notes.map((n) => "<p>" + hl(n) + "</p>").join("") + "</div>" : "";
     const verify = b.verify.length ? '<div class="verify"><b>ตรวจหลังวาง:</b>' + b.verify.map((v) => "<p>" + hl(v) + "</p>").join("") + "</div>" : "";
     const hasPh = b.commands.some((c) => /<(?!->)[^<>]+>/.test(c));
-    return '<div class="block">' +
+    return '<div class="block' + (done ? ' copied-block' : '') + '">' +
       '<div class="block-h"><div><div class="t">' + hl(b.title) + '</div><div class="st">' + status +
-      (hasPh ? ' <span class="chip warn">มีค่าต้องเติม</span>' : "") + "</div></div>" +
-      '<button class="copy" data-copy="' + id + '">Copy</button></div>' + notes +
+      (hasPh ? ' <span class="chip warn">มีค่าต้องเติม</span>' : "") + (done ? ' <span class="chip ok copy-mark">✓ Copy แล้ว</span>' : '') + "</div></div>" +
+      '<button class="copy' + (done ? ' done' : '') + '" data-copy="' + id + '">' + (done ? 'Copy อีกครั้ง' : 'Copy') + '</button></div>' + notes +
       "<pre>" + b.commands.map(hl).join("\n") + "</pre>" + verify + "</div>";
   }
 
   function renderDevice() {
-    const name = state.dev, d = DEV[name], c = CFG[state.set][name];
+    const name = state.dev, d = DEV[name], originalConfig = CFG[state.set][name], c = mapData(originalConfig, name);
+    c.blocks.forEach((b, i) => { b.interfaceChanged = b.commands.some((line, n) => line !== originalConfig.blocks[i].commands[n]); });
     const copyMap = {};
     let n = 0;
-    const reg = (b) => { const id = "b" + n++; copyMap[id] = b.commands.join("\n") + "\n"; return id; };
+    const reg = (b) => { const id = "b" + n++; copyMap[id] = { text: b.commands.join("\n") + "\n", key: copyIdentity(state.set, name, b), set: state.set, device: name }; return id; };
 
-    const cables = d.cables[state.set].map((r) => "<tr><td class=\"mono\">" + hl(r[0]) + "</td><td>" + esc(r[1]) + "</td><td>" + esc(peerNames(r[2])) + "</td><td>" + esc(r[3]) + "</td><td class=\"mono\">" + esc(r[4]) + "</td></tr>").join("");
-    const expects = d.expect.map(pick).map((e) => "<li><code>" + esc(e[0]) + "</code><span>" + esc(e[1]) + "</span></li>").join("");
+    const cables = d.cables[state.set].map((r) => "<tr><td class=\"mono\">" + portButton(name, r[0]) + "</td><td>" + esc(r[1]) + "</td><td>" + peerCell(r[2]) + "</td><td>" + esc(r[3]) + "</td><td class=\"mono\">" + esc(r[4]) + "</td></tr>").join("");
+    const expects = d.expect.map(pick).map((e) => "<li><code>" + esc(mapped(e[0], name)) + "</code><span>" + esc(mapped(e[1], name)) + "</span></li>").join("");
     const verifyBlock = c.blocks.find((b) => b.kind === "verify");
     const seen = new Set(d.expect.map(pick).map((e) => e[0].replace(/\s+/g, " ").trim()));
     const extra = verifyBlock ? verifyBlock.verify.map((v) => {
@@ -178,6 +436,8 @@
       "<h2>" + esc(deviceName(name)) + "</h2><p class=\"meta\">" + esc(d.role) + "</p>" +
       '<p class="meta">ชื่อย่อ: ' + esc(name) + (scriptHostname ? ' · Hostname ในสคริปต์เว็บ: <code>' + esc(scriptHostname) + '</code>' : "") + '</p>' +
       '<div class="chips"><span class="chip">' + esc(pick(d.model)) + '</span><span class="chip">' + esc(d.loopback) + '</span><span class="chip">Console: แผง ' + esc(d.console[state.set]) + '</span><span class="chip">ชุด ' + esc(SETS[state.set].label) + "</span></div>";
+    const progress = deviceProgress(name);
+    html += '<div class="copy-progress"><span>✓ Copy ' + progress.done + '/' + progress.total + ' BLOCK · สีเขียวเมื่อครบ</span><button type="button" data-reset-copy' + (progress.done ? '' : ' hidden') + '>ล้างเครื่องหมาย Copy</button><small>' + (room ? 'แชร์เครื่องหมาย พอร์ต และประวัติในห้องนี้' : 'จำในเบราว์เซอร์นี้') + ' · นับการคัดลอกคำสั่ง · ตรวจผลบน Router แยกตาม BLOCK</small></div>';
     if (warns.length) html += '<div class="notice">' + warns.map((w) => "<p>" + hl(w.replace(/^!!\s*/, "")) + "</p>").join("") + "</div>";
     html += "<h3>เสียบสาย</h3><div class=\"table-wrap\"><table><thead><tr><th>พอร์ต</th><th>แผง</th><th>ไปที่</th><th>แผงปลาย</th><th>IP / หน้าที่</th></tr></thead><tbody>" + cables + "</tbody></table></div>";
     html += "<h3>ผลที่ต้องเห็นหลังวางครบ</h3><ul class=\"expect\">" + expects + extra + "</ul>" +
@@ -193,6 +453,14 @@
     }
     detail.innerHTML = html;
     detail.querySelectorAll(".copy").forEach((btn) => btn.addEventListener("click", () => copy(copyMap[btn.dataset.copy], btn)));
+    detail.querySelector("[data-reset-copy]").addEventListener("click", () => {
+      const prefix = state.set + ":" + name + ":";
+      const changes = {};
+      for (const key of Object.keys(copied)) if (key.startsWith(prefix)) { delete copied[key]; changes[key] = null; }
+      persistChanges(changes);
+      refresh();
+    });
+    detail.querySelectorAll("[data-interface-original]").forEach((btn) => btn.addEventListener("click", () => editPort(btn.dataset.interfaceDevice, btn.dataset.interfaceOriginal)));
     detail.querySelector("[data-back]").addEventListener("click", () => go(state.set, null));
   }
 
@@ -218,11 +486,29 @@
   }
 
   /* ---------- copy ---------- */
-  function copy(text, btn) {
-    const done = () => { btn.textContent = "Copied ✓"; btn.classList.add("done"); setTimeout(() => { btn.textContent = "Copy"; btn.classList.remove("done"); }, 1600); };
+  function copy(entry, btn) {
+    const text = entry.text;
+    const done = () => {
+      copied[entry.key] = copySignature(text);
+      persistChanges({ [entry.key]: copied[entry.key] });
+      if (!detail.contains(btn) || state.set !== entry.set || state.dev !== entry.device) { drawTopo(); return; }
+      const block = btn.closest(".block");
+      block.classList.add("copied-block");
+      if (!block.querySelector(".copy-mark")) {
+        const mark = document.createElement("span"); mark.className = "chip ok copy-mark"; mark.textContent = "✓ Copy แล้ว";
+        block.querySelector(".st").append(" ", mark);
+      }
+      btn.textContent = "Copied ✓"; btn.classList.add("done");
+      const progress = deviceProgress(state.dev);
+      detail.querySelector(".copy-progress span").textContent = "✓ Copy " + progress.done + "/" + progress.total + " BLOCK · สีเขียวเมื่อครบ";
+      detail.querySelector("[data-reset-copy]").hidden = false;
+      drawTopo();
+      setTimeout(() => { btn.textContent = "Copy อีกครั้ง"; }, 1600);
+    };
     if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(text).then(done, () => fallback(text) && done());
+      navigator.clipboard.writeText(text).then(done, () => fallback(text) ? done() : window.alert("คัดลอกไม่สำเร็จ ลองกด Copy อีกครั้ง"));
     } else if (fallback(text)) done();
+    else window.alert("คัดลอกไม่สำเร็จ ลองกด Copy อีกครั้ง");
   }
   function fallback(text) {
     const ta = document.createElement("textarea");
@@ -236,17 +522,26 @@
   function go(set, dev) {
     location.hash = set + (dev ? "/" + dev : "");
   }
+  function refresh() {
+    updateInterfaceStatus();
+    const po = SETS[state.set].poPorts.split(" ")[0];
+    const changed = Object.values(temporary[state.set]).some((ports) => Object.keys(ports).length);
+    document.getElementById("rackNote").textContent = SETS[state.set].rack + " · Po1: " + (changed ? "MLS01 " + mapped(po, "MLS01") + " ↔ MLS02 " + mapped(po, "MLS02") : SETS[state.set].poPorts);
+    drawTopo();
+    state.dev ? renderDevice() : renderOverview();
+  }
   function fromHash() {
     const [s, d] = location.hash.replace(/^#/, "").split("/");
     state.set = SETS[s] ? s : "vrrp";
     state.dev = DEV[d] ? d : null;
     document.querySelectorAll(".set-switch button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.set === state.set)));
-    document.getElementById("rackNote").textContent = SETS[state.set].rack + " · Po1: " + SETS[state.set].poPorts;
-    drawTopo();
-    state.dev ? renderDevice() : renderOverview();
+    refresh();
     if (state.dev && window.innerWidth < 980) detail.scrollIntoView({ behavior: "smooth", block: "start" });
   }
   document.querySelectorAll(".set-switch button").forEach((b) => b.addEventListener("click", () => go(b.dataset.set, state.dev)));
   window.addEventListener("hashchange", fromHash);
   fromHash();
+  if (roomError) sharingStatus("error", roomError);
+  else if (room) connectSharing();
+  else if (!SHARE.configured()) sharingStatus("local", "สถานะ Copy · เก็บในเบราว์เซอร์นี้ · แชร์กับทีมรอตั้งค่า Supabase");
 })();

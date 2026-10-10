@@ -52,6 +52,17 @@ code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
 .topo-wrap { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px; align-self: start; position: sticky; top: 84px; }
 @media (max-width: 980px) { .topo-wrap { position: static; } }
 .rack-note { font-size: 13px; color: var(--muted); margin: 0 4px 6px; }
+.interface-tools { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; margin: 0 4px 8px; color: var(--muted); font-size: 12px; }
+.interface-tools button { font: inherit; color: var(--accent); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 3px 8px; cursor: pointer; }
+.interface-tools button[hidden] { display: none; }
+.interface-edit { font: inherit; color: var(--accent); background: none; border: 0; border-bottom: 1px dashed var(--accent); padding: 1px 0; cursor: pointer; text-align: left; }
+.interface-edit:hover, .interface-edit:focus-visible { background: var(--code-bg); outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+.interface-edited { background: var(--warn-bg); color: var(--warn-ink); }
+.port-edit { cursor: pointer; }
+.port-edit .lbl.port { fill: var(--accent); text-decoration: underline; text-decoration-style: dashed; }
+.port-edit:hover .lbl-bg, .port-edit:focus .lbl-bg { fill: var(--code-bg); opacity: 1; }
+.port-edit:focus-visible { outline: 2px solid var(--accent); }
+.port-edit.changed .lbl.port { fill: var(--warn-ink); }
 #topo { width: 100%; height: auto; display: block; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--muted); padding: 4px; }
 .lg { display: inline-block; width: 22px; height: 0; border-top: 3px solid; vertical-align: middle; margin-right: 6px; }
@@ -72,6 +83,9 @@ code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
 .node.isp rect { stroke-dasharray: 5 4; }
 .node:hover rect, .node:focus rect { stroke: var(--node-sel); }
 .node.sel rect { stroke: var(--node-sel); stroke-width: 3; }
+.node.copied rect { stroke: var(--ok-ink); stroke-width: 3; fill: var(--ok-bg); }
+.copy-dot { fill: var(--warn-ink); }
+.copy-dot.complete { fill: var(--ok-ink); }
 .node .nm { font-size: 15px; font-weight: 600; fill: var(--ink); }
 .node .nm.hostname { font-size: 13px; }
 .node .md { font-size: 11px; fill: var(--muted); }
@@ -88,6 +102,11 @@ code, pre, .mono { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
 .chip { font-size: 12px; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--line); background: var(--code-bg); }
 .chip.ok { background: var(--ok-bg); color: var(--ok-ink); border-color: transparent; }
 .chip.warn { background: var(--warn-bg); color: var(--warn-ink); border-color: transparent; }
+.copy-progress { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; margin: 12px 0; font-size: 13px; }
+.copy-progress span { color: var(--ok-ink); font-weight: 600; }
+.copy-progress small { flex-basis: 100%; color: var(--muted); }
+.copy-progress button { border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--muted); cursor: pointer; padding: 3px 8px; font: inherit; font-size: 12px; }
+.copy-progress button[hidden] { display: none; }
 
 table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
@@ -103,6 +122,7 @@ th { color: var(--muted); font-weight: 600; font-size: 12.5px; }
 @media (max-width: 560px) { .expect li { grid-template-columns: 1fr; } }
 
 .block { border: 1px solid var(--line); border-radius: 12px; margin: 10px 0; overflow: hidden; }
+.block.copied-block { border-color: var(--ok-ink); }
 .block-h { display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; padding: 10px 12px; background: var(--code-bg); }
 .block-h .t { font-weight: 600; font-size: 14px; }
 .block-h .st { margin-top: 4px; }
@@ -127,6 +147,21 @@ details.untested .intro p { margin: 2px 0; }
 .overview ol { padding-left: 20px; margin: 6px 0; }
 .foot { text-align: center; color: var(--muted); font-size: 12px; padding: 8px 20px 24px; }
 .back { border: 0; background: none; color: var(--accent); cursor: pointer; padding: 0; font: inherit; font-size: 13px; margin-bottom: 6px; }
+
+.sharing-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 16px; padding: 8px 24px; border-bottom: 1px solid var(--line); background: var(--panel); color: var(--muted); font-size: 12px; }
+.interface-history { margin: 6px 0 10px; font-size: 12px; color: var(--muted); }
+.interface-history summary { cursor: pointer; width: fit-content; }
+.interface-history ol { margin: 8px 0; padding: 0 10px 0 24px; max-height: 240px; overflow: auto; }
+.interface-history li { padding: 6px 0; border-bottom: 1px solid var(--line); }
+.interface-history time { margin-left: 6px; font-size: 11px; }
+.interface-history small { display: block; }
+.interface-history code { color: var(--ink); overflow-wrap: anywhere; }
+.sharing-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.sharing-actions button { font: inherit; font-size: 12px; border: 1px solid var(--line); border-radius: 7px; background: var(--panel); color: var(--accent); padding: 5px 9px; cursor: pointer; }
+.sharing-actions button:disabled { color: var(--muted); opacity: .65; cursor: default; }
+#sharingStatus { overflow-wrap: anywhere; }
+#sharingStatus[data-state="live"] { color: var(--ok-ink); }
+#sharingStatus[data-state="error"], #sharingStatus[data-state="offline"] { color: var(--warn-ink); }
 
 @media (max-width: 640px) {
   .top { padding: 12px 16px; position: static; }
