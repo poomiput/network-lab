@@ -37,7 +37,26 @@
   if (!animalOf(myAnimal)) myAnimal = ANIMALS[0].id;
   const joinedAt = Date.now();
   const displayName = () => myName || animalOf(myAnimal).label;
-  const presencePayload = () => ({ name: displayName(), animal: myAnimal, since: joinedAt, set: state.set, dev: state.dev });
+  // setAt = when this person last pressed HSRP/VRRP (or adopted someone else's choice). The newest choice wins for the whole Template.
+  let setAt = 0;
+  const presencePayload = () => ({ name: displayName(), animal: myAnimal, since: joinedAt, setAt, set: state.set, dev: state.dev });
+  function followTeamSet() {
+    const leader = people.filter((p) => p.key !== presenceKey && p.set && p.setAt > setAt).sort((a, b) => b.setAt - a.setAt)[0];
+    if (!leader) return;
+    setAt = leader.setAt;
+    if (leader.set !== state.set) {
+      toast((animalOf(leader.animal)?.emoji || "") + " " + leader.name + " เปลี่ยนทุกคนเป็นชุด " + SETS[leader.set].label);
+      adopting = leader.set;
+      go(leader.set, state.dev);
+    }
+  }
+  let toastTimer;
+  function toast(text) {
+    const box = document.getElementById("toast");
+    box.textContent = text; box.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { box.hidden = true; }, 5000);
+  }
   function resolveAnimal() {
     const others = people.filter((p) => p.key !== presenceKey);
     const clash = others.some((p) => p.animal === myAnimal && (p.since < joinedAt || (p.since === joinedAt && p.key < presenceKey)));
@@ -190,7 +209,7 @@
       }, (kind) => {
         realtimeState = kind;
         sharingStatus(kind, kind === "offline" ? "การเชื่อมต่อสดขาด · ลองเชื่อมอีกครั้ง" : kind === "error" ? "อ่านสถานะร่วมไม่สำเร็จ · ลองเชื่อมอีกครั้ง" : "");
-      }, { key: presenceKey, payload: presencePayload(), onChange: (list) => { people = list; const moved = resolveAnimal(); drawPresence(); updateOnline(); if (moved) publishPresence(); } });
+      }, { key: presenceKey, payload: presencePayload(), onChange: (list) => { people = list; const moved = resolveAnimal(); drawPresence(); updateOnline(); if (moved) publishPresence(); followTeamSet(); } });
       updateTemplatePicker();
       flushPending();
     } catch (e) { sharingStatus("error", "ยังเชื่อมข้อมูลไม่ได้ · " + e.message); }
@@ -813,16 +832,28 @@
     drawTopo();
     state.dev ? renderDevice() : renderOverview();
   }
+  let routed = false, adopting = null;
   function fromHash() {
     const [s, d] = location.hash.replace(/^#/, "").split("/");
+    const prev = state.set;
     state.set = SETS[s] ? s : "vrrp";
+    // Any set change after the first load (button, link or typed URL) becomes the team's choice, unless we are following someone.
+    if (routed && prev !== state.set && adopting !== state.set) setAt = Date.now();
+    adopting = null; routed = true;
     state.dev = DEV[d] ? d : null;
     document.querySelectorAll(".set-switch button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.set === state.set)));
     refresh();
     publishPresence();
     if (state.dev && window.innerWidth < 980) detail.scrollIntoView({ behavior: "smooth", block: "start" });
   }
-  document.querySelectorAll(".set-switch button").forEach((b) => b.addEventListener("click", () => go(b.dataset.set, state.dev)));
+  document.querySelectorAll(".set-switch button").forEach((b) => {
+    if (room) b.title = "เปลี่ยนแล้วทุกคนใน Template นี้จะเปลี่ยนตาม";
+    b.addEventListener("click", () => {
+      if (b.dataset.set === state.set) return;
+      go(b.dataset.set, state.dev);
+      if (room) toast("เปลี่ยนทุกคนใน Template เป็นชุด " + SETS[b.dataset.set].label);
+    });
+  });
   window.addEventListener("hashchange", fromHash);
   fromHash();
   if (SHARE.configured()) loadTemplates();

@@ -81,7 +81,7 @@
       if (!m || typeof m.name !== "string") continue;
       const name = m.name.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, 24);
       if (!name) continue;
-      people.push({ key, name, animal: /^[a-z]{2,12}$/.test(m.animal) ? m.animal : "", since: Number.isFinite(m.since) ? m.since : 0, set: /^(hsrp|vrrp)$/.test(m.set) ? m.set : null, dev: /^(CE01|CE02|MLS01|MLS02|R01|SW01)$/.test(m.dev) ? m.dev : null });
+      people.push({ key, name, animal: /^[a-z]{2,12}$/.test(m.animal) ? m.animal : "", since: Number.isFinite(m.since) ? m.since : 0, setAt: Number.isFinite(m.setAt) ? m.setAt : 0, set: /^(hsrp|vrrp)$/.test(m.set) ? m.set : null, dev: /^(CE01|CE02|MLS01|MLS02|R01|SW01)$/.test(m.dev) ? m.dev : null });
     }
     return people;
   }

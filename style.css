@@ -222,3 +222,5 @@ details.untested .intro p { margin: 2px 0; }
 .panel-key small { color: var(--muted); font-size: 12px; }
 .node .md.who { fill: var(--accent); font-weight: 600; font-size: 11.5px; }
 .node.occupied rect { stroke: var(--accent); stroke-dasharray: none; }
+.toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 20; max-width: min(92vw, 520px); background: var(--ink); color: var(--panel); padding: 10px 16px; border-radius: 10px; font-size: 14px; box-shadow: 0 6px 24px rgba(0,0,0,.25); }
+.toast[hidden] { display: none; }

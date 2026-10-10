@@ -42,12 +42,12 @@ test('browser connection accepts a publishable key and rejects privileged keys',
 });
 test('presence keeps only a cleaned name and known set/device', () => {
   assert.deepEqual(S.readPresence({
-    a: [{ name: '  🐱 แมว ', animal: 'cat', since: 5, set: 'vrrp', dev: 'CE01' }],
+    a: [{ name: '  🐱 แมว ', animal: 'cat', since: 5, setAt: 9, set: 'vrrp', dev: 'CE01' }],
     b: [{ name: 'x'.repeat(40), animal: '<img>', set: 'bad', dev: 'G01' }],
     c: [{ name: '\u0007' }],
     d: null
   }), [
-    { key: 'a', name: '🐱 แมว', animal: 'cat', since: 5, set: 'vrrp', dev: 'CE01' },
-    { key: 'b', name: 'x'.repeat(24), animal: '', since: 0, set: null, dev: null }
+    { key: 'a', name: '🐱 แมว', animal: 'cat', since: 5, setAt: 9, set: 'vrrp', dev: 'CE01' },
+    { key: 'b', name: 'x'.repeat(24), animal: '', since: 0, setAt: 0, set: null, dev: null }
   ]);
 });
