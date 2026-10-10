@@ -73,7 +73,19 @@
     if (error) throw templateError(error);
     return { id: data.id, name: data.name, template: true };
   }
-  async function connect(room, onData, onStatus) {
+  // Presence = who is looking at which device right now. Not stored in the database.
+  function readPresence(state) {
+    const people = [];
+    for (const [key, metas] of Object.entries(state || {})) {
+      const list = Array.isArray(metas) ? metas : [], m = list[list.length - 1];
+      if (!m || typeof m.name !== "string") continue;
+      const name = m.name.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, 24);
+      if (!name) continue;
+      people.push({ key, name, animal: /^[a-z]{2,12}$/.test(m.animal) ? m.animal : "", since: Number.isFinite(m.since) ? m.since : 0, set: /^(hsrp|vrrp)$/.test(m.set) ? m.set : null, dev: /^(CE01|CE02|MLS01|MLS02|R01|SW01)$/.test(m.dev) ? m.dev : null });
+    }
+    return people;
+  }
+  async function connect(room, onData, onStatus, presence) {
     const c = await client();
     const joined = room.template
       ? await c.rpc("g06_open_template", { p_id: room.id })
@@ -96,13 +108,15 @@
       } catch (e) { if (!closed) onStatus("error", e.message); }
       finally { syncing = false; if (syncAgain) { syncAgain = false; sync(); } }
     }
-    const channel = c.channel("g06-room-" + room.id)
+    let me = presence?.payload || null, subscribed = false;
+    const channel = c.channel("g06-room-" + room.id, { config: { presence: { key: presence?.key || "" } } })
+      .on("presence", { event: "sync" }, () => { if (!closed && presence?.onChange) presence.onChange(readPresence(channel.presenceState())); })
       .on("postgres_changes", { event: "*", schema: "public", table: "g06_copy_progress", filter: "room_id=eq." + room.id }, sync)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "g06_interface_history", filter: "room_id=eq." + room.id }, sync)
       .subscribe((status) => {
         if (closed) return;
-        if (status === "SUBSCRIBED") { onStatus("live"); sync(); }
-        else if (["CHANNEL_ERROR", "TIMED_OUT", "CLOSED"].includes(status)) onStatus("offline");
+        if (status === "SUBSCRIBED") { subscribed = true; onStatus("live"); sync(); if (me) channel.track(me); }
+        else if (["CHANNEL_ERROR", "TIMED_OUT", "CLOSED"].includes(status)) { subscribed = false; onStatus("offline"); }
       });
     await sync();
     return {
@@ -118,9 +132,10 @@
         if (error) throw error;
         await sync();
       },
+      track(payload) { me = payload; if (subscribed) channel.track(payload); },
       sync,
       close() { closed = true; c.removeChannel(channel); }
     };
   }
-  root.G06SharedProgress = { configured, roomFromURL, roomURL, readRows, createRoom, listTemplates, createTemplate, connect };
+  root.G06SharedProgress = { configured, roomFromURL, roomURL, readRows, readPresence, createRoom, listTemplates, createTemplate, connect };
 })(typeof window !== "undefined" ? window : globalThis);

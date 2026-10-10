@@ -40,3 +40,14 @@ test('browser connection accepts a publishable key and rejects privileged keys',
   globalThis.G06_SUPABASE.publishableKey = 'sb_secret_test-key';
   assert.equal(S.configured(), false);
 });
+test('presence keeps only a cleaned name and known set/device', () => {
+  assert.deepEqual(S.readPresence({
+    a: [{ name: '  🐱 แมว ', animal: 'cat', since: 5, set: 'vrrp', dev: 'CE01' }],
+    b: [{ name: 'x'.repeat(40), animal: '<img>', set: 'bad', dev: 'G01' }],
+    c: [{ name: '\u0007' }],
+    d: null
+  }), [
+    { key: 'a', name: '🐱 แมว', animal: 'cat', since: 5, set: 'vrrp', dev: 'CE01' },
+    { key: 'b', name: 'x'.repeat(24), animal: '', since: 0, set: null, dev: null }
+  ]);
+});

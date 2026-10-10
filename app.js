@@ -17,6 +17,39 @@
   let interfaceHistory = [];
   let sharedController = null, pending = {}, revision = 0, flushing = false, realtimeState = "connecting";
   let copied = {};
+  /* ---------- who is on which device (Realtime presence, not saved) ---------- */
+  // 6 avatars for the 6 team members. Put an image path in img (e.g. "avatars/cat.png") to show art instead of the emoji.
+  const ANIMALS = [
+    { id: "cat", label: "แมว", emoji: "🐱", img: "" },
+    { id: "dog", label: "หมา", emoji: "🐶", img: "" },
+    { id: "panda", label: "แพนด้า", emoji: "🐼", img: "" },
+    { id: "penguin", label: "เพนกวิน", emoji: "🐧", img: "" },
+    { id: "fox", label: "จิ้งจอก", emoji: "🦊", img: "" },
+    { id: "turtle", label: "เต่า", emoji: "🐢", img: "" },
+  ];
+  const animalOf = (id) => ANIMALS.find((a) => a.id === id) || null;
+  // No random pick: whoever joins later takes the first animal nobody else is using.
+  const NAME_KEY = "g06-my-name", ANIMAL_KEY = "g06-my-animal-v2";
+  const presenceKey = crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2);
+  const cleanName = (v) => String(v || "").replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, 24);
+  let myName = "", myAnimal = "", people = [];
+  try { myName = cleanName(localStorage.getItem(NAME_KEY)); myAnimal = localStorage.getItem(ANIMAL_KEY) || ""; } catch (e) {}
+  if (!animalOf(myAnimal)) myAnimal = ANIMALS[0].id;
+  const joinedAt = Date.now();
+  const displayName = () => myName || animalOf(myAnimal).label;
+  const presencePayload = () => ({ name: displayName(), animal: myAnimal, since: joinedAt, set: state.set, dev: state.dev });
+  function resolveAnimal() {
+    const others = people.filter((p) => p.key !== presenceKey);
+    const clash = others.some((p) => p.animal === myAnimal && (p.since < joinedAt || (p.since === joinedAt && p.key < presenceKey)));
+    if (!clash) { try { localStorage.setItem(ANIMAL_KEY, myAnimal); } catch (e) {} return false; }
+    const used = new Set(others.map((p) => p.animal));
+    const free = ANIMALS.find((a) => !used.has(a.id));
+    if (!free) return false;
+    myAnimal = free.id;
+    try { localStorage.setItem(ANIMAL_KEY, myAnimal); } catch (e) {}
+    return true;
+  }
+  function publishPresence() { if (sharedController) sharedController.track(presencePayload()); }
   try {
     const saved = JSON.parse(localStorage.getItem(progressKey));
     if (saved && typeof saved === "object" && !Array.isArray(saved)) copied = saved;
@@ -144,7 +177,7 @@
       }, (kind) => {
         realtimeState = kind;
         sharingStatus(kind, kind === "offline" ? "การเชื่อมต่อสดขาด · ลองเชื่อมอีกครั้ง" : kind === "error" ? "อ่านสถานะร่วมไม่สำเร็จ · ลองเชื่อมอีกครั้ง" : "");
-      });
+      }, { key: presenceKey, payload: presencePayload(), onChange: (list) => { people = list; const moved = resolveAnimal(); drawPresence(); updateOnline(); if (moved) publishPresence(); } });
       updateTemplatePicker();
       flushPending();
     } catch (e) { sharingStatus("error", "ยังเชื่อมข้อมูลไม่ได้ · " + e.message); }
@@ -414,7 +447,68 @@
       gNodes.append(g);
     });
     svg.append(gLinks, gLabels, gNodes);
+    drawPresence();
   }
+  function drawPresence() {
+    svg.querySelector(".presence")?.remove();
+    const layer = el("g", { class: "presence" });
+    svg.append(layer);
+    Object.entries(NODES).forEach(([name, n]) => {
+      if (n.isp) return;
+      const list = people.filter((p) => p.key !== presenceKey && p.dev === name)
+        .map((p) => ({ animal: p.animal, text: p.name + (p.set && p.set !== state.set ? " (" + p.set.toUpperCase() + ")" : "") }));
+      if (state.dev === name) list.unshift({ animal: myAnimal, text: displayName() + " (คุณ)" });
+      if (!list.length) return;
+      const shown = list.slice(0, 3);
+      if (list.length > 3) shown.push({ animal: "", text: "+" + (list.length - 3) });
+      // Lay out avatar + name chips in a row centred under the node.
+      const row = el("g", {}), y = n.y + H / 2 + 13;
+      layer.append(row);
+      let x = 0;
+      shown.forEach((p) => {
+        const a = animalOf(p.animal), chip = el("g", { class: "who-chip" });
+        row.append(chip);
+        let w = 0;
+        if (a?.img) { chip.append(el("image", { href: a.img, x, y: y - 9, width: 18, height: 18, class: "who-img" })); w = 21; }
+        else if (a) { chip.append(el("text", { x, y, "dominant-baseline": "middle", class: "who-emoji" }, a.emoji)); w = chip.getBBox().width + 3; }
+        const t = el("text", { x: x + w, y, "dominant-baseline": "middle", class: "lbl who" }, p.text);
+        chip.append(t);
+        const bb = chip.getBBox();
+        chip.insertBefore(el("rect", { x: bb.x - 4, y: bb.y - 1, width: bb.width + 8, height: bb.height + 2, rx: 9, class: "lbl-bg who-bg" }), chip.firstChild);
+        x += bb.width + 12;
+      });
+      const total = row.getBBox();
+      row.setAttribute("transform", "translate(" + (n.x - total.x - total.width / 2) + ",0)");
+    });
+  }
+  function updateOnline() {
+    const box = document.getElementById("onlineList");
+    updateAvatar();
+    if (!room) { box.hidden = true; return; }
+    const others = people.filter((p) => p.key !== presenceKey);
+    box.hidden = false;
+    box.textContent = "ออนไลน์ " + (others.length + 1) + " คน" + (others.length ? ": " + others.map((p) => (animalOf(p.animal)?.emoji || "") + p.name + (p.dev ? " → " + p.dev : "")).join(" · ") : "");
+  }
+  const nameInput = document.getElementById("myName"), avatar = document.getElementById("myAvatar");
+  function updateAvatar() {
+    const a = animalOf(myAnimal);
+    avatar.textContent = "";
+    if (a.img) avatar.append(Object.assign(document.createElement("img"), { src: a.img, alt: "" }));
+    else avatar.textContent = a.emoji;
+    avatar.title = "สัตว์ประจำตัว: " + a.label + " (แจกให้อัตโนมัติ ไม่ซ้ำกับคนที่เข้ามาก่อน)";
+    nameInput.placeholder = a.label;
+  }
+  updateAvatar();
+  nameInput.value = myName;
+  let nameTimer;
+  nameInput.addEventListener("input", () => {
+    clearTimeout(nameTimer);
+    nameTimer = setTimeout(() => {
+      myName = cleanName(nameInput.value);
+      try { myName ? localStorage.setItem(NAME_KEY, myName) : localStorage.removeItem(NAME_KEY); } catch (e) {}
+      drawPresence(); publishPresence();
+    }, 300);
+  });
 
   /* ---------- detail ---------- */
   function blockHTML(b, id) {
@@ -567,6 +661,7 @@
     state.dev = DEV[d] ? d : null;
     document.querySelectorAll(".set-switch button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.set === state.set)));
     refresh();
+    publishPresence();
     if (state.dev && window.innerWidth < 980) detail.scrollIntoView({ behavior: "smooth", block: "start" });
   }
   document.querySelectorAll(".set-switch button").forEach((b) => b.addEventListener("click", () => go(b.dataset.set, state.dev)));
