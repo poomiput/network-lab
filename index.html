@@ -13,7 +13,7 @@ try {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Thai:wght@400;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="style.css?v=20261010-hover2">
+<link rel="stylesheet" href="style.css?v=20261010-templates3">
 </head>
 <body>
 <header class="top">
@@ -30,13 +30,13 @@ try {
   </div>
 </header>
 
-<div class="sharing-bar" aria-label="สถานะร่วมกับทีม">
-  <span id="sharingStatus" role="status">สถานะ Copy · เก็บในเบราว์เซอร์นี้</span>
+<div class="sharing-bar" aria-label="เลือก Template">
+  <div class="template-picker"><label for="templateSelect">Template</label><select id="templateSelect"><option value="">ส่วนตัว · ในเบราว์เซอร์นี้</option></select><button type="button" id="refreshTemplates" title="โหลดรายชื่อ Template ใหม่" aria-label="โหลดรายชื่อ Template ใหม่">↻</button></div>
+  <span id="sharingStatus" role="status">เก็บในเบราว์เซอร์นี้</span>
   <div class="sharing-actions">
-    <button type="button" id="createRoom" disabled>สร้างห้องทีม</button>
-    <button type="button" id="shareRoom" hidden>Copy ลิงก์ห้อง</button>
-    <button type="button" id="retrySharing" hidden>ลองเชื่อมอีกครั้ง</button>
-    <button type="button" id="leaveRoom" hidden>กลับส่วนตัว</button>
+    <button type="button" id="createRoom" disabled>+ สร้าง Template</button>
+    <button type="button" id="shareRoom" hidden>Copy ลิงก์</button>
+    <button type="button" id="retrySharing" hidden>ลองอีกครั้ง</button>
   </div>
 </div>
 
@@ -61,11 +61,11 @@ try {
   สร้างจาก <code>G06_Device_Scripts/</code> · ส่วนที่ติดป้าย “ยังไม่ทดสอบ” ยังไม่เคยลงเครื่องจริง ตรวจผลทุก BLOCK ก่อนเชื่อ
 </footer>
 
-<script src="data/configs.js?v=20261010-hover2"></script>
-<script src="data/devices.js?v=20261010-hover2"></script>
-<script src="interfaces.js?v=20261010-hover2"></script>
-<script src="supabase-config.js?v=20261010-hover2"></script>
-<script src="shared-progress.js?v=20261010-hover2"></script>
-<script src="app.js?v=20261010-hover2"></script>
+<script src="data/configs.js?v=20261010-templates3"></script>
+<script src="data/devices.js?v=20261010-templates3"></script>
+<script src="interfaces.js?v=20261010-templates3"></script>
+<script src="supabase-config.js?v=20261010-templates3"></script>
+<script src="shared-progress.js?v=20261010-templates3"></script>
+<script src="app.js?v=20261010-templates3"></script>
 </body>
 </html>

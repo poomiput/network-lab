@@ -8,7 +8,7 @@
   const TEMP_KEY = "g06-temporary-interfaces-v1";
   const COPY_KEY = "g06-copy-progress-v1";
   const SHARE = window.G06SharedProgress;
-  let room = null, roomError = "";
+  let room = null, roomError = "", templates = [];
   try { room = SHARE.roomFromURL(location.href); } catch (e) { roomError = e.message; }
   const progressKey = room ? COPY_KEY + ":room:" + room.id : COPY_KEY;
   const outboxKey = progressKey + ":pending";
@@ -83,7 +83,7 @@
     const status = document.getElementById("sharingStatus");
     const waiting = Object.keys(pending).length;
     status.dataset.state = kind;
-    status.textContent = room ? "ห้อง " + room.id.slice(0, 8) + " · " + (message || (waiting ? "มี " + waiting + " รายการรอบันทึก" : kind === "live" ? "แชร์กับทีมแล้ว" : "กำลังเชื่อมต่อ")) : (message || "สถานะ Copy · เก็บในเบราว์เซอร์นี้");
+    status.textContent = room ? (room.template ? (room.name || "Template") : "ชุดที่แชร์เดิม") + " · " + (message || (waiting ? "มี " + waiting + " รายการรอบันทึก" : kind === "live" ? "แชร์กับทีมแล้ว" : "กำลังเชื่อมต่อ")) : (message || "เก็บในเบราว์เซอร์นี้");
     document.getElementById("retrySharing").hidden = !room || !["error", "offline"].includes(kind);
   }
   async function flushPending() {
@@ -145,18 +145,45 @@
         realtimeState = kind;
         sharingStatus(kind, kind === "offline" ? "การเชื่อมต่อสดขาด · ลองเชื่อมอีกครั้ง" : kind === "error" ? "อ่านสถานะร่วมไม่สำเร็จ · ลองเชื่อมอีกครั้ง" : "");
       });
+      updateTemplatePicker();
       flushPending();
-    } catch (e) { sharingStatus("error", "ยังเชื่อมห้องไม่ได้ · " + e.message); }
+    } catch (e) { sharingStatus("error", "ยังเชื่อมข้อมูลไม่ได้ · " + e.message); }
   }
+  function updateTemplatePicker() {
+    const select = document.getElementById("templateSelect");
+    select.innerHTML = '<option value="">ส่วนตัว · ในเบราว์เซอร์นี้</option>';
+    for (const item of templates) {
+      const option = document.createElement("option"); option.value = item.id; option.textContent = item.name; select.append(option);
+    }
+    if (room && !templates.some((item) => item.id === room.id)) {
+      const option = document.createElement("option"); option.value = room.id; option.textContent = room.name || (room.template ? "Template ที่เลือก" : "ชุดที่แชร์เดิม"); select.append(option);
+    }
+    select.value = room?.id || "";
+  }
+  async function loadTemplates() {
+    const btn = document.getElementById("refreshTemplates"); btn.disabled = true;
+    try { templates = await SHARE.listTemplates(); updateTemplatePicker(); if (!room && !roomError) sharingStatus("local"); }
+    catch (e) { if (!room) sharingStatus("error", e.message); btn.title = e.message; }
+    finally { btn.disabled = false; }
+  }
+  document.getElementById("templateSelect").addEventListener("change", (event) => {
+    const id = event.target.value;
+    if (id === room?.id) return;
+    location.href = SHARE.roomURL(location.href, id ? { id, template: true } : null);
+  });
+  document.getElementById("refreshTemplates").addEventListener("click", loadTemplates);
   document.getElementById("createRoom").disabled = !SHARE.configured();
-  document.getElementById("createRoom").title = SHARE.configured() ? "สร้างห้องพร้อมสถานะ Copy ที่มีอยู่ แล้วส่งลิงก์ให้ทีม" : "ตั้งค่า Supabase ก่อนเพื่อแชร์สถานะกับทีม";
+  document.getElementById("createRoom").title = "ตั้งชื่อ Template · เริ่มด้วยพอร์ตและสถานะที่เห็นอยู่ · ทุกคนเลือกใช้ได้";
   document.getElementById("shareRoom").hidden = !room;
-  document.getElementById("leaveRoom").hidden = !(room || roomError);
   document.getElementById("createRoom").addEventListener("click", async (event) => {
+    const title = window.prompt("ตั้งชื่อ Template (ทุกคนจะเลือกชื่อนี้จากรายการได้)\nเริ่มด้วยพอร์ตและสถานะ Copy ที่เห็นอยู่", "");
+    if (title === null) return;
+    const name = title.trim();
+    if (!name || name.length > 80) { window.alert("ชื่อ Template ต้องมี 1-80 ตัวอักษร"); return; }
     const btn = event.currentTarget; btn.disabled = true;
-    sharingStatus("connecting", "กำลังสร้างห้องทีม");
+    sharingStatus("connecting", "กำลังสร้าง Template");
     try {
-      const next = await SHARE.createRoom();
+      const next = await SHARE.createTemplate(name);
       if (interfaceHistory.length || Object.values(temporary).some((maps) => Object.values(maps).some((ports) => Object.keys(ports).length))) {
         const controller = await SHARE.connect(next, () => {}, () => {});
         try {
@@ -166,25 +193,24 @@
           }
         } finally { controller.close(); }
       }
-      // A new room starts with this browser's current Copy marks.
       const nextKey = COPY_KEY + ":room:" + next.id;
       try {
         localStorage.setItem(nextKey, JSON.stringify(copied));
         localStorage.setItem(nextKey + ":pending", JSON.stringify(Object.fromEntries(Object.entries(copied).map(([key, signature]) => [key, { signature }]))));
       } catch (e) {}
       location.href = SHARE.roomURL(location.href, next);
-    } catch (e) { btn.disabled = false; sharingStatus("error", "สร้างห้องไม่สำเร็จ · " + e.message); }
+    } catch (e) { btn.disabled = false; sharingStatus("error", "สร้าง Template ไม่สำเร็จ · " + e.message); }
   });
   document.getElementById("shareRoom").addEventListener("click", async () => {
     const link = SHARE.roomURL(location.href, room);
     try {
       await navigator.clipboard.writeText(link);
       const btn = document.getElementById("shareRoom"); btn.textContent = "Copied ✓";
-      setTimeout(() => { btn.textContent = "Copy ลิงก์ห้อง"; }, 1600);
-    } catch (e) { window.prompt("คัดลอกลิงก์นี้ให้ทีม", link); }
+      setTimeout(() => { btn.textContent = "Copy ลิงก์"; }, 1600);
+    } catch (e) { window.prompt("คัดลอกลิงก์นี้", link); }
   });
-  document.getElementById("leaveRoom").addEventListener("click", () => { location.href = SHARE.roomURL(location.href, null); });
   document.getElementById("retrySharing").addEventListener("click", connectSharing);
+  updateTemplatePicker();
   const peerNames = (text) => String(text).replace(/\b(?:CE01|CE02|MLS01|MLS02|R01|SW01)\b/g, deviceName);
   function copySignature(text) {
     let hash = 2166136261;
@@ -221,7 +247,7 @@
     const changes = [...new Set(Object.keys(previous).concat(Object.keys(nextMap)))].map((original) => ({ original, from: previous[original] || original, to: nextMap[original] || original })).filter((v) => v.from !== v.to);
     if (!changes.length) return;
     if (room) {
-      if (!sharedController) throw new Error("ห้องยังไม่พร้อมบันทึกพอร์ต กรุณาตั้งค่า Supabase แล้วลองเชื่อมอีกครั้ง");
+      if (!sharedController) throw new Error("ข้อมูลยังเชื่อมต่อไม่เสร็จ กรุณารอสักครู่แล้วลองอีกครั้ง");
       sharingStatus("saving", "กำลังบันทึกพอร์ตและประวัติให้ทีม");
       await sharedController.setInterfaces(set, owner, changes.map((v) => v.original), changes.map((v) => v.to));
       sharingStatus(realtimeState);
@@ -402,7 +428,7 @@
     return '<div class="block' + (done ? ' copied-block' : '') + '">' +
       '<div class="block-h"><div><div class="t">' + hl(b.title) + '</div><div class="st">' + status +
       (hasPh ? ' <span class="chip warn">มีค่าต้องเติม</span>' : "") + (done ? ' <span class="chip ok copy-mark">✓ Copy แล้ว</span>' : '') + "</div></div>" +
-      '<button class="copy' + (done ? ' done' : '') + '" data-copy="' + id + '">' + (done ? 'Copy อีกครั้ง' : 'Copy') + '</button></div>' + notes +
+      '<div class="block-actions"><button class="copy' + (done ? ' done' : '') + '" data-copy="' + id + '">' + (done ? 'Copy อีกครั้ง' : 'Copy') + '</button><button type="button" class="undo-copy" data-undo-copy="' + id + '" title="ยกเลิกเครื่องหมาย Copy เฉพาะ BLOCK นี้"' + (done ? '' : ' hidden') + '>ยกเลิก ✓</button></div></div>' + notes +
       "<pre>" + b.commands.map(hl).join("\n") + "</pre>" + verify + "</div>";
   }
 
@@ -437,7 +463,7 @@
       '<p class="meta">ชื่อย่อ: ' + esc(name) + (scriptHostname ? ' · Hostname ในสคริปต์เว็บ: <code>' + esc(scriptHostname) + '</code>' : "") + '</p>' +
       '<div class="chips"><span class="chip">' + esc(pick(d.model)) + '</span><span class="chip">' + esc(d.loopback) + '</span><span class="chip">Console: แผง ' + esc(d.console[state.set]) + '</span><span class="chip">ชุด ' + esc(SETS[state.set].label) + "</span></div>";
     const progress = deviceProgress(name);
-    html += '<div class="copy-progress"><span>✓ Copy ' + progress.done + '/' + progress.total + ' BLOCK · สีเขียวเมื่อครบ</span><button type="button" data-reset-copy' + (progress.done ? '' : ' hidden') + '>ล้างเครื่องหมาย Copy</button><small>' + (room ? 'แชร์เครื่องหมาย พอร์ต และประวัติในห้องนี้' : 'จำในเบราว์เซอร์นี้') + ' · นับการคัดลอกคำสั่ง · ตรวจผลบน Router แยกตาม BLOCK</small></div>';
+    html += '<div class="copy-progress"><span>✓ Copy ' + progress.done + '/' + progress.total + ' BLOCK · สีเขียวเมื่อครบ</span><button type="button" data-reset-copy' + (progress.done ? '' : ' hidden') + '>ล้างเครื่องหมาย Copy</button><small>' + (room ? 'ทุกคนที่ใช้ Template นี้เห็นเครื่องหมาย พอร์ต และประวัติร่วมกัน' : 'จำในเบราว์เซอร์นี้') + ' · นับการคัดลอกคำสั่ง · ตรวจผลบน Router แยกตาม BLOCK</small></div>';
     if (warns.length) html += '<div class="notice">' + warns.map((w) => "<p>" + hl(w.replace(/^!!\s*/, "")) + "</p>").join("") + "</div>";
     html += "<h3>เสียบสาย</h3><div class=\"table-wrap\"><table><thead><tr><th>พอร์ต</th><th>แผง</th><th>ไปที่</th><th>แผงปลาย</th><th>IP / หน้าที่</th></tr></thead><tbody>" + cables + "</tbody></table></div>";
     html += "<h3>ผลที่ต้องเห็นหลังวางครบ</h3><ul class=\"expect\">" + expects + extra + "</ul>" +
@@ -453,6 +479,10 @@
     }
     detail.innerHTML = html;
     detail.querySelectorAll(".copy").forEach((btn) => btn.addEventListener("click", () => copy(copyMap[btn.dataset.copy], btn)));
+    detail.querySelectorAll("[data-undo-copy]").forEach((btn) => btn.addEventListener("click", () => {
+      const entry = copyMap[btn.dataset.undoCopy];
+      delete copied[entry.key]; persistChanges({ [entry.key]: null }); updateProgressView();
+    }));
     detail.querySelector("[data-reset-copy]").addEventListener("click", () => {
       const prefix = state.set + ":" + name + ":";
       const changes = {};
@@ -499,6 +529,7 @@
         block.querySelector(".st").append(" ", mark);
       }
       btn.textContent = "Copied ✓"; btn.classList.add("done");
+      block.querySelector(".undo-copy").hidden = false;
       const progress = deviceProgress(state.dev);
       detail.querySelector(".copy-progress span").textContent = "✓ Copy " + progress.done + "/" + progress.total + " BLOCK · สีเขียวเมื่อครบ";
       detail.querySelector("[data-reset-copy]").hidden = false;
@@ -541,6 +572,7 @@
   document.querySelectorAll(".set-switch button").forEach((b) => b.addEventListener("click", () => go(b.dataset.set, state.dev)));
   window.addEventListener("hashchange", fromHash);
   fromHash();
+  if (SHARE.configured()) loadTemplates();
   if (roomError) sharingStatus("error", roomError);
   else if (room) connectSharing();
   else if (!SHARE.configured()) sharingStatus("local", "สถานะ Copy · เก็บในเบราว์เซอร์นี้ · แชร์กับทีมรอตั้งค่า Supabase");

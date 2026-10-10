@@ -17,6 +17,15 @@ test('malformed room links fail rather than falling into personal mode', () => {
   assert.throws(() => S.roomFromURL('https://example.test/?room=' + room.id));
   assert.equal(S.roomFromURL('https://example.test/#vrrp/CE01'), null);
 });
+test('templates open by ID without an invitation key and preserve the current device', () => {
+  const template = { id: room.id, template: true };
+  const link = S.roomURL('https://example.test/?room=' + room.id + '&key=' + room.key + '#vrrp/CE02', template);
+  assert.deepEqual(S.roomFromURL(link), template);
+  assert.equal(new URL(link).searchParams.get('key'), null);
+  assert.match(link, /#vrrp\/CE02$/);
+  assert.equal(new URL(S.roomURL(link, null)).searchParams.get('template'), null);
+  assert.throws(() => S.roomFromURL('https://example.test/?template=invalid'));
+});
 test('progress rows accept only signatures of known devices, and reset tombstones remove marks', () => {
   assert.deepEqual(S.readRows([
     { block_key: 'vrrp:CE01:BLOCK 1', signature: '50:abc123' },

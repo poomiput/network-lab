@@ -129,6 +129,11 @@ th { color: var(--muted); font-weight: 600; font-size: 12.5px; }
 .copy { flex: none; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 8px; padding: 6px 12px; font: inherit; font-size: 13px; cursor: pointer; }
 .copy:hover { border-color: var(--accent); }
 .copy.done { background: var(--ok-bg); color: var(--ok-ink); border-color: transparent; }
+.block-actions { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.undo-copy { font: inherit; font-size: 11px; padding: 1px 2px; border: 0; background: transparent; color: var(--muted); opacity: .5; cursor: pointer; white-space: nowrap; }
+.undo-copy[hidden] { display: none; }
+.undo-copy:hover, .undo-copy:focus-visible { opacity: 1; color: var(--accent); }
+.undo-copy:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
 .block .notes { margin: 0; padding: 8px 12px 0; color: var(--muted); font-size: 12.5px; }
 .block .notes p { margin: 2px 0; }
 .block pre { margin: 0; padding: 10px 12px 12px; overflow-x: auto; font-size: 12.5px; line-height: 1.5; }
@@ -159,6 +164,11 @@ details.untested .intro p { margin: 2px 0; }
 .sharing-actions { display: flex; flex-wrap: wrap; gap: 6px; }
 .sharing-actions button { font: inherit; font-size: 12px; border: 1px solid var(--line); border-radius: 7px; background: var(--panel); color: var(--accent); padding: 5px 9px; cursor: pointer; }
 .sharing-actions button:disabled { color: var(--muted); opacity: .65; cursor: default; }
+.template-picker { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.template-picker label { font-weight: 600; color: var(--ink); }
+.template-picker select { min-width: 160px; max-width: min(310px, 60vw); font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 7px; padding: 5px 8px; }
+.template-picker button { font: inherit; border: 0; background: transparent; color: var(--muted); cursor: pointer; padding: 4px; }
+.template-picker button:hover, .template-picker button:focus-visible { color: var(--accent); }
 #sharingStatus { overflow-wrap: anywhere; }
 #sharingStatus[data-state="live"] { color: var(--ok-ink); }
 #sharingStatus[data-state="error"], #sharingStatus[data-state="offline"] { color: var(--warn-ink); }
