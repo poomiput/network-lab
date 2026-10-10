@@ -100,6 +100,19 @@
   const hl = (s) => esc(s).replace(/&lt;(?!-&gt;)([^&]*?)&gt;/g, '<span class="ph">&lt;$1&gt;</span>');
   const pick = (v) => (v && typeof v === "object" && !Array.isArray(v) ? v[state.set] : v);
   const deviceName = (id) => DEV[id]?.hostname || id;
+  /* ---------- patch panel slots: T05 -> "แถวบน ช่อง 5", B03 -> "แถวล่าง ช่อง 3", P02 -> "ช่อง 2" ---------- */
+  const SLOT_RE = /\b([TBP])0?(\d{1,2})(?:\s*[–\-\/]\s*[TBP]?0?(\d{1,2}))?\b/g;
+  const ROW_NAME = { T: "แถวบน", B: "แถวล่าง", P: "" };
+  const slotText = (text) => String(text).replace(SLOT_RE, (m, r, a, b) => (ROW_NAME[r] ? ROW_NAME[r] + " " : "") + "ช่อง " + a + (b ? "–" + b : ""));
+  const slotShort = (text) => String(text).replace(SLOT_RE, (m, r, a, b) => (r === "T" ? "ช่องบน " : r === "B" ? "ช่องล่าง " : "ช่อง ") + a + (b ? "–" + b : ""));
+  function slotsOf(text) {
+    const out = [];
+    String(text).replace(SLOT_RE, (m, r, a, b) => {
+      for (let i = Number(a); i <= Number(b || a); i++) out.push({ row: r, n: i });
+      return m;
+    });
+    return out;
+  }
   function saveProgress() {
     try {
       localStorage.setItem(progressKey, JSON.stringify(copied));
@@ -370,7 +383,7 @@
     g.insertBefore(r, t);
   }
   function portLabel(parent, x, y, original, owner) {
-    const port = original.split(" · ")[0], text = mapped(original, owner);
+    const port = original.split(" · ")[0], text = slotShort(mapped(original, owner));
     const g = el("g", { class: "port-edit" + (text !== original ? " changed" : ""), tabindex: 0, role: "button", "aria-label": "แก้พอร์ต " + deviceName(owner) + " " + mapped(port, owner), "data-interface-device": owner, "data-interface-original": port });
     parent.append(g);
     label(g, x, y, text, "port");
@@ -382,22 +395,7 @@
   function drawTopo() {
     svg.textContent = "";
     const gLinks = el("g", {}), gLabels = el("g", {}), gNodes = el("g", {});
-    svg.append(el("rect", { x: 200, y: 470, width: 460, height: 100, rx: 12, class: "zone" }));
-    const zt = el("text", { x: 430, y: 492, "text-anchor": "middle", class: "zone-t" });
-    zt.textContent = "HQ LAN · VLAN10 Teller · 20 App · 30 ATM · 40 DB · 50 Admin · 60 DMZ";
-    svg.append(zt);
-    const zt2 = el("text", { x: 430, y: 516, "text-anchor": "middle", class: "zone-t" });
-    zt2.textContent = "VIP: VLAN10–50 ใช้ .1 · DMZ ใช้ 198.51.100.11 (" + SETS[state.set].fhrp + ")";
-    svg.append(zt2);
-    const zt3 = el("text", { x: 430, y: 540, "text-anchor": "middle", class: "zone-t" });
-    zt3.textContent = "PC เสียบช่อง/LAN 5–10 ของ MLS (5=Teller … 10=DMZ)";
-    svg.append(zt3);
-    svg.append(el("rect", { x: 760, y: 470, width: 160, height: 100, rx: 12, class: "zone" }));
-    const bt = el("text", { x: 840, y: 505, "text-anchor": "middle", class: "zone-t" }); bt.textContent = "Branch VLAN110"; svg.append(bt);
-    const bt2 = el("text", { x: 840, y: 529, "text-anchor": "middle", class: "zone-t" }); bt2.textContent = "10.6.16.0/20 · GW .1"; svg.append(bt2);
-    svg.append(el("line", { x1: 300, y1: 396, x2: 300, y2: 470, class: "link routed", opacity: 0.35 }));
-    svg.append(el("line", { x1: 560, y1: 396, x2: 560, y2: 470, class: "link routed", opacity: 0.35 }));
-    svg.append(el("line", { x1: 840, y1: 396, x2: 840, y2: 470, class: "link routed", opacity: 0.35 }));
+    drawHosts();
 
     // WAN G01 -> R01 (curve over the top)
     gLinks.append(el("path", { d: "M300 32 Q 650 -90 840 174", class: "link wan" }));
@@ -448,6 +446,80 @@
     });
     svg.append(gLinks, gLabels, gNodes);
     drawPresence();
+  }
+  /* ---------- PCs / servers under the switches ---------- */
+  const HQ_HOSTS = [
+    { label: "Teller", vlan: 10, ip: "IP อัตโนมัติ", icon: "pc", port: 5 },
+    { label: "App Server", vlan: 20, ip: "10.6.1.10", icon: "server", port: 6 },
+    { label: "ATM", vlan: 30, ip: "IP อัตโนมัติ", icon: "atm", port: 7 },
+    { label: "Database", vlan: 40, ip: "10.6.3.10", icon: "server", port: 8 },
+    { label: "Admin", vlan: 50, ip: "10.6.4.10", icon: "pc", port: 9 },
+    { label: "Web (DMZ)", vlan: 60, ip: "198.51.100.12", icon: "web", port: 10 },
+  ];
+  const BR_HOSTS = [
+    { label: "Client", vlan: 110, ip: "10.6.16.20", icon: "pc", port: 5 },
+    { label: "Server", vlan: 110, ip: "10.6.16.10", icon: "server", port: 6 },
+  ];
+  // Panel slot for switch access port Gi1/0/<n>, from the cable table (null when cabled at the switch itself).
+  function accessSlot(dev, n) {
+    for (const r of DEV[dev].cables[state.set]) {
+      let ports;
+      try { ports = IF.parse(r[0]); } catch (e) { continue; }
+      const i = ports.indexOf("GigabitEthernet1/0/" + n), slots = slotsOf(r[1]);
+      if (i >= 0) return slots.length === ports.length ? (slots[i].row === "T" ? "บน " : slots[i].row === "B" ? "ล่าง " : "ช่อง ") + slots[i].n : null;
+    }
+    return null;
+  }
+  function hostIcon(g, kind, x, y) {
+    if (kind === "pc") {
+      g.append(el("rect", { x: x - 15, y, width: 30, height: 20, rx: 2, class: "ico" }));
+      g.append(el("rect", { x: x - 12, y: y + 3, width: 24, height: 14, rx: 1, class: "ico-scr" }));
+      g.append(el("path", { d: "M" + x + " " + (y + 20) + " v5 M" + (x - 8) + " " + (y + 26) + " h16", class: "ico-line" }));
+    } else if (kind === "atm") {
+      g.append(el("rect", { x: x - 12, y: y - 2, width: 24, height: 28, rx: 3, class: "ico" }));
+      g.append(el("rect", { x: x - 8, y: y + 2, width: 16, height: 9, rx: 1, class: "ico-scr" }));
+      g.append(el("path", { d: "M" + (x - 6) + " " + (y + 16) + " h12 M" + (x - 6) + " " + (y + 21) + " h12", class: "ico-line" }));
+    } else {
+      for (let i = 0; i < 3; i++) {
+        g.append(el("rect", { x: x - 13, y: y - 1 + i * 9, width: 26, height: 8, rx: 1.5, class: "ico" }));
+        g.append(el("circle", { cx: x + 8, cy: y + 3 + i * 9, r: 1.4, class: "ico-dot" }));
+      }
+      if (kind === "web") {
+        g.append(el("circle", { cx: x + 15, cy: y + 1, r: 6, class: "ico-globe" }));
+        g.append(el("path", { d: "M" + (x + 9) + " " + (y + 1) + " h12 M" + (x + 15) + " " + (y - 5) + " v12", class: "ico-line thin" }));
+      }
+    }
+  }
+  function drawHostRow(hosts, x0, width, switches, bg) {
+    const step = width / hosts.length, top = 486, iconY = 500, sel = switches.includes(state.dev);
+    const xs = hosts.map((h, i) => x0 + step * (i + 0.5));
+    bg.append(el("line", { x1: xs[0], y1: top, x2: xs[xs.length - 1], y2: top, class: "host-bus" }));
+    hosts.forEach((h, i) => {
+      const x = xs[i], g = el("g", { class: "host" + (sel ? " sel" : "") });
+      bg.append(el("line", { x1: x, y1: top, x2: x, y2: iconY - 4, class: "host-bus" }));
+      hostIcon(g, h.icon, x, iconY);
+      const lines = [[h.label, "host-name"], ["VLAN " + h.vlan, "host-t"], [h.ip, "host-t mono"]];
+      switches.forEach((sw) => {
+        const slot = accessSlot(sw, h.port);
+        lines.push([sw + " " + (slot || "LAN " + h.port), "host-plug"]);
+      });
+      lines.forEach(([t, cls], n) => g.append(el("text", { x, y: iconY + 42 + n * 14, "text-anchor": "middle", class: cls }, t)));
+      g.append(el("title", {}, h.label + " · VLAN " + h.vlan + " · " + h.ip + " · เสียบพอร์ต Gi1/0/" + h.port + " ของ " + switches.join(" หรือ ")));
+      bg.append(g);
+    });
+  }
+  function drawHosts() {
+    const bg = el("g", { class: "hosts" });
+    svg.append(bg);
+    bg.append(el("rect", { x: 140, y: 462, width: 580, height: 178, rx: 12, class: "zone" }));
+    bg.append(el("text", { x: 150, y: 478, class: "zone-t" }, "HQ LAN — เสียบ PC ที่ MLS01 หรือ MLS02 ก็ได้ · " + (state.set === "vrrp" ? "ป้ายฟ้า = ช่องบนแผง (บน/ล่าง = แถว)" : "ป้ายฟ้า = ช่อง LAN ที่ตัวสวิตช์")));
+    bg.append(el("text", { x: 430, y: 632, "text-anchor": "middle", class: "zone-t" }, "Gateway ทุก VLAN = .1 · DMZ = 198.51.100.11 (" + SETS[state.set].fhrp + ")"));
+    bg.append(el("rect", { x: 740, y: 462, width: 200, height: 178, rx: 12, class: "zone" }));
+    bg.append(el("text", { x: 750, y: 478, class: "zone-t" }, "สาขา VLAN110 · GW .1"));
+    [300, 560].forEach((x) => bg.append(el("line", { x1: x, y1: 396, x2: x, y2: 486, class: "link routed", opacity: 0.35 })));
+    bg.append(el("line", { x1: 840, y1: 396, x2: 840, y2: 486, class: "link routed", opacity: 0.35 }));
+    drawHostRow(HQ_HOSTS, 140, 580, ["MLS01", "MLS02"], bg);
+    drawHostRow(BR_HOSTS, 740, 200, ["SW01"], bg);
   }
   function drawPresence() {
     svg.querySelector(".presence")?.remove();
@@ -526,6 +598,40 @@
       "<pre>" + b.commands.map(hl).join("\n") + "</pre>" + verify + "</div>";
   }
 
+  // Picture of the patch panel (as seen from the front of the rack) with this device's slots lit up.
+  function panelHTML(name) {
+    const d = DEV[name], used = new Map();
+    const mark = (slot, kind, text) => { const k = slot.row + slot.n; if (!used.has(k)) used.set(k, { kind, text: [] }); used.get(k).text.push(text); };
+    slotsOf(String(d.console[state.set]).split(" ")[0]).slice(0, 1).forEach((sl) => mark(sl, "con", "สาย Console ของ " + name));
+    d.cables[state.set].forEach((r) => {
+      const slots = slotsOf(r[1]);
+      let ports = [r[0]];
+      try { ports = IF.parse(mapped(r[0], name)).map((p) => IF.format([p], "Gi")); } catch (e) {}
+      let originals = [];
+      try { originals = IF.parse(r[0]); } catch (e) {}
+      slots.forEach((sl, i) => {
+        const own = ports.length === slots.length ? ports[i] : mapped(r[0], name);
+        // Access ports: name the actual PC (Teller, ATM, ...) instead of the generic "PC" text.
+        const n = Number((originals[i] || "").match(/^GigabitEthernet1\/0\/(\d+)$/)?.[1]);
+        const host = /^PC/.test(r[2]) && (name === "SW01" ? BR_HOSTS : HQ_HOSTS).find((h) => h.port === n);
+        mark(sl, "lan", own + " → " + (host ? "PC " + host.label + " (VLAN " + host.vlan + ")" : /^PC/.test(r[2]) ? "PC สำรอง (ว่างได้)" : peerNames(r[2])));
+      });
+    });
+    if (!used.size) return '<p class="meta">ไม่มีเลขช่องแผงของชุดนี้ — สายเสียบตรงที่ตัวเครื่อง</p>';
+    const rows = state.set === "vrrp" ? [["T", "แถวบน"], ["B", "แถวล่าง"]] : [["P", "แผง"]];
+    let html = '<div class="panel"><div class="panel-title">แผงเสียบสาย (มองจากหน้า rack) · ช่องที่มีสีคือช่องของเครื่องนี้</div>';
+    rows.forEach(([r, label]) => {
+      html += '<div class="panel-row"><span class="panel-label"><span class="long">' + label + '</span><span class="short">' + label.replace("แถว", "") + '</span></span><div class="panel-cells">';
+      for (let i = 1; i <= 24; i++) {
+        const u = used.get(r + i);
+        html += '<span class="cell' + (u ? " " + u.kind : "") + '"' + (u ? ' title="' + esc(label + " ช่อง " + i + ": " + u.text.join(", ")) + '"' : "") + ">" + i + "</span>";
+      }
+      html += "</div></div>";
+    });
+    html += '<ul class="panel-key">' + [...used.entries()].sort((a, b) => (a[0][0] === b[0][0] ? Number(a[0].slice(1)) - Number(b[0].slice(1)) : a[0][0] === "T" ? -1 : 1))
+      .map(([k, u]) => '<li><span class="cell ' + u.kind + '">' + k.slice(1) + "</span>" + esc(slotText(k)) + " — " + esc(u.text.join(", ")) + "</li>").join("") + "</ul>";
+    return html + '<p class="panel-legend"><span class="cell con"></span> Console <span class="cell lan"></span> สาย LAN</p></div>';
+  }
   function renderDevice() {
     const name = state.dev, d = DEV[name], originalConfig = CFG[state.set][name], c = mapData(originalConfig, name);
     c.blocks.forEach((b, i) => { b.interfaceChanged = b.commands.some((line, n) => line !== originalConfig.blocks[i].commands[n]); });
@@ -533,7 +639,7 @@
     let n = 0;
     const reg = (b) => { const id = "b" + n++; copyMap[id] = { text: b.commands.join("\n") + "\n", key: copyIdentity(state.set, name, b), set: state.set, device: name }; return id; };
 
-    const cables = d.cables[state.set].map((r) => "<tr><td class=\"mono\">" + portButton(name, r[0]) + "</td><td>" + esc(r[1]) + "</td><td>" + peerCell(r[2]) + "</td><td>" + esc(r[3]) + "</td><td class=\"mono\">" + esc(r[4]) + "</td></tr>").join("");
+    const cables = d.cables[state.set].map((r) => "<tr><td class=\"mono\">" + portButton(name, r[0]) + "</td><td>" + esc(slotText(r[1])) + "</td><td>" + peerCell(r[2]) + "</td><td>" + esc(slotText(r[3])) + "</td><td class=\"mono\">" + esc(r[4]) + "</td></tr>").join("");
     const expects = d.expect.map(pick).map((e) => "<li><code>" + esc(mapped(e[0], name)) + "</code><span>" + esc(mapped(e[1], name)) + "</span></li>").join("");
     const verifyBlock = c.blocks.find((b) => b.kind === "verify");
     const seen = new Set(d.expect.map(pick).map((e) => e[0].replace(/\s+/g, " ").trim()));
@@ -555,11 +661,11 @@
     let html = '<button class="back" data-back>← ภาพรวม</button>' +
       "<h2>" + esc(deviceName(name)) + "</h2><p class=\"meta\">" + esc(d.role) + "</p>" +
       '<p class="meta">ชื่อย่อ: ' + esc(name) + (scriptHostname ? ' · Hostname ในสคริปต์เว็บ: <code>' + esc(scriptHostname) + '</code>' : "") + '</p>' +
-      '<div class="chips"><span class="chip">' + esc(pick(d.model)) + '</span><span class="chip">' + esc(d.loopback) + '</span><span class="chip">Console: แผง ' + esc(d.console[state.set]) + '</span><span class="chip">ชุด ' + esc(SETS[state.set].label) + "</span></div>";
+      '<div class="chips"><span class="chip">' + esc(pick(d.model)) + '</span><span class="chip">' + esc(d.loopback) + '</span><span class="chip">Console: ' + esc(slotText(d.console[state.set])) + '</span><span class="chip">ชุด ' + esc(SETS[state.set].label) + "</span></div>";
     const progress = deviceProgress(name);
     html += '<div class="copy-progress"><span>✓ Copy ' + progress.done + '/' + progress.total + ' BLOCK · สีเขียวเมื่อครบ</span><button type="button" data-reset-copy' + (progress.done ? '' : ' hidden') + '>ล้างเครื่องหมาย Copy</button><small>' + (room ? 'ทุกคนที่ใช้ Template นี้เห็นเครื่องหมาย พอร์ต และประวัติร่วมกัน' : 'จำในเบราว์เซอร์นี้') + ' · นับการคัดลอกคำสั่ง · ตรวจผลบน Router แยกตาม BLOCK</small></div>';
     if (warns.length) html += '<div class="notice">' + warns.map((w) => "<p>" + hl(w.replace(/^!!\s*/, "")) + "</p>").join("") + "</div>";
-    html += "<h3>เสียบสาย</h3><div class=\"table-wrap\"><table><thead><tr><th>พอร์ต</th><th>แผง</th><th>ไปที่</th><th>แผงปลาย</th><th>IP / หน้าที่</th></tr></thead><tbody>" + cables + "</tbody></table></div>";
+    html += "<h3>เสียบสาย</h3>" + panelHTML(name) + "<div class=\"table-wrap\"><table><thead><tr><th>พอร์ตบนเครื่อง</th><th>เสียบที่แผง</th><th>ไปที่เครื่อง</th><th>ปลายสายอยู่ที่</th><th>IP / หน้าที่</th></tr></thead><tbody>" + cables + "</tbody></table></div>";
     html += "<h3>ผลที่ต้องเห็นหลังวางครบ</h3><ul class=\"expect\">" + expects + extra + "</ul>" +
       '<p class="meta" style="margin-top:8px">ถ้าอีกฝั่งยังวางไม่เสร็จ OSPF / LACP / Gateway จะยังไม่ขึ้น — รอทุกเครื่องเสร็จแล้วรอ ~1 นาที</p>';
     html += "<h3>คอนฟิก (วางทีละ BLOCK แล้วรอ prompt)</h3>";
@@ -651,7 +757,7 @@
     updateInterfaceStatus();
     const po = SETS[state.set].poPorts.split(" ")[0];
     const changed = Object.values(temporary[state.set]).some((ports) => Object.keys(ports).length);
-    document.getElementById("rackNote").textContent = SETS[state.set].rack + " · Po1: " + (changed ? "MLS01 " + mapped(po, "MLS01") + " ↔ MLS02 " + mapped(po, "MLS02") : SETS[state.set].poPorts);
+    document.getElementById("rackNote").textContent = SETS[state.set].rack.replace(/\s*\(T = แถวบน, B = แถวล่าง\)|\s*\(P = ช่องแผง\)/, "") + " · Po1: " + (changed ? "MLS01 " + mapped(po, "MLS01") + " ↔ MLS02 " + mapped(po, "MLS02") : slotText(SETS[state.set].poPorts));
     drawTopo();
     state.dev ? renderDevice() : renderOverview();
   }

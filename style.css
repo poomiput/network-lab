@@ -191,3 +191,42 @@ details.untested .intro p { margin: 2px 0; }
 .who-emoji { font-size: 15px; }
 .who-bg { stroke: var(--accent); stroke-width: .8; opacity: 1; }
 .who-img { clip-path: inset(0 round 50%); }
+
+/* PCs / servers under the switches */
+.host-bus { stroke: var(--node-line); stroke-width: 1.5; }
+.host .ico { fill: var(--node); stroke: var(--ink); stroke-width: 1.4; }
+.host .ico-scr { fill: var(--accent); opacity: .25; }
+.host .ico-line { fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linecap: round; }
+.host .ico-line.thin { stroke-width: 1; }
+.host .ico-dot { fill: var(--ok-ink); }
+.host .ico-globe { fill: var(--panel); stroke: var(--accent); stroke-width: 1.4; }
+.host-name { font-size: 12.5px; font-weight: 600; fill: var(--ink); }
+.host-t { font-size: 11px; fill: var(--muted); }
+.host-t.mono { font-family: "IBM Plex Mono", monospace; }
+.host-plug { font-size: 11px; fill: var(--accent); font-weight: 600; }
+.host.sel .ico { stroke: var(--node-sel); stroke-width: 2.2; }
+
+/* patch panel picture on the device page */
+.panel { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin: 0 0 12px; background: var(--code-bg); }
+.panel-title { font-size: 12.5px; color: var(--muted); margin-bottom: 8px; }
+.panel-row { display: grid; grid-template-columns: 52px minmax(0, 1fr); align-items: center; gap: 6px; margin: 4px 0; }
+.panel-label { font-size: 12px; font-weight: 600; }
+.panel-cells { display: grid; grid-template-columns: repeat(24, minmax(0, 1fr)); gap: 2px; }
+.cell { display: inline-grid; place-items: center; min-width: 0; height: 22px; border-radius: 4px; border: 1px solid var(--line); background: var(--panel); color: var(--muted); font-size: 10px; font-family: "IBM Plex Mono", monospace; }
+.cell.lan { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+.cell.con { background: var(--warn-ink); border-color: var(--warn-ink); color: #fff; font-weight: 700; }
+.panel-key { list-style: none; padding: 0; margin: 10px 0 4px; font-size: 13px; }
+.panel-key li { display: flex; align-items: center; gap: 8px; padding: 2px 0; }
+.panel-key .cell, .panel-legend .cell { width: 26px; flex: none; }
+.panel-legend { margin: 6px 0 0; font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.panel-legend .cell { height: 12px; width: 16px; }
+.panel-label { white-space: nowrap; }
+.panel-label .short { display: none; }
+@media (max-width: 560px) {
+  .panel { padding: 8px; }
+  .panel-cells { gap: 1px; }
+  .panel-cells .cell { height: 18px; font-size: 7px; letter-spacing: -.4px; border-radius: 3px; }
+  .panel-row { grid-template-columns: 26px minmax(0, 1fr); gap: 4px; }
+  .panel-label .long { display: none; }
+  .panel-label .short { display: inline; }
+}
