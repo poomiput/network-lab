@@ -249,7 +249,7 @@ try {
           <li>อาจารย์ให้ต่อ PC เข้า MLS01 อย่างเดียว → ถอดสาย PC ฝั่ง MLS02 ออก</li>
           <li><b>Server ย้ายเป็น Ubuntu 26.04 (VM) ตามใบงาน Step 07:</b> nginx 1.28.3 · <code>listen 198.51.100.12:8080</code> + หน้า <code>/srv/g06-app</code> ตรงใบงาน · การ์ดที่ 2 ของ VM bridged เข้า DMZ (T24) = 198.51.100.12/29 · <b>Teller เปิดเว็บได้ HTTP 200</b> และ log nginx เห็น IP Teller ตรงๆ (ไม่มี NAT)</li>
           <li><b>ISP จำลองด้วย Loopback</b> (อาจารย์ให้ทำแทน G01/G02 ที่ไม่มา): CE01/CE02/R01 มี Loopback101 = ขา WAN จริง + Loopback102 = อินเทอร์เน็ต 192.0.2.10 · CE01 ส่ง default metric 1, CE02 metric 50 · <b>ตัดขา ISP ของ CE01 → ทราฟฟิกย้ายไป CE02 ping ไม่หายเลย</b> แล้วคืนกลับ CE01 · สาขา SW01 ping อินเทอร์เน็ตจำลองผ่าน R01 ได้</li>
-          <li><b>Step 08 NTP + Syslog (Collector จำลอง):</b> Server Ubuntu 198.51.100.12 = NTP (chrony) + rsyslog TCP 514 แทน G04 · CE01/CE02 ส่ง log ด้วย Loopback1 (198.51.100.1/.2) · NTP sync แล้ว · ตัวตรวจ <code>g06-det</code>: <b>DET-02 ALERT</b> (Teller แอบ SSH ถูกปฏิเสธ 17 ครั้ง) · DET-01 รอลอง login ผิด 5 ครั้ง</li>
+          <li><b>Step 08 NTP + Syslog (Collector จำลอง):</b> Server Ubuntu 198.51.100.12 = NTP (chrony) + rsyslog TCP 514 แทน G04 · CE01/CE02 ส่ง log ด้วย Loopback1 (198.51.100.1/.2) · NTP sync แล้ว · ตัวตรวจ <code>g06-det</code>: <b>DET-01 ALERT</b> (login ผิด 5 ครั้ง/5 นาที จาก Admin) + <b>DET-02 ALERT</b> (Teller แอบ SSH ถูกปฏิเสธ 17 ครั้ง)</li>
           <li><b>Step 10 Change Request CR-01:</b> เพิ่ม VLAN31 ATM-NEW 10.6.6.0/24 บน MLS ทั้งคู่ (VRRP .1 / MLS01 หลัก · DHCP · trunk · ACL ATM-NEW-IN) · ทดสอบโดยย้ายพอร์ต ATM เข้า VLAN31 ชั่วคราว: ได้ 10.6.6.100 · ping Gateway ได้ · ไป Teller / Admin / SSH ถูกบล็อก · ย้ายกลับ VLAN30 แล้ว config ตรงกับที่เซฟ (<a href="#cr01">ดูแบบฟอร์ม</a>)</li>
           <li><b>Step 11 Backup ครบ 6 เครื่อง:</b> <code>copy running-config flash:G06-accepted.cfg</code> + <code>write memory</code> + เก็บไฟล์ไว้นอกเครื่อง (ฉบับปิด hash <a href="#backups">โหลดได้ด้านล่าง</a>)</li>
           <li><b>Step 06 ATM-IN อีกรอบ:</b> ATM ได้ DHCP 10.6.2.100 · ping Gateway ได้ · ไป Teller / Management / Database / SSH / เว็บ DMZ ถูกบล็อก (MLS01 ตอบ "Destination net unreachable")</li>
@@ -282,7 +282,7 @@ try {
         <tr><td>06</td><td>ACL ระหว่าง Zone</td><td><span class="st part">เกือบครบ</span></td><td>ATM-IN ผ่านและพิสูจน์บรรทัดสำคัญแล้ว · MGMT-SOURCES ผ่าน · DATABASE-OUT เขียนไว้แต่ยังไม่ทดสอบ (ต้องรู้พอร์ต DB)</td><td class="n">0.75</td></tr>
         <tr><td>07</td><td>Public Application บน Server</td><td><span class="st ok">ผ่าน Rack</span></td><td>nginx บน <b>Ubuntu 26.04</b> ตามใบงาน (11 ต.ค.) · 198.51.100.12:8080 · Teller HTTP 200 · ATM ถูกบล็อก</td><td class="n">1</td></tr>
         <tr><td>07B</td><td>NAT ให้ Private Client</td><td><span class="st no">ยังไม่ผ่าน</span></td><td>ลองใน EVE แล้วยังพิสูจน์ไม่ได้ · Rack ต้องมี WAN</td><td class="n">0.1</td></tr>
-        <tr><td>08</td><td>NTP, Syslog, หลักฐาน Cyber</td><td><span class="st part">เกือบครบ</span></td><td>Collector + NTP จำลองบน Server DMZ (11 ต.ค.) · log จาก Loopback1 TCP 514 · DET-02 ALERT · เหลือ DET-01 และส่งเข้า G04 จริง</td><td class="n">0.75</td></tr>
+        <tr><td>08</td><td>NTP, Syslog, หลักฐาน Cyber</td><td><span class="st part">เกือบครบ</span></td><td>Collector + NTP จำลองบน Server DMZ (11 ต.ค.) · log จาก Loopback1 TCP 514 · DET-01 + DET-02 ALERT · เหลือส่งเข้า G04 จริง</td><td class="n">0.75</td></tr>
         <tr><td>09</td><td>Verify, Failover, วัดเวลาฟื้น</td><td><span class="st part">เกือบครบ</span></td><td>Gateway failover ผ่านบน Rack (70/70, 79/80) · WAN failover แบบ ISP จำลองบน Rack ping ไม่หาย (11 ต.ค.) · eBGP failover จริงรอ ISP</td><td class="n">0.75</td></tr>
         <tr><td>10</td><td>Change Request (เพิ่ม ATM Subnet)</td><td><span class="st part">เกือบครบ</span></td><td>CR-01 VLAN31 ATM-NEW ลง + ทดสอบบน Rack แล้ว (11 ต.ค.) · เหลือ: อาจารย์อนุมัติในแบบฟอร์ม และทดสอบ rollback จริง</td><td class="n">0.75</td></tr>
         <tr><td>11</td><td>Backup, Rollback, ส่งมอบ</td><td><span class="st part">บางส่วน</span></td><td><code>flash:G06-accepted.cfg</code> ครบ 6 เครื่อง + สำเนานอกเครื่อง (11 ต.ค.) · ยังไม่ได้ทดสอบ restore (<code>configure replace</code>)</td><td class="n">0.75</td></tr>
@@ -302,7 +302,7 @@ try {
         <tr><td>TC03</td><td>บริการข้ามประเทศ</td><td><span class="st no">ยังไม่ทำ</span></td><td>ต้องมี ISP + กลุ่มคู่ค้า (G08 Clearing)</td></tr>
         <tr><td>TC04</td><td>User → Management</td><td><span class="st ok">ผ่าน Rack</span></td><td>Teller ถูกปฏิเสธ SSH · Admin เข้าได้ (8 และ 11 ต.ค.)</td></tr>
         <tr><td>TC05</td><td>ตัด Primary Path</td><td><span class="st part">บางส่วน</span></td><td>Gateway failover ผ่านบน Rack · WAN failover แบบ ISP จำลอง (Loopback) ผ่านบน Rack ping ไม่หาย · eBGP จริงรอ ISP</td></tr>
-        <tr><td>TC06</td><td>ส่ง Log + DET-01/02</td><td><span class="st part">บางส่วน</span></td><td>Collector จำลอง: log เข้าครบพร้อมเวลา/ต้นทาง · DET-02 ALERT ✅ · DET-01 รอทดสอบ</td></tr>
+        <tr><td>TC06</td><td>ส่ง Log + DET-01/02</td><td><span class="st ok">ผ่าน (จำลอง)</span></td><td>Collector จำลอง: log เข้าครบพร้อมเวลา/ต้นทาง 198.51.100.1 · DET-01 ALERT ✅ · DET-02 ALERT ✅ · G04 จริงรอ ISP</td></tr>
         <tr><td>TC07</td><td>สิทธิ์ข้อมูล</td><td><span class="st no">ยังไม่ทำ</span></td><td>รอระบบ Log กลาง</td></tr>
         <tr><td>TC08</td><td>คืน Baseline</td><td><span class="st part">บางส่วน</span></td><td>ทุกการทดสอบ failover เปิดคืนและตรวจแล้ว (รวม ISP จำลอง) · มีไฟล์ backup แล้ว ยังไม่ได้ทดสอบ restore</td></tr>
       </tbody>
@@ -325,7 +325,7 @@ try {
       <li>Branch WAN ของ R01 (Step 04B ส่วนที่เหลือ) <span class="gain">+3.1%</span></li>
       <li>GRE T1/T2 (05A) + route ผ่าน Tunnel (05B) <span class="gain">+9.4%</span></li>
       <li>NAT ให้ Client ออกข้างนอก (07B) <span class="gain">+5.6%</span></li>
-      <li>ส่ง Syslog เข้า G04 จริง + DET-01 + สิทธิ์ข้อมูล (08 ส่วนที่เหลือ, TC07) <span class="gain">+1.6%</span></li>
+      <li>ส่ง Syslog เข้า G04 จริง + สิทธิ์ข้อมูล (08 ส่วนที่เหลือ, TC07) <span class="gain">+1.6%</span></li>
       <li>WAN failover บน Rack จริง + วัดเวลาฟื้น (09, TC05) <span class="gain">+3.1%</span></li>
     </ol>
     <h3 style="margin-top:18px">เอกสารส่ง (ข้อ 6)</h3>
