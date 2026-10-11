@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="th" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ตัวอย่าง · G06 NBK</title>
+<meta name="description" content="ตัวอย่างเอกสาร G06 NBK ตาม PDF ข้อสอบ ครบ 25 หน้า">
+<link rel="stylesheet" href="style.css?v=20261011-progress1">
+<link rel="stylesheet" href="examples.css?v=20261011-1">
+</head>
+<body class="examples-body">
+<a class="skip-link" href="#exam-document">ข้ามไปเอกสาร</a>
+<header class="top examples-top">
+  <div class="brand">
+    <h1>ตัวอย่าง</h1>
+    <p class="sub">G06 NBK · เอกสารข้อสอบ</p>
+  </div>
+  <div class="top-controls">
+    <span class="reading-progress" id="readingProgress">หน้า 1 / 25</span>
+    <a class="progress-link" href="index.html">← Config Map</a>
+    <a class="progress-link" href="assets/exam-example/G06_NBK_Exam.pdf" target="_blank" rel="noopener">เปิด PDF ต้นฉบับ ↗</a>
+  </div>
+</header>
+<div class="examples-layout">
+  <aside class="document-outline" aria-label="สารบัญเอกสาร">
+    <details open>
+      <summary>สารบัญ <span>25 หน้า</span></summary>
+      <nav aria-label="เลือกหน้าเอกสาร">
+        <ol>
+          <li><a href="#page-1" data-page-link="1"><span class="page-number">01</span><span>บริบทและภารกิจ / ขอบเขตและกติกา</span></a></li>
+          <li><a href="#page-2" data-page-link="2"><span class="page-number">02</span><span>Topology และ Address ประจำกลุ่ม</span></a></li>
+          <li><a href="#page-3" data-page-link="3"><span class="page-number">03</span><span>Policy และตัวอย่างการออกแบบ</span></a></li>
+          <li><a href="#page-4" data-page-link="4"><span class="page-number">04</span><span>Acceptance Test และตัวอย่างหลักฐาน</span></a></li>
+          <li><a href="#page-5" data-page-link="5"><span class="page-number">05</span><span>Change Request การให้คะแนน และการส่งงาน</span></a></li>
+          <li><a href="#page-6" data-page-link="6"><span class="page-number">06</span><span>Network Diagram — โครงสร้างเครือข่าย</span></a></li>
+          <li><a href="#page-7" data-page-link="7"><span class="page-number">07</span><span>Network Diagram — Tunnel และบริการ</span></a></li>
+          <li><a href="#page-8" data-page-link="8"><span class="page-number">08</span><span>ลำดับขั้น / Step 00 — สำรวจ Image</span></a></li>
+          <li><a href="#page-9" data-page-link="9"><span class="page-number">09</span><span>Step 01 — Hostname, SSH และสิทธิ์บริหาร</span></a></li>
+          <li><a href="#page-10" data-page-link="10"><span class="page-number">10</span><span>Step 02A — VLAN, LACP และ HSRP</span></a></li>
+          <li><a href="#page-11" data-page-link="11"><span class="page-number">11</span><span>Step 02B — SVI Gateway, DMZ และ DHCP</span></a></li>
+          <li><a href="#page-12" data-page-link="12"><span class="page-number">12</span><span>Step 02B — DHCP และการตรวจสอบ (ต่อ)</span></a></li>
+          <li><a href="#page-13" data-page-link="13"><span class="page-number">13</span><span>Step 03 — Routed Link และ OSPF ภายใน HQ</span></a></li>
+          <li><a href="#page-14" data-page-link="14"><span class="page-number">14</span><span>Step 04A — WAN eBGP และ Exact Prefix Filter</span></a></li>
+          <li><a href="#page-15" data-page-link="15"><span class="page-number">15</span><span>Step 04B — iBGP ระหว่าง CE และ Branch WAN</span></a></li>
+          <li><a href="#page-16" data-page-link="16"><span class="page-number">16</span><span>Step 05A — GRE Tunnel T1 และ T2</span></a></li>
+          <li><a href="#page-17" data-page-link="17"><span class="page-number">17</span><span>Step 05B — Private Route บน Overlay</span></a></li>
+          <li><a href="#page-18" data-page-link="18"><span class="page-number">18</span><span>Step 06 — ACL ระหว่าง Zone</span></a></li>
+          <li><a href="#page-19" data-page-link="19"><span class="page-number">19</span><span>Step 07 / 07B — Public Application และ NAT</span></a></li>
+          <li><a href="#page-20" data-page-link="20"><span class="page-number">20</span><span>Step 08 — NTP, Syslog และหลักฐาน Cyber</span></a></li>
+          <li><a href="#page-21" data-page-link="21"><span class="page-number">21</span><span>Step 09 — Verify, Failover และวัดเวลาฟื้น</span></a></li>
+          <li><a href="#page-22" data-page-link="22"><span class="page-number">22</span><span>Step 10 — Change Request เฉพาะกลุ่ม</span></a></li>
+          <li><a href="#page-23" data-page-link="23"><span class="page-number">23</span><span>Step 11 — Backup, Rollback และส่งมอบ</span></a></li>
+          <li><a href="#page-24" data-page-link="24"><span class="page-number">24</span><span>Step 11 — Restore Check (ต่อ)</span></a></li>
+          <li><a href="#page-25" data-page-link="25"><span class="page-number">25</span><span>เอกสารอ้างอิงและขอบเขตการใช้งาน Config</span></a></li>
+        </ol>
+      </nav>
+    </details>
+  </aside>
+  <main id="exam-document" class="exam-document">
+    <article class="exam-page" id="page-1" data-page="1" aria-label="หน้า 1: บริบทและภารกิจ / ขอบเขตและกติกา">
+      <div class="page-caption"><span>หน้า 1 / 25</span><span>บริบทและภารกิจ / ขอบเขตและกติกา</span></div>
+      <div class="paper">
+        <img class="pdf-page-image" src="assets/exam-example/page-01.svg" alt="ข้อสอบ G06 NBK หน้า 1: บริบทและภารกิจ / ขอบเขตและกติกา" width="794" height="1123" loading="eager" decoding="async">
+      </div>
+      <!-- เพิ่มภาพของคุณหลังหน้า 1 ตรงนี้ เช่น:
+      <figure class="evidence-figure">
+        <img src="assets/my-evidence/page-01-result.png" alt="คำอธิบายภาพผลการทำงาน">
+        <figcaption>คำอธิบายผลการทำงาน</figcaption>
+      </figure>
+      -->
+    </article>
+
+    <article class="exam-page" id="page-2" data-page="2" aria-label="หน้า 2: Topology และ Address ประจำกลุ่ม">
+      <div class="page-caption"><span>หน้า 2 / 25</span><span>Topology และ Address ประจำกลุ่ม</span></div>
+      <div class="paper">
+        <img class="pdf-page-image" src="assets/exam-example/page-02.svg" alt="ข้อสอบ G06 NBK หน้า 2: Topology และ Address ประจำกลุ่ม" width="794" height="1123" loading="lazy" decoding="async">
+      </div>
+      <!-- เพิ่มภาพของคุณหลังหน้า 2 ตรงนี้ เช่น:
+      <figure class="evidence-figure">
+        <img src="assets/my-evidence/page-02-result.png" alt="คำอธิบายภาพผลการทำงาน">
+        <figcaption>คำอธิบายผลการทำงาน</figcaption>
+      </figure>
+      -->
+    </article>
+
+    <article class="exam-page" id="page-3" data-page="3" aria-label="หน้า 3: Policy และตัวอย่างการออกแบบ">
+      <div class="page-caption"><span>หน้า 3 / 25</span><span>Policy และตัวอย่างการออกแบบ</span></div>
+      <div class="paper">
+        <img class="pdf-page-image" src="assets/exam-example/page-03.svg" alt="ข้อสอบ G06 NBK หน้า 3: Policy และตัวอย่างการออกแบบ" width="794" height="1123" loading="lazy" decoding="async">
+      </div>
+      <!-- เพิ่มภาพของคุณหลังหน้า 3 ตรงนี้ เช่น:
+      <figure class="evidence-figure">
+        <img src="assets/my-evidence/page-03-result.png" alt="คำอธิบายภาพผลการทำงาน">
+        <figcaption>คำอธิบายผลการทำงาน</figcaption>
+      </figure>
+      -->
+    </article>
+
+    <article class="exam-page" id="page-4" data-page="4" aria-label="หน้า 4: Acceptance Test และตัวอย่างหลักฐาน">
+      <div class="page-caption"><span>หน้า 4 / 25</span><span>Acceptance Test และตัวอย่างหลักฐาน</span></div>
+      <div class="paper">
+        <img class="pdf-page-image" src="assets/exam-example/page-04.svg" alt="ข้อสอบ G06 NBK หน้า 4: Acceptance Test และตัวอย่างหลักฐาน" width="794" height="1123" loading="lazy" decoding="async">
+      </div>
+      <!-- เพิ่มภาพของคุณหลังหน้า 4 ตรงนี้ เช่น:
+      <figure class="evidence-figure">
+        <img src="assets/my-evidence/page-04-result.png" alt="คำอธิบายภาพผลการทำงาน">
+        <figcaption>คำอธิบายผลการทำงาน</figcaption>
+      </figure>
+      -->
+    </article>
+
+    <article class="exam-page" id="page-5" data-page="5" aria-label="หน้า 5: Change Request การให้คะแนน และการส่งงาน">
+      <div class="page-caption"><span>หน้า 5 / 25</span><span>Change Request การให้คะแนน และการส่งงาน</span></div>
+      <div class="paper">
+        <img class="pdf-page-image" src="assets/exam-example/page-05.svg" alt="ข้อสอบ G06 NBK หน้า 5: Change Request การให้คะแนน และการส่งงาน" width="794" height="1123" loading="lazy" decoding="async">
+      </div>
+      <!-- เพิ่มภาพของคุณหลังหน้า 5 ตรงนี้ เช่น:
+      <figure class="evidence-figure">
+        <img src="assets/my-evidence/page-05-result.png" alt="คำอธิบายภาพผลการทำงาน">
+        <figcaption>คำอธิบายผลการทำงาน</figcaption>
+      </figure>
+      -->
+    </article>
+
+    <article class="exam-page" id="page-6" data-page="6" aria-label="หน้า 6: Network Diagram — โครงสร้างเครือข่าย">
+      <div class="page-caption"><span>หน้า 6 / 25</span><span>Network Diagram — โครงสร้างเครือข่าย</span></div>
+      <div class="paper">
+        <img class="pdf-page-image" src="assets/exam-example/page-06.svg" alt="ข้อสอบ G06 NBK หน้า 6: Network Diagram — โครงสร้างเครือข่าย" width="794" height="1123" loading="lazy" decoding="async">
+      </div>
+      <!-- เพิ่มภาพของคุณหลังหน้า 6 ตรงนี้ เช่น:
+      <figure class="evidence-figure">
+        <img src="assets/my-evidence/page-06-result.png" alt="คำอธิบายภาพผลการทำงาน">
+        <figcaption>คำอธิบายผลการทำงาน</figcaption>
+      </figure>
+      -->
+    </article>
+
+    <article class="exam-page" id="page-7" data-page="7" aria-label="หน้า 7: Network Diagram — Tunnel และบริการ">
+      <div class="page-caption"><span>หน้า 7 / 25</span><span>Network Diagram — Tunnel และบริการ</span></div>
+      <div class="paper">
+        <img class="pdf-page-image" src="assets/exam-example/page-07.svg" alt="ข้อสอบ G06 NBK หน้า 7: Network Diagram — Tunnel และบริการ" width="794" height="1123" loading="lazy" decoding="async">
+      </div>
+      <!-- เพิ่มภาพของคุณหลังหน้า 7 ตรงนี้ เช่น:
+      <figure class="evidence-figure">
+        <img src="assets/my-evidence/page-07-result.png" alt="คำอธิบายภาพผลการทำงาน">
+        <figcaption>คำอธิบายผลการทำงาน</figcaption>
+      </figure>
+      -->
+    </article>
+
+    <article class="exam-page" id="page-8" data-page="8" aria-label="หน้า 8: ลำดับขั้น / Step 00 — สำรวจ Image">
+      <div class="page-caption"><span>หน้า 8 / 25</span><span>ลำดับขั้น / Step 00 — สำรวจ Image</span></div>
+      <div class="paper">
+        <img class="pdf-page-image" src="assets/exam-example/page-08.svg" alt="ข้อสอบ G06 NBK หน้า 8: ลำดับขั้น / Step 00 — สำรวจ Image" width="794" height="1123" loading="lazy" decoding="async">
+      </div>
+      <!-- เพิ่มภาพของคุณหลังหน้า 8 ตรงนี้ เช่น:
+      <figure class="evidence-figure">
+        <img src="assets/my-evidence/page-08-result.png" alt="คำอธิบายภาพผลการทำงาน">
+        <figcaption>คำอธิบายผลการทำงาน</figcaption>
+      </figure>
+      -->
+    </article>
+
+    <article class="exam-page" id="page-9" data-page="9" aria-label="หน้า 9: Step 01 — Hostname, SSH และสิทธิ์บริหาร">
+      <div class="page-caption"><span>หน้า 9 / 25</span><span>Step 01 — Hostname, SSH และสิทธิ์บริหาร</span></div>
+      <div class="paper">
+        <img class="pdf-page-image" src="assets/exam-example/page-09.svg" alt="ข้อสอบ G06 NBK หน้า 9: Step 01 — Hostname, SSH และสิทธิ์บริหาร" width="794" height="1123" loading="lazy" decoding="async">
+      </div>
+      <!-- เพิ่มภาพของคุณหลังหน้า 9 ตรงนี้ เช่น:
+      <figure class="evidence-figure">
+        <img src="assets/my-evidence/page-09-result.png" alt="คำอธิบายภาพผลการทำงาน">
+        <figcaption>คำอธิบายผลการทำงาน</figcaption>
+      </figure>
+      -->
+    </article>
+
+    <article class="exam-page" id="page-10" data-page="10" aria-label="หน้า 10: Step 02A — VLAN, LACP และ HSRP">
+      <div class="page-caption"><span>หน้า 10 / 25</span><span>Step 02A — VLAN, LACP และ HSRP</span></div>
+      <div class="paper">
+        <img class="pdf-page-image" src="assets/exam-example/page-10.svg" alt="ข้อสอบ G06 NBK หน้า 10: Step 02A — VLAN, LACP และ HSRP" width="794" height="1123" loading="lazy" decoding="async">
+      </div>
+      <!-- เพิ่มภาพของคุณหลังหน้า 10 ตรงนี้ เช่น:
+      <figure class="evidence-figure">
+        <img src="assets/my-evidence/page-10-result.png" alt="คำอธิบายภาพผลการทำงาน">
+        <figcaption>คำอธิบายผลการทำงาน</figcaption>
+      </figure>
+      -->
+    </article>
+
+    <article class="exam-page" id="page-11" data-page="11" aria-label="หน้า 11: Step 02B — SVI Gateway, DMZ และ DHCP">
+      <div class="page-caption"><span>หน้า 11 / 25</span><span>Step 02B — SVI Gateway, DMZ และ DHCP</span></div>
+      <div class="paper">
+        <img class="pdf-page-image" src="assets/exam-example/page-11.svg" alt="ข้อสอบ G06 NBK หน้า 11: Step 02B — SVI Gateway, DMZ และ DHCP" width="794" height="1123" loading="lazy" decoding="async">
+      </div>
+      <!-- เพิ่มภาพของคุณหลังหน้า 11 ตรงนี้ เช่น:
+      <figure class="evidence-figure">
+        <img src="assets/my-evidence/page-11-result.png" alt="คำอธิบายภาพผลการทำงาน">
+        <figcaption>คำอธิบายผลการทำงาน</figcaption>
+      </figure>
+      -->
+    </article>
+
+    <article class="exam-page" id="page-12" data-page="12" aria-label="หน้า 12: Step 02B — DHCP และการตรวจสอบ (ต่อ)">
+      <div class="page-caption"><span>หน้า 12 / 25</span><span>Step 02B — DHCP และการตรวจสอบ (ต่อ)</span></div>
+      <div class="paper">
+        <img class="pdf-page-image" src="assets/exam-example/page-12.svg" alt="ข้อสอบ G06 NBK หน้า 12: Step 02B — DHCP และการตรวจสอบ (ต่อ)" width="794" height="1123" loading="lazy" decoding="async">
+      </div>
+      <!-- เพิ่มภาพของคุณหลังหน้า 12 ตรงนี้ เช่น:
+      <figure class="evidence-figure">
+        <img src="assets/my-evidence/page-12-result.png" alt="คำอธิบายภาพผลการทำงาน">
+        <figcaption>คำอธิบายผลการทำงาน</figcaption>
+      </figure>
+      -->
+    </article>
+
+    <article class="exam-page" id="page-13" data-page="13" aria-label="หน้า 13: Step 03 — Routed Link และ OSPF ภายใน HQ">
+      <div class="page-caption"><span>หน้า 13 / 25</span><span>Step 03 — Routed Link และ OSPF ภายใน HQ</span></div>
+      <div class="paper">
+        <img class="pdf-page-image" src="assets/exam-example/page-13.svg" alt="ข้อสอบ G06 NBK หน้า 13: Step 03 — Routed Link และ OSPF ภายใน HQ" width="794" height="1123" loading="lazy" decoding="async">
+      </div>
+      <!-- เพิ่มภาพของคุณหลังหน้า 13 ตรงนี้ เช่น:
+      <figure class="evidence-figure">
+        <img src="assets/my-evidence/page-13-result.png" alt="คำอธิบายภาพผลการทำงาน">
+        <figcaption>คำอธิบายผลการทำงาน</figcaption>
+      </figure>
+      -->
+    </article>
+
+    <article class="exam-page" id="page-14" data-page="14" aria-label="หน้า 14: Step 04A — WAN eBGP และ Exact Prefix Filter">
+      <div class="page-caption"><span>หน้า 14 / 25</span><span>Step 04A — WAN eBGP และ Exact Prefix Filter</span></div>
+      <div class="paper">
+        <img class="pdf-page-image" src="assets/exam-example/page-14.svg" alt="ข้อสอบ G06 NBK หน้า 14: Step 04A — WAN eBGP และ Exact Prefix Filter" width="794" height="1123" loading="lazy" decoding="async">
+      </div>
+      <!-- เพิ่มภาพของคุณหลังหน้า 14 ตรงนี้ เช่น:
+      <figure class="evidence-figure">
+        <img src="assets/my-evidence/page-14-result.png" alt="คำอธิบายภาพผลการทำงาน">
+        <figcaption>คำอธิบายผลการทำงาน</figcaption>
+      </figure>
+      -->
+    </article>
+
+    <article class="exam-page" id="page-15" data-page="15" aria-label="หน้า 15: Step 04B — iBGP ระหว่าง CE และ Branch WAN">
+      <div class="page-caption"><span>หน้า 15 / 25</span><span>Step 04B — iBGP ระหว่าง CE และ Branch WAN</span></div>
+      <div class="paper">
+        <img class="pdf-page-image" src="assets/exam-example/page-15.svg" alt="ข้อสอบ G06 NBK หน้า 15: Step 04B — iBGP ระหว่าง CE และ Branch WAN" width="794" height="1123" loading="lazy" decoding="async">
+      </div>
+      <!-- เพิ่มภาพของคุณหลังหน้า 15 ตรงนี้ เช่น:
+      <figure class="evidence-figure">
+        <img src="assets/my-evidence/page-15-result.png" alt="คำอธิบายภาพผลการทำงาน">
+        <figcaption>คำอธิบายผลการทำงาน</figcaption>
+      </figure>
+      -->
+    </article>
+
+    <article class="exam-page" id="page-16" data-page="16" aria-label="หน้า 16: Step 05A — GRE Tunnel T1 และ T2">
+      <div class="page-caption"><span>หน้า 16 / 25</span><span>Step 05A — GRE Tunnel T1 และ T2</span></div>
+      <div class="paper">
+        <img class="pdf-page-image" src="assets/exam-example/page-16.svg" alt="ข้อสอบ G06 NBK หน้า 16: Step 05A — GRE Tunnel T1 และ T2" width="794" height="1123" loading="lazy" decoding="async">
+      </div>
+      <!-- เพิ่มภาพของคุณหลังหน้า 16 ตรงนี้ เช่น:
+      <figure class="evidence-figure">
+        <img src="assets/my-evidence/page-16-result.png" alt="คำอธิบายภาพผลการทำงาน">
+        <figcaption>คำอธิบายผลการทำงาน</figcaption>
+      </figure>
+      -->
+    </article>
+
+    <article class="exam-page" id="page-17" data-page="17" aria-label="หน้า 17: Step 05B — Private Route บน Overlay">
+      <div class="page-caption"><span>หน้า 17 / 25</span><span>Step 05B — Private Route บน Overlay</span></div>
+      <div class="paper">
+        <img class="pdf-page-image" src="assets/exam-example/page-17.svg" alt="ข้อสอบ G06 NBK หน้า 17: Step 05B — Private Route บน Overlay" width="794" height="1123" loading="lazy" decoding="async">
+      </div>
+      <!-- เพิ่มภาพของคุณหลังหน้า 17 ตรงนี้ เช่น:
+      <figure class="evidence-figure">
+        <img src="assets/my-evidence/page-17-result.png" alt="คำอธิบายภาพผลการทำงาน">
+        <figcaption>คำอธิบายผลการทำงาน</figcaption>
+      </figure>
+      -->
+    </article>
+
+    <article class="exam-page" id="page-18" data-page="18" aria-label="หน้า 18: Step 06 — ACL ระหว่าง Zone">
+      <div class="page-caption"><span>หน้า 18 / 25</span><span>Step 06 — ACL ระหว่าง Zone</span></div>
+      <div class="paper">
+        <img class="pdf-page-image" src="assets/exam-example/page-18.svg" alt="ข้อสอบ G06 NBK หน้า 18: Step 06 — ACL ระหว่าง Zone" width="794" height="1123" loading="lazy" decoding="async">
+      </div>
+      <!-- เพิ่มภาพของคุณหลังหน้า 18 ตรงนี้ เช่น:
+      <figure class="evidence-figure">
+        <img src="assets/my-evidence/page-18-result.png" alt="คำอธิบายภาพผลการทำงาน">
+        <figcaption>คำอธิบายผลการทำงาน</figcaption>
+      </figure>
+      -->
+    </article>
+
+    <article class="exam-page" id="page-19" data-page="19" aria-label="หน้า 19: Step 07 / 07B — Public Application และ NAT">
+      <div class="page-caption"><span>หน้า 19 / 25</span><span>Step 07 / 07B — Public Application และ NAT</span></div>
+      <div class="paper">
+        <img class="pdf-page-image" src="assets/exam-example/page-19.svg" alt="ข้อสอบ G06 NBK หน้า 19: Step 07 / 07B — Public Application และ NAT" width="794" height="1123" loading="lazy" decoding="async">
+      </div>
+      <!-- เพิ่มภาพของคุณหลังหน้า 19 ตรงนี้ เช่น:
+      <figure class="evidence-figure">
+        <img src="assets/my-evidence/page-19-result.png" alt="คำอธิบายภาพผลการทำงาน">
+        <figcaption>คำอธิบายผลการทำงาน</figcaption>
+      </figure>
+      -->
+    </article>
+
+    <article class="exam-page" id="page-20" data-page="20" aria-label="หน้า 20: Step 08 — NTP, Syslog และหลักฐาน Cyber">
+      <div class="page-caption"><span>หน้า 20 / 25</span><span>Step 08 — NTP, Syslog และหลักฐาน Cyber</span></div>
+      <div class="paper">
+        <img class="pdf-page-image" src="assets/exam-example/page-20.svg" alt="ข้อสอบ G06 NBK หน้า 20: Step 08 — NTP, Syslog และหลักฐาน Cyber" width="794" height="1123" loading="lazy" decoding="async">
+      </div>
+      <!-- เพิ่มภาพของคุณหลังหน้า 20 ตรงนี้ เช่น:
+      <figure class="evidence-figure">
+        <img src="assets/my-evidence/page-20-result.png" alt="คำอธิบายภาพผลการทำงาน">
+        <figcaption>คำอธิบายผลการทำงาน</figcaption>
+      </figure>
+      -->
+    </article>
+
+    <article class="exam-page" id="page-21" data-page="21" aria-label="หน้า 21: Step 09 — Verify, Failover และวัดเวลาฟื้น">
+      <div class="page-caption"><span>หน้า 21 / 25</span><span>Step 09 — Verify, Failover และวัดเวลาฟื้น</span></div>
+      <div class="paper">
+        <img class="pdf-page-image" src="assets/exam-example/page-21.svg" alt="ข้อสอบ G06 NBK หน้า 21: Step 09 — Verify, Failover และวัดเวลาฟื้น" width="794" height="1123" loading="lazy" decoding="async">
+      </div>
+      <!-- เพิ่มภาพของคุณหลังหน้า 21 ตรงนี้ เช่น:
+      <figure class="evidence-figure">
+        <img src="assets/my-evidence/page-21-result.png" alt="คำอธิบายภาพผลการทำงาน">
+        <figcaption>คำอธิบายผลการทำงาน</figcaption>
+      </figure>
+      -->
+    </article>
+
+    <article class="exam-page" id="page-22" data-page="22" aria-label="หน้า 22: Step 10 — Change Request เฉพาะกลุ่ม">
+      <div class="page-caption"><span>หน้า 22 / 25</span><span>Step 10 — Change Request เฉพาะกลุ่ม</span></div>
+      <div class="paper">
+        <img class="pdf-page-image" src="assets/exam-example/page-22.svg" alt="ข้อสอบ G06 NBK หน้า 22: Step 10 — Change Request เฉพาะกลุ่ม" width="794" height="1123" loading="lazy" decoding="async">
+      </div>
+      <!-- เพิ่มภาพของคุณหลังหน้า 22 ตรงนี้ เช่น:
+      <figure class="evidence-figure">
+        <img src="assets/my-evidence/page-22-result.png" alt="คำอธิบายภาพผลการทำงาน">
+        <figcaption>คำอธิบายผลการทำงาน</figcaption>
+      </figure>
+      -->
+    </article>
+
+    <article class="exam-page" id="page-23" data-page="23" aria-label="หน้า 23: Step 11 — Backup, Rollback และส่งมอบ">
+      <div class="page-caption"><span>หน้า 23 / 25</span><span>Step 11 — Backup, Rollback และส่งมอบ</span></div>
+      <div class="paper">
+        <img class="pdf-page-image" src="assets/exam-example/page-23.svg" alt="ข้อสอบ G06 NBK หน้า 23: Step 11 — Backup, Rollback และส่งมอบ" width="794" height="1123" loading="lazy" decoding="async">
+      </div>
+      <!-- เพิ่มภาพของคุณหลังหน้า 23 ตรงนี้ เช่น:
+      <figure class="evidence-figure">
+        <img src="assets/my-evidence/page-23-result.png" alt="คำอธิบายภาพผลการทำงาน">
+        <figcaption>คำอธิบายผลการทำงาน</figcaption>
+      </figure>
+      -->
+    </article>
+
+    <article class="exam-page" id="page-24" data-page="24" aria-label="หน้า 24: Step 11 — Restore Check (ต่อ)">
+      <div class="page-caption"><span>หน้า 24 / 25</span><span>Step 11 — Restore Check (ต่อ)</span></div>
+      <div class="paper">
+        <img class="pdf-page-image" src="assets/exam-example/page-24.svg" alt="ข้อสอบ G06 NBK หน้า 24: Step 11 — Restore Check (ต่อ)" width="794" height="1123" loading="lazy" decoding="async">
+      </div>
+      <!-- เพิ่มภาพของคุณหลังหน้า 24 ตรงนี้ เช่น:
+      <figure class="evidence-figure">
+        <img src="assets/my-evidence/page-24-result.png" alt="คำอธิบายภาพผลการทำงาน">
+        <figcaption>คำอธิบายผลการทำงาน</figcaption>
+      </figure>
+      -->
+    </article>
+
+    <article class="exam-page" id="page-25" data-page="25" aria-label="หน้า 25: เอกสารอ้างอิงและขอบเขตการใช้งาน Config">
+      <div class="page-caption"><span>หน้า 25 / 25</span><span>เอกสารอ้างอิงและขอบเขตการใช้งาน Config</span></div>
+      <div class="paper">
+        <img class="pdf-page-image" src="assets/exam-example/page-25.svg" alt="ข้อสอบ G06 NBK หน้า 25: เอกสารอ้างอิงและขอบเขตการใช้งาน Config" width="794" height="1123" loading="lazy" decoding="async">
+      </div>
+      <!-- เพิ่มภาพของคุณหลังหน้า 25 ตรงนี้ เช่น:
+      <figure class="evidence-figure">
+        <img src="assets/my-evidence/page-25-result.png" alt="คำอธิบายภาพผลการทำงาน">
+        <figcaption>คำอธิบายผลการทำงาน</figcaption>
+      </figure>
+      -->
+    </article>
+  </main>
+</div>
+<script src="examples.js?v=20261011-1"></script>
+</body>
+</html>
