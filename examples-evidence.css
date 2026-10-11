@@ -16,3 +16,8 @@
 .g06-out pre { margin: 0; padding: 8px 10px; overflow-x: auto; font-size: 12px; line-height: 1.5; background: #0f1720; color: #d7e3f0; }
 .g06-submit { margin-top: 10px; padding: 7px 10px; border-radius: 8px; background: #eef4ff; color: #1e3a8a; font-size: 12.5px; }
 @media (max-width: 500px) { .g06-result { padding: 12px; } }
+.g06-shot { margin: 10px 0 0; }
+.g06-shot img { display: block; max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 1px 3px #26344526; }
+.g06-shot figcaption { margin: 5px 2px 0; color: #5b6577; font-size: 12px; }
+.g06-raw summary { cursor: pointer; color: #1d4ed8; font-size: 12px; margin: 2px 2px 0; }
+.g06-raw pre { margin: 4px 0 0; padding: 8px 10px; overflow-x: auto; font-size: 12px; background: #f1f4f8; border-radius: 6px; }

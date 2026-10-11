@@ -159,6 +159,8 @@
       submit: ["ไม่ต้องแคป"] },
   };
 
+  window.G06_EVIDENCE = E;
+  if (typeof document === "undefined" || !document.querySelectorAll) return;
   const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
   document.querySelectorAll(".exam-page").forEach((page) => {
     const d = E[page.dataset.page];
@@ -174,9 +176,14 @@
     }
     box.append(head);
     const did = el("ul", "g06-did"); d.did.forEach((t) => did.append(el("li", null, t))); box.append(did);
-    (d.out || []).forEach(([title, text]) => {
-      const fig = el("figure", "g06-out");
-      fig.append(el("figcaption", null, title), el("pre", null, text));
+    (d.out || []).forEach(([title, text], i) => {
+      const fig = el("figure", "g06-shot");
+      const img = el("img"); img.src = "assets/g06-evidence/p" + String(page.dataset.page).padStart(2, "0") + "-" + (i + 1) + ".png";
+      img.alt = title + "\n" + text; img.loading = "lazy"; img.decoding = "async";
+      img.onerror = () => { fig.replaceChildren(el("figcaption", null, title), el("pre", null, text)); fig.className = "g06-out"; };
+      const cap = el("figcaption", null, title + " · ภาพจาก output จริง (log 11 ต.ค. 2026)");
+      const raw = el("details", "g06-raw"); raw.append(el("summary", null, "ข้อความ (คัดลอกได้)"), el("pre", null, text));
+      fig.append(img, cap, raw);
       box.append(fig);
     });
     const sub = el("div", "g06-submit"); sub.append(el("b", null, "ต้องแคป/ส่ง: "), document.createTextNode(d.submit.join(" · "))); box.append(sub);
