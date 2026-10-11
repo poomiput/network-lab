@@ -76,7 +76,7 @@ try {
 <header class="top">
   <div class="brand">
     <h1>G06 NBK · ความคืบหน้า 0 → 100%</h1>
-    <p class="sub">ทุกอย่างที่ทำตั้งแต่ได้โจทย์จนถึงตอนนี้ · อัปเดต 11 ต.ค. 2026 (14:00 น.) · <a href="tests.html">ลำดับทดสอบต่อหน้า TA →</a></p>
+    <p class="sub">ทุกอย่างที่ทำตั้งแต่ได้โจทย์จนถึงตอนนี้ · อัปเดต 11 ต.ค. 2026 (14:30 น.) · <a href="tests.html">ลำดับทดสอบต่อหน้า TA →</a></p>
   </div>
   <div class="top-controls">
     <a class="navlink" href="index.html">← กลับ Config Map</a>
@@ -88,15 +88,15 @@ try {
 
   <!-- ===================== สรุป ===================== -->
   <section class="card hero" aria-label="สรุปความคืบหน้า">
-    <div class="big">54<small>%</small></div>
+    <div class="big">57<small>%</small></div>
     <div class="bars">
       <div class="bar-row">
-        <div class="bar-lbl"><span>ทั้งใบงาน (16 Step ในข้อ 9)</span><b>54%</b></div>
-        <div class="bar" role="progressbar" aria-valuenow="54" aria-valuemin="0" aria-valuemax="100"><i style="width:54%"></i></div>
+        <div class="bar-lbl"><span>ทั้งใบงาน (16 Step ในข้อ 9)</span><b>57%</b></div>
+        <div class="bar" role="progressbar" aria-valuenow="57" aria-valuemin="0" aria-valuemax="100"><i style="width:57%"></i></div>
       </div>
       <div class="bar-row">
-        <div class="bar-lbl"><span>ส่วนที่ทำได้โดยไม่ต้องมี ISP (LAN · Security · Server · Backup · Change)</span><b>75%</b></div>
-        <div class="bar alt" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"><i style="width:75%"></i></div>
+        <div class="bar-lbl"><span>ส่วนที่ทำได้โดยไม่ต้องมี ISP (LAN · Security · Server · Backup · Change)</span><b>78%</b></div>
+        <div class="bar alt" role="progressbar" aria-valuenow="78" aria-valuemin="0" aria-valuemax="100"><i style="width:78%"></i></div>
       </div>
     </div>
     <p class="rule">วิธีคิด: ทำ 16 Step ของใบงาน (Step 00–11) แต่ละ Step มีน้ำหนักเท่ากัน · ผ่านบน Rack จริง = เต็ม · ทำบน Rack บางส่วน = ครึ่ง/สามส่วนสี่ · ผ่านแค่ใน EVE-NG = หนึ่งในสี่ · ยังไม่ทำ = 0 — ตัวเลขนี้นับเฉพาะของที่<b>ทดสอบแล้วมีหลักฐาน</b> ไม่นับคำสั่งที่เขียนรอไว้</p>
@@ -238,7 +238,7 @@ try {
     </li>
 
     <li>
-      <span class="pct now">54%</span>
+      <span class="pct now">57%</span>
       <div class="card">
         <h3>วันนี้: ตรวจ Rack + ทดสอบ PC + ย้าย Server เป็น Ubuntu</h3>
         <p class="when">11 ต.ค. 2026 · ตอนนี้</p>
@@ -248,6 +248,8 @@ try {
           <li><b>TC04 ผ่านอีกรอบ:</b> Teller ได้ DHCP 10.6.0.101 · Admin ตั้ง 10.6.4.10 · ทั้งคู่ ping Gateway/Loopback/DMZ ได้ · Admin เปิด SSH ไป CE01, CE02, MLS01, MLS02 ได้ · Teller ถูกบล็อก</li>
           <li>อาจารย์ให้ต่อ PC เข้า MLS01 อย่างเดียว → ถอดสาย PC ฝั่ง MLS02 ออก</li>
           <li><b>Server ย้ายเป็น Ubuntu 26.04 (VM) ตามใบงาน Step 07:</b> nginx 1.28.3 · <code>listen 198.51.100.12:8080</code> + หน้า <code>/srv/g06-app</code> ตรงใบงาน · การ์ดที่ 2 ของ VM bridged เข้า DMZ (T24) = 198.51.100.12/29 · <b>Teller เปิดเว็บได้ HTTP 200</b> และ log nginx เห็น IP Teller ตรงๆ (ไม่มี NAT)</li>
+          <li><b>ISP จำลองด้วย Loopback</b> (อาจารย์ให้ทำแทน G01/G02 ที่ไม่มา): CE01/CE02/R01 มี Loopback101 = ขา WAN จริง + Loopback102 = อินเทอร์เน็ต 192.0.2.10 · CE01 ส่ง default metric 1, CE02 metric 50 · <b>ตัดขา ISP ของ CE01 → ทราฟฟิกย้ายไป CE02 ping ไม่หายเลย</b> แล้วคืนกลับ CE01 · สาขา SW01 ping อินเทอร์เน็ตจำลองผ่าน R01 ได้</li>
+          <li><b>Step 11 Backup ครบ 6 เครื่อง:</b> <code>copy running-config flash:G06-accepted.cfg</code> + <code>write memory</code> + เก็บไฟล์ไว้นอกเครื่อง (ฉบับปิด hash <a href="#backups">โหลดได้ด้านล่าง</a>)</li>
           <li><b>Step 06 ATM-IN อีกรอบ:</b> ATM ได้ DHCP 10.6.2.100 · ping Gateway ได้ · ไป Teller / Management / Database / SSH / เว็บ DMZ ถูกบล็อก (MLS01 ตอบ "Destination net unreachable")</li>
         </ul>
         <div class="fix">
@@ -279,10 +281,10 @@ try {
         <tr><td>07</td><td>Public Application บน Server</td><td><span class="st ok">ผ่าน Rack</span></td><td>nginx บน <b>Ubuntu 26.04</b> ตามใบงาน (11 ต.ค.) · 198.51.100.12:8080 · Teller HTTP 200 · ATM ถูกบล็อก</td><td class="n">1</td></tr>
         <tr><td>07B</td><td>NAT ให้ Private Client</td><td><span class="st no">ยังไม่ผ่าน</span></td><td>ลองใน EVE แล้วยังพิสูจน์ไม่ได้ · Rack ต้องมี WAN</td><td class="n">0.1</td></tr>
         <tr><td>08</td><td>NTP, Syslog, หลักฐาน Cyber</td><td><span class="st no">ยังไม่ทำ</span></td><td>คำสั่งเขียนรอไว้ · ต้องมี G04 Collector 192.0.2.58 และเส้นทางผ่าน ISP</td><td class="n">0</td></tr>
-        <tr><td>09</td><td>Verify, Failover, วัดเวลาฟื้น</td><td><span class="st part">บางส่วน</span></td><td>Gateway failover ผ่านบน Rack (70/70, 79/80) · WAN failover ผ่านแค่ใน EVE</td><td class="n">0.5</td></tr>
+        <tr><td>09</td><td>Verify, Failover, วัดเวลาฟื้น</td><td><span class="st part">เกือบครบ</span></td><td>Gateway failover ผ่านบน Rack (70/70, 79/80) · WAN failover แบบ ISP จำลองบน Rack ping ไม่หาย (11 ต.ค.) · eBGP failover จริงรอ ISP</td><td class="n">0.75</td></tr>
         <tr><td>10</td><td>Change Request (เพิ่ม ATM Subnet)</td><td><span class="st no">ยังไม่ทำ</span></td><td>VLAN31 ATM-NEW 10.6.6.0/24 + Policy · <b>ทำได้เลยไม่ต้องรอ ISP</b></td><td class="n">0</td></tr>
-        <tr><td>11</td><td>Backup, Rollback, ส่งมอบ</td><td><span class="st part">บางส่วน</span></td><td><code>write memory</code> ทุกขั้น + เก็บหลักฐานทุกขั้น · ยังไม่ได้ <code>copy … flash:G06-accepted.cfg</code> และทดสอบ restore</td><td class="n">0.5</td></tr>
-        <tr><td colspan="4" style="text-align:right">รวม (เต็ม 16)</td><td class="n"><b>8.6 = 54%</b></td></tr>
+        <tr><td>11</td><td>Backup, Rollback, ส่งมอบ</td><td><span class="st part">บางส่วน</span></td><td><code>flash:G06-accepted.cfg</code> ครบ 6 เครื่อง + สำเนานอกเครื่อง (11 ต.ค.) · ยังไม่ได้ทดสอบ restore (<code>configure replace</code>)</td><td class="n">0.75</td></tr>
+        <tr><td colspan="4" style="text-align:right">รวม (เต็ม 16)</td><td class="n"><b>9.1 = 57%</b></td></tr>
       </tbody>
     </table>
   </div>
@@ -297,10 +299,10 @@ try {
         <tr><td>TC02</td><td>eBGP / Prefix Filter</td><td><span class="st eve">EVE เท่านั้น</span></td><td>รับแค่ Default ส่งแค่ /28 ใน EVE · Rack รอ ISP</td></tr>
         <tr><td>TC03</td><td>บริการข้ามประเทศ</td><td><span class="st no">ยังไม่ทำ</span></td><td>ต้องมี ISP + กลุ่มคู่ค้า (G08 Clearing)</td></tr>
         <tr><td>TC04</td><td>User → Management</td><td><span class="st ok">ผ่าน Rack</span></td><td>Teller ถูกปฏิเสธ SSH · Admin เข้าได้ (8 และ 11 ต.ค.)</td></tr>
-        <tr><td>TC05</td><td>ตัด Primary Path</td><td><span class="st part">บางส่วน</span></td><td>Gateway failover ผ่านบน Rack · WAN failover ผ่านแค่ใน EVE</td></tr>
+        <tr><td>TC05</td><td>ตัด Primary Path</td><td><span class="st part">บางส่วน</span></td><td>Gateway failover ผ่านบน Rack · WAN failover แบบ ISP จำลอง (Loopback) ผ่านบน Rack ping ไม่หาย · eBGP จริงรอ ISP</td></tr>
         <tr><td>TC06</td><td>ส่ง Log + DET-01/02</td><td><span class="st no">ยังไม่ทำ</span></td><td>รอ Collector G04</td></tr>
         <tr><td>TC07</td><td>สิทธิ์ข้อมูล</td><td><span class="st no">ยังไม่ทำ</span></td><td>รอระบบ Log กลาง</td></tr>
-        <tr><td>TC08</td><td>คืน Baseline</td><td><span class="st part">บางส่วน</span></td><td>ทุกการทดสอบ failover เปิดคืนและตรวจแล้ว · ยังไม่ได้ restore จากไฟล์ backup</td></tr>
+        <tr><td>TC08</td><td>คืน Baseline</td><td><span class="st part">บางส่วน</span></td><td>ทุกการทดสอบ failover เปิดคืนและตรวจแล้ว (รวม ISP จำลอง) · มีไฟล์ backup แล้ว ยังไม่ได้ทดสอบ restore</td></tr>
       </tbody>
     </table>
   </div>
@@ -308,11 +310,11 @@ try {
   <!-- ===================== ที่เหลือ ===================== -->
   <h2>ที่เหลือก่อนถึง 100%</h2>
   <div class="card">
-    <h3>ทำได้เลย ไม่ต้องรอ ISP <span class="note">(รวม +14%)</span></h3>
+    <h3>ทำได้เลย ไม่ต้องรอ ISP <span class="note">(รวม +9%)</span></h3>
     <ol class="todo">
             <li><b>ACL DATABASE-OUT</b> + PC Database 10.6.3.10 · ให้ Database รับแค่ Application Server <span class="gain">+1.6%</span></li>
       <li><b>Step 10 Change Request:</b> VLAN31 ATM-NEW 10.6.6.0/24 บนทั้งสอง MLS พร้อม FHRP / Trunk / DHCP / ACL และกรอกแบบฟอร์ม Before–Rollback <span class="gain">+6.3%</span></li>
-      <li><b>Backup ตามใบงาน:</b> <code>copy running-config flash:G06-pre.cfg</code> / <code>flash:G06-accepted.cfg</code> + ทดสอบ restore <span class="gain">+6.3%</span></li>
+      <li><b>ทดสอบ restore</b> จาก <code>flash:G06-accepted.cfg</code> (backup ทำแล้ว) — ทำหลังลบ SIM-ISP <span class="gain">+1.6%</span></li>
       <li>เปลี่ยน hostname บนเครื่องจริงเป็น G06-HQ-CE01 … ให้ตรงผังใบงาน (ไม่เพิ่ม % แต่ As-built จะตรง)</li>
     </ol>
     <h3 style="margin-top:18px">ต้องรอ ISP (G01 / G02) <span class="note">(รวม +32%)</span></h3>
@@ -329,6 +331,23 @@ try {
       <li>As-built · ทะเบียน IP/VLAN/Interface · Routing/Security Policy — ข้อมูลอยู่ในสคริปต์และเว็บนี้แล้ว เหลือจัดรูปแบบ</li>
       <li>Test Register (กรอกผลจริงทุก TC) · Incident / Change Record · Contribution · Known Issues</li>
     </ul>
+  </div>
+
+  <!-- ===================== Backup ===================== -->
+  <h2 id="backups">ไฟล์ Backup (Step 11) · 11 ต.ค. 2026</h2>
+  <div class="card">
+    <p style="margin-top:0">ดึงจาก <code>show running-config</code> หลัง <code>copy running-config flash:G06-accepted.cfg</code> + <code>write memory</code> (ก่อนลง ISP จำลอง) · <b>ฉบับบนเว็บปิด hash ของรหัส</b> (<code>secret 9 &lt;hidden&gt;</code>) เพราะเว็บเป็นสาธารณะ — ใช้ดู As-built / เทียบ config ได้ทุกบรรทัด ส่วนฉบับเต็มสำหรับ restore อยู่ในเครื่องทีม และใน <code>flash:</code> ของแต่ละอุปกรณ์</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>อุปกรณ์</th><th>ไฟล์</th><th class="n">ขนาดใน flash</th></tr></thead>
+      <tbody>
+        <tr><td>CE01</td><td><a href="backups/CE01.cfg" download>CE01.cfg</a></td><td class="n">6,838 B</td></tr>
+        <tr><td>CE02</td><td><a href="backups/CE02.cfg" download>CE02.cfg</a></td><td class="n">6,841 B</td></tr>
+        <tr><td>MLS01</td><td><a href="backups/MLS01.cfg" download>MLS01.cfg</a></td><td class="n">13,564 B</td></tr>
+        <tr><td>MLS02</td><td><a href="backups/MLS02.cfg" download>MLS02.cfg</a></td><td class="n">13,186 B</td></tr>
+        <tr><td>R01</td><td><a href="backups/R01.cfg" download>R01.cfg</a></td><td class="n">6,199 B</td></tr>
+        <tr><td>SW01</td><td><a href="backups/SW01.cfg" download>SW01.cfg</a></td><td class="n">10,312 B</td></tr>
+      </tbody>
+    </table></div>
   </div>
 
   <!-- ===================== บทเรียน ===================== -->

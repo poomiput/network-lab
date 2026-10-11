@@ -56,7 +56,7 @@ try {
 <header class="top">
   <div class="brand">
     <h1>G06 NBK · ทดสอบต่อหน้า TA</h1>
-    <p class="sub">พิมพ์อะไร ที่เครื่องไหน ต้องเห็นอะไร · เรียงตามลำดับเดโม · อัปเดต 11 ต.ค. 2026</p>
+    <p class="sub">พิมพ์อะไร ที่เครื่องไหน ต้องเห็นอะไร · เรียงตามลำดับเดโม · อัปเดต 11 ต.ค. 2026 (14:30)</p>
   </div>
   <div class="top-controls">
     <a class="navlink" href="index.html">← Config Map</a>
@@ -72,7 +72,7 @@ try {
       <table class="prep">
         <thead><tr><th>เครื่อง</th><th>เสียบที่แผง</th><th>IP</th><th>ใช้ทดสอบ</th></tr></thead>
         <tbody>
-          <tr><td>PC Teller</td><td>แถวบน ช่อง 19 (MLS01 Gi1/0/5, VLAN10)</td><td class="mono">DHCP 10.6.0.100+</td><td>ข้อ 3, 4, 5, 7, 8</td></tr>
+          <tr><td>PC Teller</td><td>แถวบน ช่อง 19 (MLS01 Gi1/0/5, VLAN10)</td><td class="mono">DHCP 10.6.0.100+</td><td>ข้อ 3, 4, 5, 7, 8, 10</td></tr>
           <tr><td>PC ATM</td><td>แถวบน ช่อง 21 (Gi1/0/7, VLAN30)</td><td class="mono">DHCP 10.6.2.100+</td><td>ข้อ 6</td></tr>
           <tr><td>PC Admin</td><td>แถวบน ช่อง 23 (Gi1/0/9, VLAN50)</td><td class="mono">10.6.4.10/24</td><td>ข้อ 5</td></tr>
           <tr><td>Server Ubuntu</td><td>แถวบน ช่อง 24 (Gi1/0/10, VLAN60 DMZ)</td><td class="mono">198.51.100.12/29</td><td>ข้อ 7</td></tr>
@@ -83,6 +83,7 @@ try {
     <div class="warnbox">
       <p><b>PC ต่อแค่ MLS01</b> (อาจารย์กำหนด) · การ์ดแลปของ PC ต้องตั้ง metric 500 ก่อนเสียบ ไม่งั้นเน็ต/remote หลุด</p>
       <p>คำสั่ง <code>show</code> และ <code>ping</code> บนอุปกรณ์ทำที่ <code>&gt;</code> ได้ · ข้อ 8 (failover) ต้อง <code>enable</code> — คนในทีมพิมพ์รหัสเอง</p>
+      <p>ข้อ 10: PC เดิมออกเน็ตทางการ์ดมหาลัย → ต้องเพิ่ม route <code>192.0.2.0/24</code> ผ่าน 10.6.0.1 บนการ์ดแลปก่อน (Teller ตั้งไว้แล้ว)</p>
       <p>ถ้าใช้ชุด C9300 · HSRP: เปลี่ยน <code>show vrrp brief</code> เป็น <code>show standby brief</code> (Active/Standby แทน MASTER/BACKUP) ที่เหลือเหมือนกัน</p>
     </div>
     <nav class="toc" id="toc" aria-label="ไปยังข้อทดสอบ"></nav>
@@ -97,7 +98,7 @@ try {
       <tbody>
         <tr><td>TC02</td><td>eBGP + Exact Prefix Filter (รับแค่ Default ส่งแค่ /28)</td><td>สาย WAN ไป G01/G02 + เลือกพอร์ต WAN ของ CE</td></tr>
         <tr><td>TC03</td><td>บริการข้ามประเทศ / Clearing G08</td><td>ISP + กลุ่มคู่ค้า</td></tr>
-        <tr><td>TC05</td><td>ตัด WAN หลัก → ใช้ WAN สำรอง</td><td>WAN ทั้งสองเส้น</td></tr>
+        <tr><td>TC05</td><td>ตัด WAN หลัก (ของจริง) → eBGP สำรอง</td><td>WAN ทั้งสองเส้น · ตอนนี้ทดสอบแบบจำลองแล้ว (ข้อ 10)</td></tr>
         <tr><td>TC06–07</td><td>Syslog / DET-01/02 / สิทธิ์ข้อมูล</td><td>Collector G04 192.0.2.58 ผ่าน ISP</td></tr>
         <tr><td>05A/B · 07B</td><td>GRE T1/T2 ไปสาขา · NAT</td><td>WAN ก่อน (Tunnel endpoint ต้องถึงกันผ่าน ISP)</td></tr>
       </tbody>
@@ -168,6 +169,20 @@ try {
       "R01 (Console แถวบน 7)",
       [["ดูสาย", "show cdp neighbors", "เห็น SW01 ที่ Gig 0/0/0 → Gig 1/0/1"],
        ["ping สวิตช์สาขา", "ping 10.6.16.2", "!!!!! (5/5)"]]],
+    ["ISP จำลอง (Loopback) + WAN failover", ["TC05 จำลอง", "Step 09", "TC08"], ["ok", "ผ่าน 11 ต.ค. (ping ไม่หาย)"],
+      "ไม่มี G01/G02 จริง → อาจารย์ให้จำลองด้วย Loopback บน CE: Loopback101 = ขา WAN, Loopback102 = อินเทอร์เน็ต 192.0.2.10 · CE01 ส่ง default metric 1 (หลัก) CE02 metric 50 (สำรอง)",
+      "PC Teller + CE01 (ต้อง enable) · PC ต้องมี route 192.0.2.0/24 ผ่านการ์ดแลป (Gateway 10.6.0.1)",
+      [["1. CE01: ดู default ทั้งสองทาง", "show ip ospf database external 0.0.0.0 | include Advertising|Metric:", "10.6.255.1 Metric 1 และ 10.6.255.2 Metric 50"],
+       ["2. PC Teller: ping อินเทอร์เน็ตค้างไว้", "ping -t 192.0.2.10", "Reply ต่อเนื่อง (ปล่อยไว้)"],
+       ["3. PC Teller: ดูว่าออกทาง CE ไหน", "tracert -d -h 2 192.0.2.99", "hop 2 = 10.6.240.1 (CE01 = ทางหลัก)"],
+       ["4. CE01: ตัดขา ISP หลัก", "configure terminal\ninterface Loopback101\n shutdown\nend", "ping ยังผ่าน (11 ต.ค. ไม่หายเลย)"],
+       ["5. PC Teller: ดูทางใหม่", "tracert -d -h 2 192.0.2.99", "hop 2 = 10.6.240.9 (CE02 = ทางสำรอง)"],
+       ["6. CE01: คืนขา ISP", "configure terminal\ninterface Loopback101\n no shutdown\nend", "tracert กลับเป็น 10.6.240.1 = คืน baseline (TC08) · ไม่ต้อง write memory"]]],
+    ["สาขาออกอินเทอร์เน็ต (จำลอง)", ["Step 04B จำลอง"], ["ok", "ผ่าน 11 ต.ค."],
+      "R01 มี ISP จำลองของตัวเอง (Loopback101 = 172.31.11.26) · SW01 ใช้ R01 เป็น Gateway",
+      "SW01 (Console แถวล่าง 14) — ทำที่ > ได้",
+      [["ping อินเทอร์เน็ตจำลอง", "ping 192.0.2.10", "!!!!! (5/5)"],
+       ["ดูทาง", "traceroute 192.0.2.10 numeric", "hop 1 = 10.6.16.1 (R01)"]]],
   ];
   const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   let html = "", toc = "", id = 0;
