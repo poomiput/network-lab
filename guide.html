@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="th" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>G06 วิธีทำทั้งหมด</title>
+<meta name="description" content="G06 NBK — คู่มือทำแลปตั้งแต่ 0 ถึง 100% ทีละขั้น: ทำอะไร ทำไม พิมพ์อะไร และต้องเห็นผลอะไร">
+<script>
+try {
+  if (localStorage.getItem("g06-config-site-theme") === "dark") document.documentElement.dataset.theme = "dark";
+} catch (e) {}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Thai:wght@400;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="style.css?v=20261011-guide1">
+<style>
+  .pg { max-width: 980px; margin: 0 auto; padding: 18px 20px 48px; }
+  .pg h2 { font-size: 19px; margin: 32px 0 10px; }
+  .pg h3 { font-size: 17px; margin: 0; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; }
+  .intro p { margin: 4px 0; }
+  .pg code { background: var(--code-bg); padding: 1px 5px; border-radius: 5px; font-size: 12.5px; }
+  .pg pre { margin: 8px 0 0; padding: 10px 12px; background: var(--code-bg); border-radius: 10px; overflow-x: auto; font-size: 12.5px; line-height: 1.5; }
+  .pg pre code { background: none; padding: 0; }
+  .pg table td:first-child { white-space: nowrap; font-weight: 600; }
+  .pg a { color: var(--accent); }
+
+  .steps { list-style: none; margin: 0; padding: 0; position: relative; }
+  .steps::before { content: ""; position: absolute; left: 23px; top: 8px; bottom: 8px; width: 2px; background: var(--line); }
+  .steps > li { position: relative; padding: 0 0 16px 62px; scroll-margin-top: 90px; }
+  .pct { position: absolute; left: 0; top: 0; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center;
+    font-size: 12.5px; font-weight: 600; background: var(--panel); border: 2px solid var(--accent); color: var(--accent); font-variant-numeric: tabular-nums; }
+  .pct.start { border-color: var(--line); color: var(--muted); }
+  .pct.end { background: var(--accent); color: #fff; }
+  .meta-line { font-size: 12.5px; color: var(--muted); margin: 3px 0 8px; }
+  .why { margin: 6px 0; }
+  .steps ul { margin: 6px 0 0; padding-left: 20px; }
+  .check { margin: 10px 0 0; padding: 8px 12px; border-radius: 10px; background: var(--ok-bg); color: var(--ok-ink); font-size: 13.5px; }
+  .check p { margin: 3px 0; }
+  .warn { margin: 10px 0 0; padding: 8px 12px; border-radius: 10px; background: var(--warn-bg); color: var(--warn-ink); font-size: 13.5px; }
+  .warn p { margin: 3px 0; }
+  .check code, .warn code { background: transparent; padding: 0; }
+  .toc { columns: 2 260px; margin: 0; padding-left: 22px; }
+  .toc li { margin: 3px 0; break-inside: avoid; }
+  .toc a { text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .navlink { color: var(--accent); text-decoration: none; border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px; background: var(--panel); }
+  .navlink:hover { border-color: var(--accent); }
+  .note { color: var(--muted); font-size: 13px; }
+  @media (max-width: 560px) {
+    .steps::before { left: 17px; }
+    .steps > li { padding-left: 46px; }
+    .pct { width: 36px; height: 36px; font-size: 11px; }
+    .card { padding: 14px; }
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <h1>G06 NBK · วิธีทำทั้งหมด 0 → 100%</h1>
+    <p class="sub">ทีละขั้น: ทำอะไร · ทำไม · พิมพ์อะไร · ต้องเห็นอะไร</p>
+  </div>
+  <div class="top-controls">
+    <a class="navlink" href="index.html">← Config Map (Copy คำสั่งเต็ม)</a>
+    <button type="button" class="theme-toggle" id="themeToggle" aria-label="เปลี่ยนเป็น Dark theme">☾ Dark</button>
+  </div>
+</header>
+
+<main class="pg">
+
+  <section class="card intro">
+    <p><b>หน้านี้คือ "แผนที่"</b> อธิบายว่าเราสร้างเครือข่าย G06 ยังไง ตั้งแต่เครื่องเปล่าจนเสร็จ · คำสั่งในหน้านี้เป็น<b>ตัวอย่างสั้น</b>ให้เข้าใจ ส่วนคำสั่งเต็มของแต่ละเครื่อง กด Copy ทีละ BLOCK ในหน้า <a href="index.html">Config Map</a></p>
+    <p>ตัวอย่างใช้ชุด <b>C9200L · VRRP</b> (แผง 2 แถว: T = แถวบน, B = แถวล่าง) · ถ้าวันจริงเป็น C9300 ใช้ชุด HSRP ซึ่งต่างกันแค่ขั้น 5 และบรรทัด 6 ของ ACL</p>
+    <p>อยากรู้ว่าตอนนี้ทำถึงไหนแล้ว → <a href="progress.html">ความคืบหน้า</a> · ลำดับทดสอบต่อหน้า TA → <a href="tests.html">ทดสอบ</a></p>
+  </section>
+
+  <h2>ภาพรวมก่อนเริ่ม</h2>
+  <div class="card table-wrap">
+    <table>
+      <thead><tr><th>เครื่อง</th><th>หน้าที่</th><th>Loopback</th><th>Console</th></tr></thead>
+      <tbody>
+        <tr><td>CE01</td><td>Router HQ หลัก → ISP G01 (AS65001)</td><td>10.6.255.1 · Lo1 198.51.100.1</td><td>T1</td></tr>
+        <tr><td>CE02</td><td>Router HQ สำรอง → ISP G02 (AS65002)</td><td>10.6.255.2 · Lo1 198.51.100.2</td><td>T4</td></tr>
+        <tr><td>MLS01</td><td>Core Switch หลัก · Gateway หลัก (priority 110) · DHCP</td><td>10.6.255.11</td><td>T14</td></tr>
+        <tr><td>MLS02</td><td>Core Switch สำรอง · Gateway สำรอง (priority 100)</td><td>10.6.255.12</td><td>B2 (รูบน)</td></tr>
+        <tr><td>R01</td><td>Router สาขา → ISP G01</td><td>Lo1 198.51.100.161</td><td>T7</td></tr>
+        <tr><td>SW01</td><td>Switch สาขา (VLAN110)</td><td>Vlan110 10.6.16.2</td><td>B14</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card table-wrap" style="margin-top:10px">
+    <table>
+      <thead><tr><th>VLAN</th><th>Zone</th><th>Subnet</th><th>Gateway (VIP)</th><th>เครื่องในวง</th><th>เสียบช่อง</th></tr></thead>
+      <tbody>
+        <tr><td>10</td><td>TELLER</td><td>10.6.0.0/24</td><td>10.6.0.1</td><td>PC พนักงาน (DHCP)</td><td>T19</td></tr>
+        <tr><td>20</td><td>APPLICATION</td><td>10.6.1.0/24</td><td>10.6.1.1</td><td>App Server 10.6.1.10</td><td>T20</td></tr>
+        <tr><td>30</td><td>ATM</td><td>10.6.2.0/24</td><td>10.6.2.1</td><td>ตู้ ATM (DHCP)</td><td>T21</td></tr>
+        <tr><td>40</td><td>DATABASE</td><td>10.6.3.0/24</td><td>10.6.3.1</td><td>DB 10.6.3.10</td><td>T22</td></tr>
+        <tr><td>50</td><td>MANAGEMENT</td><td>10.6.4.0/24</td><td>10.6.4.1</td><td>Admin 10.6.4.10</td><td>T23</td></tr>
+        <tr><td>60</td><td>PUBLIC-DMZ</td><td>198.51.100.8/29</td><td>198.51.100.11</td><td>Web Server 198.51.100.12</td><td>T24</td></tr>
+        <tr><td>110</td><td>BRANCH (สาขา)</td><td>10.6.16.0/20</td><td>10.6.16.1 (R01)</td><td>Client / Server สาขา</td><td>B19–B24</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">Gateway ทุกวง: .1 = Virtual IP (ตัวที่ PC ใช้) · .2 = MLS01 · .3 = MLS02 · ยกเว้น DMZ: .9 = MLS01, .10 = MLS02, .11 = VIP</p>
+
+  <h2>ลำดับขั้น</h2>
+  <div class="card">
+    <ol class="toc" start="0">
+      <li><a href="#s0">เตรียมตัว: เลือกชุด เสียบสาย ต่อ Console</a></li>
+      <li><a href="#s1">สำรวจเครื่อง สำรอง และล้างของเก่า</a></li>
+      <li><a href="#s2">ตั้งพื้นฐาน + เปิด OSPF</a></li>
+      <li><a href="#s3">Loopback + ลิงก์ CE–MLS</a></li>
+      <li><a href="#s4">VLAN + Port-channel ระหว่าง MLS</a></li>
+      <li><a href="#s5">Gateway สำรอง (VRRP / HSRP)</a></li>
+      <li><a href="#s6">พอร์ต PC + DHCP</a></li>
+      <li><a href="#s7">สาขา R01 + SW01</a></li>
+      <li><a href="#s8">SSH + จำกัดคนเข้าเครื่อง</a></li>
+      <li><a href="#s9">ACL กั้น Zone</a></li>
+      <li><a href="#s10">Web Server ใน DMZ (Ubuntu + nginx)</a></li>
+      <li><a href="#s11">iBGP ระหว่าง CE + Public Loopback</a></li>
+      <li><a href="#s12">WAN + eBGP ไป ISP</a></li>
+      <li><a href="#s13">GRE Tunnel HQ ↔ สาขา</a></li>
+      <li><a href="#s14">NAT ให้ PC ออกข้างนอก</a></li>
+      <li><a href="#s15">NTP + Syslog</a></li>
+      <li><a href="#s16">ทดสอบ Failover</a></li>
+      <li><a href="#s17">Change Request: VLAN ATM ใหม่</a></li>
+      <li><a href="#s18">Backup + ส่งงาน</a></li>
+    </ol>
+  </div>
+
+  <h2>ทีละขั้น</h2>
+  <ol class="steps">
+
+    <li id="s0">
+      <span class="pct start">0%</span>
+      <div class="card">
+        <h3>0 · เตรียมตัว: เลือกชุด เสียบสาย ต่อ Console</h3>
+        <p class="meta-line">ทุกคน · ก่อนพิมพ์อะไรสักบรรทัด</p>
+        <p class="why"><b>ทำอะไร:</b> ดูรุ่นสวิตช์ → เลือกชุดในเว็บ · เสียบสายตามตารางในหน้าเครื่อง · แบ่งกันคนละเครื่อง</p>
+        <p class="why"><b>ทำไม:</b> C9300 ใช้ HSRP ได้ แต่ C9200L <b>ไม่มี HSRP</b> ต้องใช้ VRRP · เลือกชุดผิด คำสั่งจะ error ทั้ง BLOCK</p>
+        <ul>
+          <li>ดูป้ายหน้าสวิตช์: <b>C9300 → ชุด HSRP</b> · <b>C9200L → ชุด VRRP</b></li>
+          <li>สายเชื่อมอุปกรณ์ (ชุด VRRP): T02↔T15 · T03↔B03 · T05↔T16 · T06↔B04 · T17↔B05 · T18↔B06 · T08↔B15</li>
+          <li>แต่ละคนเปิดเว็บ → เลือก Template ทีม → ใส่ชื่อ → เลือก 1 เครื่อง · <b>ทำพร้อมกันได้ทุกเครื่อง</b> ลำดับระหว่างเครื่องไม่สำคัญ (ในเครื่องเดียวกันให้ทำตามลำดับ BLOCK)</li>
+          <li>ต่อ Console: Mac ใช้ <code>screen /dev/cu.usbserial-XXXX 9600</code> · Windows ใช้ PuTTY แบบ Serial 9600</li>
+        </ul>
+        <div class="warn"><p>ตัวอักษรสะท้อนกลับ/ซ้ำ = สายเสียบช่อง MGMT แทน Console หลังเครื่อง · ออกจาก screen ด้วย <code>Ctrl-A</code> แล้ว <code>\</code> แล้ว <code>y</code> (ปิดหน้าต่างเฉยๆ พอร์ตจะค้าง)</p></div>
+      </div>
+    </li>
+
+    <li id="s1">
+      <span class="pct">5%</span>
+      <div class="card">
+        <h3>1 · สำรวจเครื่อง สำรอง และล้างของเก่า</h3>
+        <p class="meta-line">ใบงาน Step 00 · ทุกเครื่อง</p>
+        <p class="why"><b>ทำอะไร:</b> ดูรุ่นและพอร์ตที่มีจริง · เก็บ config เดิมไว้ · ล้างแลปของกลุ่มอื่นที่ค้างอยู่</p>
+        <p class="why"><b>ทำไม:</b> Rack ใช้ร่วมกัน เราเคยเจอ BGP ของกลุ่มอื่น / VLAN 47 วง / VTP Server ค้างอยู่ ถ้าไม่ล้างจะชนกับของเรา</p>
+<pre><code>enable
+terminal length 0
+show version
+show ip interface brief
+copy running-config flash:G06-pre.cfg</code></pre>
+        <div class="check"><p>จดรุ่นเครื่องและชื่อพอร์ตจริง (Gi0/0/0, Gi1/0/1 …) · <code>dir flash:</code> มีไฟล์ G06-pre.cfg</p></div>
+      </div>
+    </li>
+
+    <li id="s2">
+      <span class="pct">12%</span>
+      <div class="card">
+        <h3>2 · ตั้งพื้นฐาน + เปิด OSPF</h3>
+        <p class="meta-line">BLOCK 1 · CE01, CE02, MLS01, MLS02</p>
+        <p class="why"><b>ทำอะไร:</b> ตั้งชื่อเครื่อง · ปิดการเดา DNS (พิมพ์ผิดแล้วไม่ค้าง) · เปิด routing บนสวิตช์ · สร้าง OSPF process ไว้ก่อน</p>
+        <p class="why"><b>ทำไม:</b> ใส่ <code>router-id</code> <b>ก่อน</b>มี interface จะได้ ID ตามแผนแน่นอน · <code>passive-interface default</code> = ปิด OSPF ทุกขาไว้ก่อน แล้วค่อยเปิดเฉพาะขาที่ต้องคุยกัน</p>
+<pre><code>hostname G06-HQ-MLS01
+no ip domain lookup
+vtp mode off
+ip routing
+fhrp version vrrp v3        ! เฉพาะ C9200L
+router ospf 10
+ router-id 10.6.255.11
+ passive-interface default</code></pre>
+        <div class="warn"><p><code>vtp mode off</code> กันสวิตช์ไปรับ VLAN จากสวิตช์อื่นใน rack</p></div>
+      </div>
+    </li>
+
+    <li id="s3">
+      <span class="pct">22%</span>
+      <div class="card">
+        <h3>3 · Loopback + ลิงก์ CE–MLS (Routed)</h3>
+        <p class="meta-line">ใบงาน Step 03 · BLOCK 2–3 · CE01, CE02, MLS01, MLS02</p>
+        <p class="why"><b>ทำอะไร:</b> ทำลิงก์ /30 ระหว่าง CE ทุกตัวกับ MLS ทุกตัว (4 เส้นไขว้กัน) · Loopback0 เป็นตัวตนของเครื่อง</p>
+        <p class="why"><b>ทำไม:</b> CE แต่ละตัวต่อ MLS ทั้งสองตัว เส้นไหนขาดอีกเส้นยังวิ่งได้ · ขาสวิตช์ต้อง <code>no switchport</code> ก่อนถึงจะใส่ IP ได้</p>
+<pre><code>! MLS01 (CE ใช้รูปแบบเดียวกันแต่ไม่มี no switchport)
+interface GigabitEthernet1/0/1
+ description T15 LAN1 &lt;-&gt; T02 CE01 Gi0/0/0 | 10.6.240.0/30 .2
+ no switchport
+ ip address 10.6.240.2 255.255.255.252
+ ip ospf 10 area 0
+router ospf 10
+ no passive-interface GigabitEthernet1/0/1</code></pre>
+        <div class="check">
+          <p><code>show cdp neighbors</code> → ปลายสายเป็นเครื่องและพอร์ตที่คิดไว้ (<b>ดูก่อนใส่ IP</b>)</p>
+          <p><code>show ip ospf neighbor</code> → เห็นเพื่อน 2 ตัว สถานะ <b>FULL</b></p>
+          <p><code>ping 10.6.255.11 source Loopback0</code> → <b>!!!!!</b></p>
+        </div>
+        <div class="warn"><p>สายแผงเคยไม่ตรงป้าย ถ้า CDP บอกพอร์ตอื่น ให้ย้าย IP ไปขาที่ CDP บอก</p></div>
+      </div>
+    </li>
+
+    <li id="s4">
+      <span class="pct">30%</span>
+      <div class="card">
+        <h3>4 · VLAN + Port-channel ระหว่าง MLS</h3>
+        <p class="meta-line">ใบงาน Step 02A · BLOCK 2 + 4 · MLS01, MLS02</p>
+        <p class="why"><b>ทำอะไร:</b> สร้าง 6 VLAN ตาม Zone · มัดสาย 2 เส้นระหว่าง MLS เป็นท่อเดียว (LACP Po1) ที่ขน VLAN ทั้ง 6</p>
+        <p class="why"><b>ทำไม:</b> สองสายรวมกัน = เร็วขึ้น และสายขาด 1 เส้นก็ยังไม่ล่ม · MLS สองตัวต้องเห็น VLAN เดียวกันถึงจะสำรอง Gateway ให้กันได้</p>
+<pre><code>vlan 10
+ name TELLER
+! … 20 APPLICATION, 30 ATM, 40 DATABASE, 50 MANAGEMENT, 60 PUBLIC-DMZ
+interface range GigabitEthernet1/0/3 - 4
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40,50,60
+ channel-group 1 mode active</code></pre>
+        <div class="check"><p><code>show etherchannel summary</code> → <b>Po1(SU)</b> และสมาชิกทั้งสองเป็น <b>(P)</b> · ถ้าเห็น (s) หรือ (I) = สองฝั่งตั้งไม่เหมือนกัน หรือสายผิดคู่</p></div>
+      </div>
+    </li>
+
+    <li id="s5">
+      <span class="pct">40%</span>
+      <div class="card">
+        <h3>5 · Gateway สำรอง (VRRP บน C9200L / HSRP บน C9300)</h3>
+        <p class="meta-line">ใบงาน Step 02B · BLOCK 5 · MLS01 (priority 110), MLS02 (priority 100)</p>
+        <p class="why"><b>ทำอะไร:</b> ทำ SVI ทุก VLAN · ให้ MLS สองตัว "แชร์" IP Gateway .1 ตัวเดียวกัน (Virtual IP)</p>
+        <p class="why"><b>ทำไม:</b> PC ตั้ง Gateway เป็น .1 ตัวเดียว ถ้า MLS01 ดับ MLS02 รับ .1 ต่อทันที PC ไม่ต้องเปลี่ยนอะไร</p>
+<pre><code>! C9200L · VRRPv3
+interface Vlan10
+ ip address 10.6.0.2 255.255.255.0
+ vrrp 10 address-family ipv4
+  address 10.6.0.1 primary
+  priority 110
+  exit-vrrp
+ ip ospf 10 area 0
+
+! C9300 · HSRP (ใช้แทน ถ้าเป็น C9300)
+interface Vlan10
+ ip address 10.6.0.2 255.255.255.0
+ standby version 2
+ standby 10 ip 10.6.0.1
+ standby 10 priority 110
+ standby 10 preempt</code></pre>
+        <div class="check"><p><code>show vrrp brief</code> (หรือ <code>show standby brief</code>) → MLS01 = <b>MASTER / Active</b> ทุก VLAN · MLS02 = <b>BACKUP / Standby</b> ทุก VLAN</p></div>
+        <div class="warn"><p>"MASTER ทั้งคู่" = สองตัวไม่ได้ยินกัน → เช็ก Po1 และ VLAN ใน trunk · บน C9200L คำสั่ง <code>standby</code> และ <code>vrrp 10 ip</code> แบบเก่าจะ error ต้องใช้รูปแบบ <code>address-family</code></p></div>
+      </div>
+    </li>
+
+    <li id="s6">
+      <span class="pct">46%</span>
+      <div class="card">
+        <h3>6 · พอร์ต PC + DHCP</h3>
+        <p class="meta-line">BLOCK 6–8 · พอร์ตทั้ง MLS01/MLS02 · DHCP อยู่ที่ MLS01 ตัวเดียว</p>
+        <p class="why"><b>ทำอะไร:</b> พอร์ต 5–10 อยู่ VLAN 10–60 ตามลำดับ · แจก IP อัตโนมัติให้ Teller และ ATM</p>
+        <p class="why"><b>ทำไม:</b> PC ทั่วไปรับ IP เองง่ายสุด · Server/Admin ตั้งเองเพราะต้องคงที่ · กัน .1–.99 ไว้ให้ Gateway และอุปกรณ์</p>
+<pre><code>interface GigabitEthernet1/0/5
+ switchport mode access
+ switchport access vlan 10
+ spanning-tree portfast
+ip dhcp excluded-address 10.6.0.1 10.6.0.99
+ip dhcp pool G06-TELLER
+ network 10.6.0.0 255.255.255.0
+ default-router 10.6.0.1
+ dns-server 192.0.2.10 192.0.2.42</code></pre>
+        <div class="check"><p>PC Teller ได้ <b>10.6.0.100</b> ขึ้นไป · <code>show ip dhcp binding</code> เห็นเครื่อง · PC ping 10.6.0.1 และ Loopback ทุกเครื่องผ่าน</p></div>
+        <div class="warn"><p><b>PC Windows ที่ remote เข้ามา:</b> ตั้ง metric การ์ดแลปเป็น 500 <b>ก่อนเสียบสาย</b> และไม่ใส่ Gateway ให้การ์ดแลป ไม่งั้นมันแย่งทางออกเน็ต แล้ว remote/Tailscale หลุด · อาจารย์ให้ต่อ PC เข้า MLS01 อย่างเดียว</p></div>
+      </div>
+    </li>
+
+    <li id="s7">
+      <span class="pct">52%</span>
+      <div class="card">
+        <h3>7 · สาขา R01 + SW01</h3>
+        <p class="meta-line">R01, SW01</p>
+        <p class="why"><b>ทำอะไร:</b> R01 เป็น Gateway ของสาขา (10.6.16.1/20) · SW01 ให้พอร์ตลูกข่ายอยู่ VLAN110</p>
+        <p class="why"><b>ทำไม:</b> สาขามีวงเดียว ไม่ต้องมี Gateway สำรอง · SW01 มี IP ไว้ให้ผู้ดูแลเข้าได้</p>
+<pre><code>! R01
+interface GigabitEthernet0/0/0
+ ip address 10.6.16.1 255.255.240.0
+! SW01
+vlan 110
+ name BRANCH-LAN
+interface GigabitEthernet1/0/1
+ switchport mode access
+ switchport access vlan 110
+interface Vlan110
+ ip address 10.6.16.2 255.255.240.0
+ip default-gateway 10.6.16.1</code></pre>
+        <div class="check"><p>R01: <code>show cdp neighbors</code> เห็น SW01 · <code>ping 10.6.16.2</code> → !!!!!</p></div>
+      </div>
+    </li>
+
+    <li id="s8">
+      <span class="pct">58%</span>
+      <div class="card">
+        <h3>8 · SSH + จำกัดคนเข้าเครื่อง</h3>
+        <p class="meta-line">ใบงาน Step 01 · U-SSH · ทุกเครื่อง</p>
+        <p class="why"><b>ทำอะไร:</b> เปิด SSH v2 · สร้าง user ผู้ดูแล · ให้เข้าได้เฉพาะเครื่องจากวง Management 10.6.4.0/24</p>
+        <p class="why"><b>ทำไม:</b> โจทย์ TC04 · User ทั่วไปต้องเข้าไม่ได้ Admin ต้องเข้าได้</p>
+<pre><code>ip domain name g06.lab.test
+username labadmin privilege 15 secret &lt;รหัสที่ทีมตั้งเอง&gt;
+crypto key generate rsa modulus 2048
+ip ssh version 2
+ip access-list standard MGMT-SOURCES
+ permit 10.6.4.0 0.0.0.255
+ deny any log
+line vty 0 4
+ login local
+ transport input ssh
+ access-class MGMT-SOURCES in</code></pre>
+        <div class="check"><p>จาก PC Admin (10.6.4.10): <code>ssh labadmin@10.6.255.1</code> → ถามรหัส = <b>เข้าได้</b> · จาก PC Teller → <b>ถูกปฏิเสธ</b> = TC04 ผ่าน</p></div>
+        <div class="warn"><p>รหัสไม่เกิน 25 ตัวอักษร · ใส่คำสั่ง global ให้ครบก่อน แล้วค่อย <code>line vty</code> · อย่าปิด Console จนกว่าจะลอง SSH เข้าได้</p></div>
+      </div>
+    </li>
+
+    <li id="s9">
+      <span class="pct">64%</span>
+      <div class="card">
+        <h3>9 · ACL กั้น Zone</h3>
+        <p class="meta-line">ใบงาน Step 06 · U1 · MLS01 + MLS02 (ต้องใส่ทั้งสองตัว)</p>
+        <p class="why"><b>ทำอะไร:</b> ATM คุยได้แค่ App Server พอร์ต 8443 (+ DNS/NTP) · ห้ามเข้า Teller / Management / Database · Database รับแค่ App Server</p>
+        <p class="why"><b>ทำไม:</b> โจทย์ข้อ 1 · ตู้ ATM อยู่ที่สาธารณะ ถูกเจาะง่าย ต้องจำกัดให้แคบที่สุด</p>
+<pre><code>ip access-list extended ATM-IN
+ 5 permit udp any eq bootpc any eq bootps                 ! DHCP
+ 6 permit 112 10.6.2.0 0.0.0.255 host 224.0.0.18         ! VRRP hello
+ 7 permit icmp 10.6.2.0 0.0.0.255 10.6.2.0 0.0.0.255     ! ping ในวง
+ 40 permit tcp 10.6.2.0 0.0.0.255 host 10.6.1.10 eq 8443 ! App
+ 50 deny ip 10.6.2.0 0.0.0.255 10.6.4.0 0.0.0.255 log    ! Management
+ 60 deny ip 10.6.2.0 0.0.0.255 10.6.0.0 0.0.0.255 log    ! Teller
+ 70 deny ip 10.6.2.0 0.0.0.255 10.6.3.0 0.0.0.255 log    ! Database
+ 90 deny ip any any log
+interface Vlan30
+ ip access-group ATM-IN in</code></pre>
+        <div class="check"><p>ATM เปิด App 10.6.1.10:8443 ได้ · ping Teller ไม่ได้ · <code>show access-lists ATM-IN</code> → counter บรรทัด 60 ขึ้น · <code>show vrrp brief</code> ยังเป็น MASTER/BACKUP ปกติ</p></div>
+        <div class="warn"><p><b>บรรทัด 5, 6, 7 ห้ามลืม</b> (ใบงานไม่มี) · ไม่มี 5 = ATM ขอ IP ไม่ได้ · ไม่มี 6 = MLS02 ไม่ได้ยิน hello แล้วกลายเป็น MASTER ซ้อน · ชุด C9300 บรรทัด 6 คือ <code>permit udp 10.6.2.0 0.0.0.255 host 224.0.0.102 eq 1985</code> (HSRP)</p></div>
+      </div>
+    </li>
+
+    <li id="s10">
+      <span class="pct">70%</span>
+      <div class="card">
+        <h3>10 · Web Server ใน DMZ (Ubuntu + nginx)</h3>
+        <p class="meta-line">ใบงาน Step 07 · Server Ubuntu เสียบ T24 (VLAN60)</p>
+        <p class="why"><b>ทำอะไร:</b> ตั้ง IP Server เป็น 198.51.100.12/29 แล้วเปิดเว็บ nginx พอร์ต 8080</p>
+        <p class="why"><b>ทำไม:</b> DMZ = โซนบริการสาธารณะ ใช้ IP Public ให้คนนอกเข้าผ่าน ISP ได้โดยไม่ต้อง NAT</p>
+<pre><code>sudo apt install -y nginx curl          # ทำตอนยังมีเน็ต
+sudo nmcli con add type ethernet ifname &lt;LAB_IF&gt; con-name g06-dmz \
+  ipv4.method manual ipv4.addresses 198.51.100.12/29 ipv4.never-default yes \
+  ipv4.routes "10.6.0.0/16 198.51.100.11, 198.51.100.0/24 198.51.100.11"
+sudo nmcli con up g06-dmz
+# /etc/nginx/conf.d/g06-lab.conf
+server { listen 198.51.100.12:8080; root /srv/g06-app; }</code></pre>
+        <div class="check"><p>จาก PC Teller: <code>curl http://198.51.100.12:8080/</code> → <b>G06 NBK application OK</b> (HTTP 200) · จาก ATM → เข้าไม่ได้ (ACL)</p></div>
+        <div class="warn"><p>ถ้าเป็น VM: การ์ดที่ 1 = NAT ไว้ออกเน็ต (ห้ามแตะ) · การ์ดที่ 2 = Bridged ไปการ์ดที่เสียบ T24 · ต้องมี <code>never-default</code> ไม่งั้นเน็ต/Tailscale ของ VM หลุด</p></div>
+      </div>
+    </li>
+
+    <li id="s11">
+      <span class="pct">75%</span>
+      <div class="card">
+        <h3>11 · iBGP ระหว่าง CE + Public Loopback</h3>
+        <p class="meta-line">ใบงาน Step 03 / 04B · U1–U2 · CE01, CE02</p>
+        <p class="why"><b>ทำอะไร:</b> ให้ CE สองตัวแลก route BGP กันผ่าน Loopback0 · สร้าง Loopback1 เป็น IP Public ของแต่ละ CE</p>
+        <p class="why"><b>ทำไม:</b> ถ้า WAN ของ CE01 ขาด CE02 ต้องรู้และรับงานแทน · Loopback ไม่ล่มตราบที่ยังมีทางไปถึง · Loopback1 ใช้เป็นต้นทางของ Tunnel / NAT / Log</p>
+<pre><code>interface Loopback1
+ ip address 198.51.100.1 255.255.255.255
+ ip ospf 10 area 0
+router bgp 65106
+ bgp router-id 10.6.255.1
+ neighbor 10.6.255.2 remote-as 65106
+ neighbor 10.6.255.2 update-source Loopback0
+ neighbor 10.6.255.2 next-hop-self</code></pre>
+        <div class="check"><p><code>show ip bgp summary</code> → แถว 10.6.255.2 มีตัวเลขในช่องสุดท้าย (= <b>Established</b>) · MLS <code>show ip route 198.51.100.1</code> เรียนผ่าน OSPF</p></div>
+      </div>
+    </li>
+
+    <li id="s12">
+      <span class="pct">82%</span>
+      <div class="card">
+        <h3>12 · WAN + eBGP ไป ISP</h3>
+        <p class="meta-line">ใบงาน Step 04A · U3 · CE01 (G01 AS65001) · CE02 (G02 AS65002) · R01 (G01)</p>
+        <p class="why"><b>ทำอะไร:</b> ต่อสาย WAN ไป ISP · คุย BGP กับ ISP · <b>รับแค่ Default route</b> และ<b>ประกาศแค่ Public ของเรา</b></p>
+        <p class="why"><b>ทำไม:</b> กรองแบบตรงตัว (Exact Prefix Filter) กันประกาศ Private หลุดออกไป และกันรับ route แปลกๆ เข้ามา · CE01 local-preference 200 = ทางหลัก · CE02 = 100 ทางสำรอง</p>
+<pre><code>interface &lt;WAN_PORT&gt;
+ ip address 172.31.1.26 255.255.255.252
+ip route 198.51.100.0 255.255.255.240 Null0 250
+ip prefix-list OWN-PUBLIC seq 10 permit 198.51.100.0/28
+ip prefix-list DEFAULT-ONLY seq 10 permit 0.0.0.0/0
+route-map ISP-IN permit 10
+ match ip address prefix-list DEFAULT-ONLY
+ set local-preference 200
+router bgp 65106
+ neighbor 172.31.1.25 remote-as 65001
+ neighbor 172.31.1.25 prefix-list OWN-PUBLIC out
+ neighbor 172.31.1.25 route-map ISP-IN in
+ neighbor 172.31.1.25 maximum-prefix 1
+ network 198.51.100.0 mask 255.255.255.240
+router ospf 10
+ default-information originate</code></pre>
+        <div class="check"><p><code>show ip bgp summary</code> → ISP Established รับ 1 prefix · <code>show ip bgp neighbors 172.31.1.25 advertised-routes</code> → มีแค่ 198.51.100.0/28 · MLS เห็น Default route จาก CE</p></div>
+        <div class="warn"><p>R01 ประกาศ 198.51.100.160/29 แทน /28 · ห้ามเปิด OSPF บนขา WAN · ตกลงกับกลุ่ม ISP ก่อนว่าใช้พอร์ตไหน (SFP / Serial / LAN)</p></div>
+      </div>
+    </li>
+
+    <li id="s13">
+      <span class="pct">88%</span>
+      <div class="card">
+        <h3>13 · GRE Tunnel HQ ↔ สาขา</h3>
+        <p class="meta-line">ใบงาน Step 05A / 05B · U4 · CE01 (Tunnel1), CE02 (Tunnel2), R01 (ทั้งสองท่อ)</p>
+        <p class="why"><b>ทำอะไร:</b> สร้างท่ออุโมงค์ผ่าน ISP ให้ LAN HQ (10.6.0.0/20) คุยกับ LAN สาขา (10.6.16.0/20)</p>
+        <p class="why"><b>ทำไม:</b> ISP ไม่ส่งต่อ IP Private · เลยห่อ IP Private ไว้ใน IP Public ของ Loopback1 · มี 2 ท่อ ท่อหลักขาดก็ใช้ท่อสำรอง</p>
+<pre><code>! CE01
+interface Tunnel1
+ ip address 172.30.6.1 255.255.255.252
+ tunnel source Loopback1
+ tunnel destination 198.51.100.161
+ keepalive 3 3
+ ip mtu 1400
+ ip tcp adjust-mss 1360
+ip route 10.6.16.0 255.255.240.0 Tunnel1
+router ospf 10
+ redistribute static subnets metric 20 metric-type 1 route-map BRANCH-TO-OSPF
+! R01
+ip route 10.6.0.0 255.255.240.0 Tunnel1
+ip route 10.6.0.0 255.255.240.0 Tunnel2 20</code></pre>
+        <div class="check"><p><code>ping 172.30.6.2 source Tunnel1</code> → !!!!! · PC สาขา ping PC Teller ได้ · MLS <code>show ip route 10.6.16.0</code> ชี้ไปทาง CE01</p></div>
+        <div class="warn"><p>ก่อนเปิด Tunnel ต้อง <code>ping 198.51.100.161 source 198.51.100.1</code> ผ่าน ISP ได้ก่อน · CE02 ใช้ Tunnel2 + metric 100 (ทางสำรอง)</p></div>
+      </div>
+    </li>
+
+    <li id="s14">
+      <span class="pct">92%</span>
+      <div class="card">
+        <h3>14 · NAT ให้ PC ออกข้างนอก</h3>
+        <p class="meta-line">ใบงาน Step 07B · U5 · CE01, CE02</p>
+        <p class="why"><b>ทำอะไร:</b> แปลง IP Private ของ PC เป็น IP Public (Loopback1) ตอนออก ISP</p>
+        <p class="why"><b>ทำไม:</b> IP 10.x ใช้ข้างนอกไม่ได้ · แต่ทราฟฟิก HQ ↔ สาขาต้อง<b>ไม่</b>ถูก NAT (บรรทัด deny แรก)</p>
+<pre><code>ip access-list extended NAT-ELIGIBLE
+ deny ip 10.6.0.0 0.0.15.255 10.6.0.0 0.0.255.255
+ permit ip 10.6.0.0 0.0.15.255 any
+route-map CLIENT-NAT permit 10
+ match ip address NAT-ELIGIBLE
+interface GigabitEthernet0/0/0
+ ip nat inside
+interface &lt;WAN_PORT&gt;
+ ip nat outside
+ip nat inside source route-map CLIENT-NAT interface Loopback1 overload</code></pre>
+        <div class="check"><p>PC ping ปลายทางข้างนอกได้ · <code>show ip nat translations</code> เห็น 10.6.x.x → 198.51.100.1</p></div>
+      </div>
+    </li>
+
+    <li id="s15">
+      <span class="pct">95%</span>
+      <div class="card">
+        <h3>15 · NTP + Syslog (หลักฐาน Cyber)</h3>
+        <p class="meta-line">ใบงาน Step 08 · U-LOG · CE01, CE02, R01</p>
+        <p class="why"><b>ทำอะไร:</b> ตั้งเวลาให้ตรงกับ NTP กลาง · ส่ง Log ไป Collector G04 (192.0.2.58) โดยใช้ Loopback1 เป็นต้นทาง</p>
+        <p class="why"><b>ทำไม:</b> โจทย์ TC06 · ทีม Cyber ต้องเห็น Login ผิด ≥5 ครั้ง/5 นาที (DET-01) และ Deny เข้า Management ≥3 ครั้ง/2 นาที (DET-02) พร้อมเวลาที่ถูก</p>
+<pre><code>ntp server 192.0.2.26 prefer
+ntp source Loopback1
+logging trap informational
+logging source-interface Loopback1
+logging host 192.0.2.58 transport tcp port 514
+login on-failure log</code></pre>
+        <div class="check"><p><code>show ntp associations</code> → มี * หน้า server · <code>show logging</code> → มี host 192.0.2.58 · ลอง SSH รหัสผิด 5 ครั้ง → Collector เห็น event</p></div>
+      </div>
+    </li>
+
+    <li id="s16">
+      <span class="pct">97%</span>
+      <div class="card">
+        <h3>16 · ทดสอบ Failover</h3>
+        <p class="meta-line">ใบงาน Step 09 · TC05</p>
+        <p class="why"><b>ทำอะไร:</b> ตัดทางหลักทีละจุด ดูว่าทางสำรองรับต่อ แล้วเปิดคืน</p>
+        <p class="why"><b>ทำไม:</b> โจทย์ "ธุรกรรมใหม่ต้องทำงานหลัง HQ WAN Failover" · ต้องมีหลักฐานเวลาที่ล่มและที่กลับมา</p>
+<pre><code>! 1) Gateway: ที่ MLS01 ปิด SVI ระหว่างที่ PC ping -t 10.6.255.1
+interface Vlan10
+ shutdown            ! MLS02 ขึ้นเป็น MASTER → ping หลุดแค่ 1–2 ตัว
+ no shutdown         ! MLS01 กลับเป็น MASTER
+! 2) WAN: ที่ CE01 ปิดขา WAN → Default route ย้ายไป CE02
+! 3) Tunnel: ปิด Tunnel1 → R01 ใช้ Tunnel2 (distance 20)</code></pre>
+        <div class="check"><p>จด <code>show clock</code> ก่อน/หลัง · ping ต่อเนื่องหายแค่ไม่กี่ตัว (ตอนซ้อมได้ 70/70 และ 79/80) · ระหว่างตัด <code>show ip route 0.0.0.0</code> ชี้ CE02 · เปิดคืนแล้วกลับทางเดิม</p></div>
+      </div>
+    </li>
+
+    <li id="s17">
+      <span class="pct">99%</span>
+      <div class="card">
+        <h3>17 · Change Request: เพิ่ม VLAN ATM ใหม่</h3>
+        <p class="meta-line">ใบงาน Step 10 · MLS01 + MLS02</p>
+        <p class="why"><b>ทำอะไร:</b> เพิ่ม VLAN31 ATM-NEW 10.6.6.0/24 พร้อม Gateway สำรอง, trunk, DHCP และ ACL แบบเดียวกับ ATM เดิม</p>
+        <p class="why"><b>ทำไม:</b> โจทย์ให้ฝึกเปลี่ยนระบบแบบมีขั้นตอน: กรอก Before · Scope · Impact · Approval · Implementation · Verification · Rollback ก่อนลงมือ</p>
+<pre><code>vlan 31
+ name ATM-NEW
+interface Port-channel1
+ switchport trunk allowed vlan add 31
+interface Vlan31
+ ip address 10.6.6.2 255.255.255.0     ! MLS02 = .3 priority 100
+ vrrp 31 address-family ipv4
+  address 10.6.6.1 primary
+  priority 110
+  exit-vrrp
+ ip ospf 10 area 0
+! + DHCP pool 10.6.6.0/24 และ ACL แบบ ATM-IN ที่เปลี่ยน 10.6.2 เป็น 10.6.6</code></pre>
+        <div class="check"><p><code>show vrrp brief</code> มี Vl31 · PC ใน VLAN31 ได้ IP 10.6.6.x · ทดสอบทั้งทางที่ต้องผ่านและที่ต้องโดนบล็อก · Rollback = <code>no interface Vlan31</code> + <code>no vlan 31</code></p></div>
+      </div>
+    </li>
+
+    <li id="s18">
+      <span class="pct end">100%</span>
+      <div class="card">
+        <h3>18 · Backup + ส่งงาน</h3>
+        <p class="meta-line">ใบงาน Step 11 · ทุกเครื่อง</p>
+        <p class="why"><b>ทำอะไร:</b> เซฟ config ที่ผ่านแล้วแยกชื่อไฟล์ · ทดสอบกู้คืน · รวมเอกสารส่ง</p>
+        <p class="why"><b>ทำไม:</b> ถ้าพังตอนตรวจ กู้คืนได้ในคำสั่งเดียว · ผู้ตรวจต้องเห็นหลักฐานครบ</p>
+<pre><code>copy running-config startup-config
+copy running-config flash:G06-accepted.cfg
+dir flash:
+! กู้คืน (ถ้า Image รองรับ)
+configure replace flash:G06-accepted.cfg force</code></pre>
+        <div class="check"><p>ส่งงาน: As-built + ทะเบียน IP/VLAN/Interface · Config Backup · ผล Test TC01–TC08 พร้อมเวลา · Log/Alert · Incident + Change Record · Contribution</p></div>
+      </div>
+    </li>
+  </ol>
+
+  <h2>สรุปสั้นที่สุด</h2>
+  <div class="card">
+    <ol>
+      <li>ดูรุ่นสวิตช์ → เลือกชุด → เสียบสายตามตาราง</li>
+      <li>แบ่งคนละเครื่อง วางทีละ BLOCK ตามลำดับในเครื่องนั้น · ดูผล "ต้องเห็น" ทุกครั้ง · <code>write memory</code></li>
+      <li>เช็ก OSPF FULL → Po1(SU) → VRRP MASTER/BACKUP → PC ได้ IP → SSH/ACL → Server</li>
+      <li>ISP มาแล้ว: WAN/eBGP → Tunnel → NAT → Log</li>
+      <li>ทดสอบ Failover → Change Request → Backup → ส่งเอกสาร</li>
+    </ol>
+    <p class="note">คำสั่งในหน้านี้ย่อให้อ่านง่าย · คำสั่งเต็มพร้อม description เลขช่องแผงอยู่ในหน้า <a href="index.html">Config Map</a> · ไม่มีรหัสผ่านจริงในเว็บนี้ · <code>&lt;…&gt;</code> คือค่าที่ต้องเติมเอง</p>
+  </div>
+</main>
+
+<script>
+(() => {
+  const btn = document.getElementById("themeToggle");
+  const paint = () => {
+    const dark = document.documentElement.dataset.theme === "dark";
+    btn.textContent = dark ? "☀ Light" : "☾ Dark";
+    btn.setAttribute("aria-label", dark ? "เปลี่ยนเป็น Light theme" : "เปลี่ยนเป็น Dark theme");
+  };
+  btn.addEventListener("click", () => {
+    const theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = theme;
+    try { localStorage.setItem("g06-config-site-theme", theme); } catch (e) {}
+    paint();
+  });
+  paint();
+})();
+</script>
+</body>
+</html>
