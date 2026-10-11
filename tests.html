@@ -170,7 +170,7 @@ try {
       [["ดูสาย", "show cdp neighbors", "เห็น SW01 ที่ Gig 0/0/0 → Gig 1/0/1"],
        ["ping สวิตช์สาขา", "ping 10.6.16.2", "!!!!! (5/5)"]]],
     ["ISP จำลอง (Loopback) + WAN failover", ["TC05 จำลอง", "Step 09", "TC08"], ["ok", "ผ่าน 11 ต.ค. (ping ไม่หาย)"],
-      "ไม่มี G01/G02 จริง → อาจารย์ให้จำลองด้วย Loopback บน CE: Loopback101 = ขา WAN, Loopback102 = อินเทอร์เน็ต 192.0.2.10 · CE01 ส่ง default metric 1 (หลัก) CE02 metric 50 (สำรอง)",
+      "ไม่มี G01/G02 จริง → อาจารย์ให้จำลองด้วย Loopback บน CE: Loopback101 = ขา WAN (IP จริง) + IP ที่สอง 192.0.2.10 = อินเทอร์เน็ต · CE01 ส่ง default metric 1 (หลัก) CE02 metric 50 (สำรอง)",
       "PC Teller + CE01 (ต้อง enable) · PC ต้องมี route 192.0.2.0/24 ผ่านการ์ดแลป (Gateway 10.6.0.1)",
       [["1. CE01: ดู default ทั้งสองทาง", "show ip ospf database external 0.0.0.0 | include Advertising|Metric:", "10.6.255.1 Metric 1 และ 10.6.255.2 Metric 50"],
        ["2. PC Teller: ping อินเทอร์เน็ตค้างไว้", "ping -t 192.0.2.10", "Reply ต่อเนื่อง (ปล่อยไว้)"],

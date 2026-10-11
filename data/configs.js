@@ -158,7 +158,7 @@ window.G06_CONFIGS = {
      "status": "passed",
      "notes": [
       "Loopback101 = ขา WAN 172.31.1.26/30 ของจริง (แทนพอร์ต WAN) · default route ชี้ ISP 172.31.1.25 แทน BGP",
-      "Loopback102 = \"อินเทอร์เน็ต\" 192.0.2.10 (DNS ตามใบงาน) ไว้ ping ทดสอบ — ไม่ประกาศเข้า OSPF",
+      "192.0.2.10 = \"อินเทอร์เน็ต\" (DNS ตามใบงาน) เป็น IP ที่สองบน Loopback101 → สาย ISP ขาด (shutdown) = อินเทอร์เน็ตหายด้วย · ไม่ประกาศเข้า OSPF",
       "!! ลบด้วย BLOCK SIM-OFF ก่อนลง WAN จริง (WAN จริงใช้ IP 172.31.1.26 ซ้ำกับ Loopback101)",
       "TC05 จำลอง: interface Loopback101 / shutdown -> MLS เปลี่ยนไปใช้ default จาก CE02 (metric 50) -> no shutdown คืน"
      ],
@@ -167,9 +167,7 @@ window.G06_CONFIGS = {
       "interface Loopback101",
       " description SIM-G01 AS65001 | stands in for WAN 172.31.1.26/30 (ISP absent)",
       " ip address 172.31.1.26 255.255.255.252",
-      "interface Loopback102",
-      " description SIM-INTERNET | 192.0.2.10 test target",
-      " ip address 192.0.2.10 255.255.255.255",
+      " ip address 192.0.2.10 255.255.255.255 secondary",
       "exit",
       "ip route 0.0.0.0 0.0.0.0 172.31.1.25 name SIM-G01-DEFAULT",
       "router ospf 10",
@@ -257,14 +255,13 @@ window.G06_CONFIGS = {
       "no logging host 198.51.100.12 transport tcp port 514",
       "no ip route 0.0.0.0 0.0.0.0 172.31.1.25",
       "no interface Loopback101",
-      "no interface Loopback102",
       "router ospf 10",
       " no default-information originate",
       "end",
       "write memory"
      ],
      "verify": [
-      "show ip interface brief | include Loopback10 -> ต้องไม่มีแล้ว"
+      "show ip interface brief | include Loopback101 -> ต้องไม่มีแล้ว"
      ]
     },
     {
@@ -560,7 +557,7 @@ window.G06_CONFIGS = {
      "status": "passed",
      "notes": [
       "Loopback101 = ขา WAN 172.31.2.26/30 ของจริง (แทนพอร์ต WAN) · default route ชี้ ISP 172.31.2.25 แทน BGP",
-      "Loopback102 = \"อินเทอร์เน็ต\" 192.0.2.10 (DNS ตามใบงาน) ไว้ ping ทดสอบ — ไม่ประกาศเข้า OSPF",
+      "192.0.2.10 = \"อินเทอร์เน็ต\" (DNS ตามใบงาน) เป็น IP ที่สองบน Loopback101 → สาย ISP ขาด (shutdown) = อินเทอร์เน็ตหายด้วย · ไม่ประกาศเข้า OSPF",
       "!! ลบด้วย BLOCK SIM-OFF ก่อนลง WAN จริง (WAN จริงใช้ IP 172.31.2.26 ซ้ำกับ Loopback101)"
      ],
      "commands": [
@@ -568,9 +565,7 @@ window.G06_CONFIGS = {
       "interface Loopback101",
       " description SIM-G02 AS65002 | stands in for WAN 172.31.2.26/30 (ISP absent)",
       " ip address 172.31.2.26 255.255.255.252",
-      "interface Loopback102",
-      " description SIM-INTERNET | 192.0.2.10 test target",
-      " ip address 192.0.2.10 255.255.255.255",
+      " ip address 192.0.2.10 255.255.255.255 secondary",
       "exit",
       "ip route 0.0.0.0 0.0.0.0 172.31.2.25 name SIM-G02-DEFAULT",
       "router ospf 10",
@@ -658,14 +653,13 @@ window.G06_CONFIGS = {
       "no logging host 198.51.100.12 transport tcp port 514",
       "no ip route 0.0.0.0 0.0.0.0 172.31.2.25",
       "no interface Loopback101",
-      "no interface Loopback102",
       "router ospf 10",
       " no default-information originate",
       "end",
       "write memory"
      ],
      "verify": [
-      "show ip interface brief | include Loopback10 -> ต้องไม่มีแล้ว"
+      "show ip interface brief | include Loopback101 -> ต้องไม่มีแล้ว"
      ]
     },
     {
@@ -1599,7 +1593,7 @@ window.G06_CONFIGS = {
      "status": "passed",
      "notes": [
       "Loopback101 = ขา WAN 172.31.11.26/30 ของจริง (แทนพอร์ต WAN) · default route ชี้ ISP 172.31.11.25 แทน BGP",
-      "Loopback102 = \"อินเทอร์เน็ต\" 192.0.2.10 (DNS ตามใบงาน) ไว้ ping ทดสอบ — ไม่ประกาศเข้า OSPF",
+      "192.0.2.10 = \"อินเทอร์เน็ต\" (DNS ตามใบงาน) เป็น IP ที่สองบน Loopback101 → สาย ISP ขาด (shutdown) = อินเทอร์เน็ตหายด้วย · ไม่ประกาศเข้า OSPF",
       "!! ลบด้วย BLOCK SIM-OFF ก่อนลง WAN จริง (WAN จริงใช้ IP 172.31.11.26 ซ้ำกับ Loopback101)"
      ],
      "commands": [
@@ -1607,9 +1601,7 @@ window.G06_CONFIGS = {
       "interface Loopback101",
       " description SIM-G01 AS65001 | stands in for WAN 172.31.11.26/30 (ISP absent)",
       " ip address 172.31.11.26 255.255.255.252",
-      "interface Loopback102",
-      " description SIM-INTERNET | 192.0.2.10 test target",
-      " ip address 192.0.2.10 255.255.255.255",
+      " ip address 192.0.2.10 255.255.255.255 secondary",
       "exit",
       "ip route 0.0.0.0 0.0.0.0 172.31.11.25 name SIM-G01-DEFAULT",
       "end",
@@ -1629,12 +1621,11 @@ window.G06_CONFIGS = {
       "configure terminal",
       "no ip route 0.0.0.0 0.0.0.0 172.31.11.25",
       "no interface Loopback101",
-      "no interface Loopback102",
       "end",
       "write memory"
      ],
      "verify": [
-      "show ip interface brief | include Loopback10 -> ต้องไม่มีแล้ว"
+      "show ip interface brief | include Loopback101 -> ต้องไม่มีแล้ว"
      ]
     },
     {
@@ -2096,7 +2087,7 @@ window.G06_CONFIGS = {
      "status": "passed",
      "notes": [
       "Loopback101 = ขา WAN 172.31.1.26/30 ของจริง (แทนพอร์ต WAN) · default route ชี้ ISP 172.31.1.25 แทน BGP",
-      "Loopback102 = \"อินเทอร์เน็ต\" 192.0.2.10 (DNS ตามใบงาน) ไว้ ping ทดสอบ — ไม่ประกาศเข้า OSPF",
+      "192.0.2.10 = \"อินเทอร์เน็ต\" (DNS ตามใบงาน) เป็น IP ที่สองบน Loopback101 → สาย ISP ขาด (shutdown) = อินเทอร์เน็ตหายด้วย · ไม่ประกาศเข้า OSPF",
       "!! ลบด้วย BLOCK SIM-OFF ก่อนลง WAN จริง (WAN จริงใช้ IP 172.31.1.26 ซ้ำกับ Loopback101)",
       "TC05 จำลอง: interface Loopback101 / shutdown -> MLS เปลี่ยนไปใช้ default จาก CE02 (metric 50) -> no shutdown คืน"
      ],
@@ -2105,9 +2096,7 @@ window.G06_CONFIGS = {
       "interface Loopback101",
       " description SIM-G01 AS65001 | stands in for WAN 172.31.1.26/30 (ISP absent)",
       " ip address 172.31.1.26 255.255.255.252",
-      "interface Loopback102",
-      " description SIM-INTERNET | 192.0.2.10 test target",
-      " ip address 192.0.2.10 255.255.255.255",
+      " ip address 192.0.2.10 255.255.255.255 secondary",
       "exit",
       "ip route 0.0.0.0 0.0.0.0 172.31.1.25 name SIM-G01-DEFAULT",
       "router ospf 10",
@@ -2195,14 +2184,13 @@ window.G06_CONFIGS = {
       "no logging host 198.51.100.12 transport tcp port 514",
       "no ip route 0.0.0.0 0.0.0.0 172.31.1.25",
       "no interface Loopback101",
-      "no interface Loopback102",
       "router ospf 10",
       " no default-information originate",
       "end",
       "write memory"
      ],
      "verify": [
-      "show ip interface brief | include Loopback10 -> ต้องไม่มีแล้ว"
+      "show ip interface brief | include Loopback101 -> ต้องไม่มีแล้ว"
      ]
     },
     {
@@ -2499,7 +2487,7 @@ window.G06_CONFIGS = {
      "status": "passed",
      "notes": [
       "Loopback101 = ขา WAN 172.31.2.26/30 ของจริง (แทนพอร์ต WAN) · default route ชี้ ISP 172.31.2.25 แทน BGP",
-      "Loopback102 = \"อินเทอร์เน็ต\" 192.0.2.10 (DNS ตามใบงาน) ไว้ ping ทดสอบ — ไม่ประกาศเข้า OSPF",
+      "192.0.2.10 = \"อินเทอร์เน็ต\" (DNS ตามใบงาน) เป็น IP ที่สองบน Loopback101 → สาย ISP ขาด (shutdown) = อินเทอร์เน็ตหายด้วย · ไม่ประกาศเข้า OSPF",
       "!! ลบด้วย BLOCK SIM-OFF ก่อนลง WAN จริง (WAN จริงใช้ IP 172.31.2.26 ซ้ำกับ Loopback101)"
      ],
      "commands": [
@@ -2507,9 +2495,7 @@ window.G06_CONFIGS = {
       "interface Loopback101",
       " description SIM-G02 AS65002 | stands in for WAN 172.31.2.26/30 (ISP absent)",
       " ip address 172.31.2.26 255.255.255.252",
-      "interface Loopback102",
-      " description SIM-INTERNET | 192.0.2.10 test target",
-      " ip address 192.0.2.10 255.255.255.255",
+      " ip address 192.0.2.10 255.255.255.255 secondary",
       "exit",
       "ip route 0.0.0.0 0.0.0.0 172.31.2.25 name SIM-G02-DEFAULT",
       "router ospf 10",
@@ -2597,14 +2583,13 @@ window.G06_CONFIGS = {
       "no logging host 198.51.100.12 transport tcp port 514",
       "no ip route 0.0.0.0 0.0.0.0 172.31.2.25",
       "no interface Loopback101",
-      "no interface Loopback102",
       "router ospf 10",
       " no default-information originate",
       "end",
       "write memory"
      ],
      "verify": [
-      "show ip interface brief | include Loopback10 -> ต้องไม่มีแล้ว"
+      "show ip interface brief | include Loopback101 -> ต้องไม่มีแล้ว"
      ]
     },
     {
@@ -3555,7 +3540,7 @@ window.G06_CONFIGS = {
      "status": "passed",
      "notes": [
       "Loopback101 = ขา WAN 172.31.11.26/30 ของจริง (แทนพอร์ต WAN) · default route ชี้ ISP 172.31.11.25 แทน BGP",
-      "Loopback102 = \"อินเทอร์เน็ต\" 192.0.2.10 (DNS ตามใบงาน) ไว้ ping ทดสอบ — ไม่ประกาศเข้า OSPF",
+      "192.0.2.10 = \"อินเทอร์เน็ต\" (DNS ตามใบงาน) เป็น IP ที่สองบน Loopback101 → สาย ISP ขาด (shutdown) = อินเทอร์เน็ตหายด้วย · ไม่ประกาศเข้า OSPF",
       "!! ลบด้วย BLOCK SIM-OFF ก่อนลง WAN จริง (WAN จริงใช้ IP 172.31.11.26 ซ้ำกับ Loopback101)"
      ],
      "commands": [
@@ -3563,9 +3548,7 @@ window.G06_CONFIGS = {
       "interface Loopback101",
       " description SIM-G01 AS65001 | stands in for WAN 172.31.11.26/30 (ISP absent)",
       " ip address 172.31.11.26 255.255.255.252",
-      "interface Loopback102",
-      " description SIM-INTERNET | 192.0.2.10 test target",
-      " ip address 192.0.2.10 255.255.255.255",
+      " ip address 192.0.2.10 255.255.255.255 secondary",
       "exit",
       "ip route 0.0.0.0 0.0.0.0 172.31.11.25 name SIM-G01-DEFAULT",
       "end",
@@ -3585,12 +3568,11 @@ window.G06_CONFIGS = {
       "configure terminal",
       "no ip route 0.0.0.0 0.0.0.0 172.31.11.25",
       "no interface Loopback101",
-      "no interface Loopback102",
       "end",
       "write memory"
      ],
      "verify": [
-      "show ip interface brief | include Loopback10 -> ต้องไม่มีแล้ว"
+      "show ip interface brief | include Loopback101 -> ต้องไม่มีแล้ว"
      ]
     },
     {
