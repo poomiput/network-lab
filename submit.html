@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="th" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>G06 ส่งงาน</title>
+<meta name="description" content="G06 NBK — รวมทุกอย่างที่ต้องส่งตามข้อ 6 ของใบงาน: As-built, Registry, Policy, Backup, Test Register, Log, Incident/Change, Known Issues">
+<script>
+try { if (localStorage.getItem("g06-config-site-theme") === "dark") document.documentElement.dataset.theme = "dark"; } catch (e) {}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Thai:wght@400;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="style.css?v=20261011-submit1">
+<style>
+  .pg { max-width: 1120px; margin: 0 auto; padding: 18px 20px 48px; }
+  .pg h2 { font-size: 19px; margin: 34px 0 10px; scroll-margin-top: 90px; }
+  .pg h3 { font-size: 15.5px; margin: 16px 0 6px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; }
+  .pg code { background: var(--code-bg); padding: 1px 5px; border-radius: 5px; font-size: 12.5px; }
+  .navlink { color: var(--accent); text-decoration: none; border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px; background: var(--panel); }
+  .navlink:hover { border-color: var(--accent); }
+  .st { display: inline-block; white-space: nowrap; font-size: 12px; padding: 1px 8px; border-radius: 999px; font-weight: 600; }
+  .st.ok { background: var(--ok-bg); color: var(--ok-ink); }
+  .st.part { background: var(--warn-bg); color: var(--warn-ink); }
+  .st.no { background: var(--code-bg); color: var(--muted); border: 1px solid var(--line); }
+  .toc { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 6px 14px; margin: 0; padding-left: 20px; }
+  .toc a { color: var(--ink); text-decoration: none; } .toc a:hover { color: var(--accent); }
+  .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-top: 12px; }
+  .meta-grid div { background: var(--code-bg); border-radius: 10px; padding: 9px 12px; font-size: 13px; }
+  .meta-grid b { display: block; font-size: 15px; }
+  .note { color: var(--muted); font-size: 13px; }
+  .pg table td, .pg table th { font-size: 13px; }
+  .pg td.mono, .pg .mono { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 12.5px; }
+  .rec { background: var(--code-bg); border-radius: 10px; padding: 10px 12px; font-size: 13.5px; margin: 8px 0; }
+  .rec p { margin: 3px 0; }
+  .fill { display: inline-block; min-width: 140px; border-bottom: 1px dashed var(--muted); }
+  @media print { .top-controls { display: none; } .card { break-inside: avoid; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <h1>G06 NBK · ส่งงาน</h1>
+    <p class="sub">AS65106 · รวมทุกอย่างตามข้อ 6 “รายการส่งงาน” · อ้างอิงผลทดสอบบน Rack 7 / 8 / 11 ต.ค. 2026</p>
+  </div>
+  <div class="top-controls">
+    <a class="navlink" href="index.html">Config Map</a>
+    <a class="navlink" href="examples.html">หลักฐานใต้ใบงาน</a>
+    <a class="navlink" href="tests.html">เดโมต่อหน้า TA</a>
+    <button type="button" class="theme-toggle" id="themeToggle" aria-label="เปลี่ยนเป็น Dark theme">☾ Dark</button>
+  </div>
+</header>
+
+<main class="pg">
+  <section class="card" aria-label="ก่อนส่ง" style="margin-bottom:14px;border-color:var(--warn-line,#f0d48a)">
+    <b>ก่อนส่ง ทีมต้องทำเอง</b>
+    <ol style="margin:6px 0 0">
+      <li>กรอกวันที่ส่ง · ผู้ประสานงาน · Contribution (หัวข้อ 12) · ให้ผู้สอนลงชื่อ Approval ของ CR-01</li>
+      <li>ใน Config Map (Template ที่จะเปิดให้ดู) กด <b>คืนค่าพอร์ตทั้งหมด</b> ถ้ายังมีชื่อพอร์ตแบบ EVE (Et0/1) ค้าง — ผังต้องตรงเครื่องจริง Gi0/0/x (เกณฑ์ D01)</li>
+      <li>ส่งรูปแถวที่เหลือของ Scoring Checklist ให้เทียบครบ (ตอนนี้เทียบถึงแถว 14)</li>
+      <li>Ubuntu: <code>sudo rm /etc/sudoers.d/90-g06-lab</code></li>
+    </ol>
+  </section>
+
+  <section class="card" aria-label="ข้อมูลกลุ่ม">
+    <div class="meta-grid">
+      <div><b>G06 NBK</b>ธนาคาร Netland</div>
+      <div><b>AS65106</b>10.6.0.0/16 · Public 198.51.100.0/28 + .160/29</div>
+      <div><b>11 Node</b>CE ×2 · MLS ×2 · R ×1 · SW ×1 + Server/Client</div>
+      <div><b>ส่งวันที่</b><span class="fill">&nbsp;</span></div>
+      <div><b>ผู้ประสานงาน</b><span class="fill">&nbsp;</span></div>
+    </div>
+    <h3>สารบัญ</h3>
+    <ol class="toc">
+      <li><a href="#asbuilt">As-built (อุปกรณ์ + Topology)</a></li>
+      <li><a href="#ifmap">Interface Registry</a></li>
+      <li><a href="#ipreg">IP / VLAN / ASN Registry</a></li>
+      <li><a href="#routing">Routing Policy</a></li>
+      <li><a href="#security">Security Policy (Flow Matrix)</a></li>
+      <li><a href="#backup">Configuration Backup + Restore</a></li>
+      <li><a href="#failover">ผล Failover</a></li>
+      <li><a href="#tests">Test Register (TC01–TC08)</a></li>
+      <li><a href="#log">Log Registry + Alert + สิทธิ์ข้อมูล</a></li>
+      <li><a href="#incident">Incident Record</a></li>
+      <li><a href="#change">Change Record (CR-01)</a></li>
+      <li><a href="#contrib">Contribution</a></li>
+      <li><a href="#known">Known Issues</a></li>
+      <li><a href="#checklist">เทียบเกณฑ์ตรวจ (Scoring Checklist)</a></li>
+      <li><a href="#flow">Packet Flow + Design Decision</a></li>
+    </ol>
+  </section>
+
+  <!-- ===================== As-built ===================== -->
+  <h2 id="asbuilt">1. As-built</h2>
+  <div class="card">
+    <p style="margin-top:0">ผังจริงพร้อมเลขช่องแผงและ Console: <a href="index.html#vrrp">Config Map (ชุด C9200L · VRRP)</a> · ยืนยันปลายสายทุกเส้นด้วย <code>show cdp neighbors</code> (หลักฐานหน้า 6)</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>ชื่อตามผัง</th><th>Hostname บนเครื่อง</th><th>รุ่น / IOS-XE</th><th>Loopback</th><th>Console</th><th>หน้าที่</th></tr></thead>
+      <tbody id="devRows"></tbody>
+    </table></div>
+    <h3>เครื่องปลายทาง (Server / Client)</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>บทบาท</th><th>IP</th><th>VLAN</th><th>เสียบที่</th><th>บริการ</th></tr></thead>
+      <tbody>
+        <tr><td>Teller (Client)</td><td class="mono">DHCP 10.6.0.101</td><td>10</td><td>MLS01 Gi1/0/5 · แถวบน 19</td><td>—</td></tr>
+        <tr><td>Application Server</td><td class="mono">10.6.1.10/24</td><td>20</td><td>MLS01 Gi1/0/6 · แถวบน 20</td><td>Transaction App TCP 8443 (+8080)</td></tr>
+        <tr><td>ATM (Client)</td><td class="mono">DHCP 10.6.2.100</td><td>30</td><td>MLS01 Gi1/0/7 · แถวบน 21</td><td>—</td></tr>
+        <tr><td>Database</td><td class="mono">10.6.3.10/24</td><td>40</td><td>MLS01 Gi1/0/8 · แถวบน 22</td><td>TCP 3306 (MySQL)</td></tr>
+        <tr><td>Admin (Management)</td><td class="mono">10.6.4.10/24</td><td>50</td><td>MLS01 Gi1/0/9 · แถวบน 23</td><td>SSH ไปอุปกรณ์</td></tr>
+        <tr><td>DMZ Server (Ubuntu 26.04)</td><td class="mono">198.51.100.12/29</td><td>60</td><td>MLS01 Gi1/0/10 · แถวบน 24</td><td>nginx 8080 Portal · rsyslog TCP 514 · NTP (จำลอง G04)</td></tr>
+        <tr><td>Branch Client</td><td class="mono">10.6.16.20/20</td><td>110</td><td>SW01 Gi1/0/5 · แถวล่าง 19</td><td>—</td></tr>
+        <tr><td>Branch Server</td><td class="mono">10.6.16.10/20</td><td>110</td><td>SW01 Gi1/0/6 · แถวล่าง 20</td><td>เว็บสาขา TCP 8080</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">PC ต่อ MLS01 อย่างเดียวตามที่อาจารย์กำหนด · การ์ดแลปของ PC ไม่ใส่ Gateway (metric 500 + route เฉพาะวงแลป) เพื่อไม่ให้แย่ง default route ของเครื่อง</p>
+  </div>
+
+  <!-- ===================== Interface Registry ===================== -->
+  <h2 id="ifmap">2. Interface Registry</h2>
+  <div class="card table-wrap">
+    <table>
+      <thead><tr><th>อุปกรณ์</th><th>Interface</th><th>ช่องแผง</th><th>ต่อไปที่</th><th>ช่องปลาย</th><th>IP / หน้าที่</th></tr></thead>
+      <tbody id="ifRows"></tbody>
+    </table>
+    <p class="note">ดึงจากข้อมูลชุดเดียวกับ Config Map (ชื่อพอร์ตจริงของเครื่อง ไม่รวมการแก้พอร์ตชั่วคราวใน Template) · T = แผงแถวบน, B = แผงแถวล่าง</p>
+  </div>
+
+  <!-- ===================== IP Registry ===================== -->
+  <h2 id="ipreg">3. IP / VLAN / ASN Registry</h2>
+  <div class="card">
+    <div class="table-wrap"><table>
+      <thead><tr><th>VLAN</th><th>Zone</th><th>Subnet</th><th>Gateway (VIP)</th><th>เครื่องในวง</th><th>พอร์ต</th></tr></thead>
+      <tbody id="zoneRows"></tbody>
+      <tbody><tr><td>31</td><td>ATM-NEW (CR-01)</td><td class="mono">10.6.6.0/24</td><td class="mono">10.6.6.1</td><td>DHCP .100+</td><td>MLS Gi1/0/11</td></tr></tbody>
+    </table></div>
+    <h3>Loopback / Link / WAN / Tunnel</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>รายการ</th><th>ค่า</th><th>สถานะ</th></tr></thead>
+      <tbody>
+        <tr><td>Loopback0 (Router-ID)</td><td class="mono">CE01 10.6.255.1 · CE02 .2 · MLS01 .11 · MLS02 .12</td><td><span class="st ok">ใช้งาน</span></td></tr>
+        <tr><td>Loopback1 (Public / Tunnel / Log source)</td><td class="mono">CE01 198.51.100.1 · CE02 198.51.100.2 · R01 198.51.100.161</td><td><span class="st ok">ใช้งาน</span></td></tr>
+        <tr><td>CE–MLS routed /30</td><td class="mono">10.6.240.0/30 · .4/30 · .8/30 · .12/30</td><td><span class="st ok">ใช้งาน</span></td></tr>
+        <tr><td>WAN HQ Primary (G01 AS65001)</td><td class="mono">172.31.1.24/30 · ISP .25 · CE01 .26</td><td><span class="st part">จำลองบน Loopback101</span></td></tr>
+        <tr><td>WAN HQ Backup (G02 AS65002)</td><td class="mono">172.31.2.24/30 · ISP .25 · CE02 .26</td><td><span class="st part">จำลองบน Loopback101</span></td></tr>
+        <tr><td>WAN Branch (G01)</td><td class="mono">172.31.11.24/30 · ISP .25 · R01 .26</td><td><span class="st part">จำลองบน Loopback101</span></td></tr>
+        <tr><td>Tunnel T1 / T2</td><td class="mono">172.30.6.0/30 (HQ .1 / BR .2) · 172.30.6.4/30 (HQ .5 / BR .6)</td><td><span class="st no">รอ ISP จริง</span></td></tr>
+        <tr><td>ASN</td><td class="mono">G06 65106 · G01 65001 · G02 65002</td><td><span class="st ok">ตามทะเบียน</span></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <!-- ===================== Routing ===================== -->
+  <h2 id="routing">4. Routing Policy</h2>
+  <div class="card">
+    <ul>
+      <li><b>OSPF 10 area 0</b> ภายใน HQ: router-id = Loopback0 · <code>passive-interface default</code> · เปิดเฉพาะลิงก์ CE–MLS · SVI / Loopback อยู่ใน area 0 (passive) · neighbor FULL ครบ 4 คู่</li>
+      <li><b>iBGP</b> CE01 ↔ CE02 (AS65106) ผ่าน Loopback0 + <code>next-hop-self</code> = Established</li>
+      <li><b>Default route</b>: CE01 ส่งเข้า OSPF metric 1 (หลัก) · CE02 metric 50 (สำรอง) — ตอนนี้ default มาจาก ISP จำลอง</li>
+      <li><b>eBGP ออกแบบตามใบงาน</b> (สคริปต์ U3 พร้อมวาง): รับแค่ <code>0.0.0.0/0</code> (prefix-list DEFAULT-ONLY + local-pref 200/100) · ส่งแค่ <code>198.51.100.0/28</code> (OWN-PUBLIC) · <code>maximum-prefix 1</code> · route Null0 สำหรับ /28 → ไม่ประกาศ Private และไม่ทำ Transit</li>
+      <li><b>Branch</b>: 10.6.16.0/20 → Tunnel1 (หลัก) / Tunnel2 AD 20 · HQ redistribute static ของสาขา metric 20 (CE01) / 100 (CE02) — รอ ISP</li>
+    </ul>
+  </div>
+
+  <!-- ===================== Security ===================== -->
+  <h2 id="security">5. Security Policy (Flow Matrix)</h2>
+  <div class="card table-wrap">
+    <table>
+      <thead><tr><th>Source</th><th>Destination / Service</th><th>ผล</th><th>บังคับด้วย</th><th>ทดสอบ</th></tr></thead>
+      <tbody>
+        <tr><td>Admin 10.6.4.0/24</td><td>อุปกรณ์ทุกตัว SSH 22</td><td>Allow</td><td>MGMT-SOURCES (line vty)</td><td><span class="st ok">ผ่าน</span></td></tr>
+        <tr><td>User / Teller / ATM</td><td>Management / SSH</td><td>Deny + log</td><td>MGMT-SOURCES 20 deny any log · ATM-IN 50</td><td><span class="st ok">ผ่าน</span></td></tr>
+        <tr><td>ATM 10.6.2.0/24</td><td>App 10.6.1.10 TCP 8443</td><td>Allow</td><td>ATM-IN 40</td><td><span class="st ok">HTTP 200</span></td></tr>
+        <tr><td>ATM</td><td>Teller / Management / Database / DMZ / App:8080</td><td>Deny + log</td><td>ATM-IN 50 / 60 / 70 / 90</td><td><span class="st ok">ผ่าน</span></td></tr>
+        <tr><td>ATM</td><td>DHCP · VRRP hello · ICMP ในวง · DNS 192.0.2.10 · NTP 192.0.2.26</td><td>Allow</td><td>ATM-IN 5 / 6 / 7 / 10–30</td><td><span class="st ok">ผ่าน</span></td></tr>
+        <tr><td>App 10.6.1.10</td><td>Database 10.6.3.10 TCP 3306</td><td>Allow</td><td>DATABASE-OUT 10 (Vlan40 out)</td><td><span class="st ok">ผ่าน</span></td></tr>
+        <tr><td>ทุกเครื่องอื่น</td><td>Database 10.6.3.0/24</td><td>Deny + log</td><td>DATABASE-OUT 90</td><td><span class="st ok">ผ่าน</span></td></tr>
+        <tr><td>ATM-NEW 10.6.6.0/24</td><td>เหมือน ATM เดิม</td><td>ตาม ATM-IN</td><td>ATM-NEW-IN (Vlan31 in)</td><td><span class="st ok">ผ่าน</span></td></tr>
+        <tr><td>ทุกคน (WAN / ภายใน)</td><td>DMZ 198.51.100.12 TCP 8080</td><td>Allow</td><td>Public DMZ /29</td><td><span class="st ok">HTTP 200</span></td></tr>
+        <tr><td>WAN</td><td>Private LAN · BGP เฉพาะ Peer · GRE เฉพาะ Endpoint</td><td>Deny / Allow เฉพาะ</td><td>ออกแบบไว้ · ต้องมี WAN จริง</td><td><span class="st no">รอ ISP</span></td></tr>
+      </tbody>
+    </table>
+    <p class="note">บรรทัด 5–7 ของ ATM-IN ต้องเพิ่มจากตัวอย่างใบงาน: ถ้าไม่มีบรรทัด 6 (VRRP proto 112 → 224.0.0.18) MLS02 กลายเป็น MASTER ซ้อน (พิสูจน์แล้ว 8 ต.ค.)</p>
+  </div>
+
+  <!-- ===================== Backup ===================== -->
+  <h2 id="backup">6. Configuration Backup + Restore</h2>
+  <div class="card">
+    <p style="margin-top:0">ทุกเครื่อง: <code>copy running-config flash:G06-accepted.cfg</code> + <code>write memory</code> (11 ต.ค.) · ไฟล์ running-config ปิด hash ของรหัส (ฉบับเต็มอยู่ใน <code>flash:</code> ของแต่ละเครื่อง + สำเนาของทีม)</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>อุปกรณ์</th><th>Accepted (13:40 ก่อนจำลอง ISP)</th><th>Before CR-01</th><th>After / ปัจจุบัน</th><th>ต่างกันตรงไหน</th></tr></thead>
+      <tbody>
+        <tr><td>CE01</td><td><a href="backups/CE01.cfg" download>CE01.cfg</a></td><td>—</td><td><a href="backups/CE01-current.cfg" download>CE01-current.cfg</a></td><td>+ SIM-ISP (Loopback101) · SIM-NAT · SIM-LOG (NTP/Syslog)</td></tr>
+        <tr><td>CE02</td><td><a href="backups/CE02.cfg" download>CE02.cfg</a></td><td>—</td><td><a href="backups/CE02-current.cfg" download>CE02-current.cfg</a></td><td>เหมือน CE01 (default metric 50)</td></tr>
+        <tr><td>MLS01</td><td><a href="backups/MLS01.cfg" download>MLS01.cfg</a></td><td><a href="backups/MLS01-before-cr01.cfg" download>MLS01-before-cr01.cfg</a></td><td><a href="backups/MLS01-current.cfg" download>MLS01-current.cfg</a></td><td>+ VLAN31 / Vlan31 VRRP / DHCP ATM-NEW / ATM-NEW-IN · + DATABASE-OUT</td></tr>
+        <tr><td>MLS02</td><td><a href="backups/MLS02.cfg" download>MLS02.cfg</a></td><td><a href="backups/MLS02-before-cr01.cfg" download>MLS02-before-cr01.cfg</a></td><td><a href="backups/MLS02-current.cfg" download>MLS02-current.cfg</a></td><td>+ VLAN31 / ATM-NEW-IN · + DATABASE-OUT</td></tr>
+        <tr><td>R01</td><td><a href="backups/R01.cfg" download>R01.cfg</a></td><td>—</td><td>= Accepted + SIM-ISP</td><td>+ Loopback101 172.31.11.26/30 (+192.0.2.10) · static default → .25</td></tr>
+        <tr><td>SW01</td><td><a href="backups/SW01.cfg" download>SW01.cfg</a></td><td>—</td><td>= Accepted</td><td>ไม่มีการเปลี่ยน (ยืนยันด้วย diff = No changes)</td></tr>
+      </tbody>
+    </table></div>
+    <div class="rec">
+      <p><b>Restore test — CE02, 11 ต.ค. 16:37</b></p>
+      <p>16:37:40 <code>copy running-config flash:G06-restore-test.cfg</code> → 16:37:44 แก้ config (เพิ่ม Loopback199) → <code>configure replace flash:G06-restore-test.cfg force</code> → <b>Rollback Done</b> (16:37:46)</p>
+      <p>ตรวจหลัง restore: Loopback199 หาย · OSPF FULL 2 คู่ · iBGP ไม่หลุด (Up 07:17:34 ต่อเนื่อง) · <code>show archive config differences</code> ต่างแค่การแสดง certificate</p>
+    </div>
+  </div>
+
+  <!-- ===================== Failover ===================== -->
+  <h2 id="failover">7. ผล Failover</h2>
+  <div class="card table-wrap">
+    <table>
+      <thead><tr><th>เหตุการณ์</th><th>วิธีทดสอบ</th><th>ผล</th><th>คืน Baseline</th></tr></thead>
+      <tbody>
+        <tr><td>Gateway หลัก (MLS01) ล่ม</td><td>shutdown Vlan10/30 บน MLS01 ระหว่าง ping ต่อเนื่อง</td><td>MLS02 รับ VIP · Teller→CE01 79/80 · ATM→Server 78/80 (8 ต.ค.)</td><td>no shutdown → MLS01 กลับ MASTER (preempt)</td></tr>
+        <tr><td>ISP หลัก G01 ขาด (จำลอง)</td><td>CE01 Loopback101 shutdown 17:29:58 · Teller ping 192.0.2.10 ×40</td><td><b>40/40 ไม่หาย</b> · ทางออกย้าย CE01 → CE02</td><td>no shutdown 17:30:12 → tracert กลับ 10.6.240.1</td></tr>
+        <tr><td>Branch WAN ขาด (จำลอง)</td><td>R01 Loopback101 shutdown</td><td>อินเทอร์เน็ตหาย · Client → Server สาขา :8080 ยัง HTTP 200 (Single WAN ตามใบงาน)</td><td>no shutdown → default กลับ</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===================== Test Register ===================== -->
+  <h2 id="tests">8. Test Register</h2>
+  <div class="card table-wrap">
+    <table>
+      <thead><tr><th>Test ID</th><th>เวลา</th><th>Source → Destination / Service</th><th>Expected</th><th>Actual</th><th>หลักฐาน</th></tr></thead>
+      <tbody>
+        <tr><td>G06-TC01</td><td>11 ต.ค.</td><td>Teller 10.6.0.101 → GW, Admin, Loopback ทุกเครื่อง, DMZ</td><td>ถึงทุกปลายทาง</td><td><span class="st ok">ผ่าน</span> OSPF FULL ×4 · ping ครบ</td><td><a href="examples.html#page-13">หน้า 13</a></td></tr>
+        <tr><td>G06-TC02</td><td>—</td><td>CE ↔ ISP eBGP / Prefix Filter</td><td>รับแค่ default · ส่งแค่ /28</td><td><span class="st part">ผ่านใน EVE</span> · Rack จำลองด้วย Loopback</td><td><a href="examples.html#page-14">หน้า 14</a></td></tr>
+        <tr><td>G06-TC03</td><td>—</td><td>บริการข้ามประเทศ (Clearing G08)</td><td>Application ใหม่ใช้ได้</td><td><span class="st no">รอ ISP + คู่ค้า</span></td><td>—</td></tr>
+        <tr><td>G06-TC04</td><td>11 ต.ค. 14:50</td><td>Teller 10.6.0.101 → CE01 10.6.255.1 SSH 22 · Control: Admin 10.6.4.10</td><td>Deny / Admin Allow</td><td><span class="st ok">ผ่าน</span> Teller False · Admin True · ACL 20 deny 33 matches</td><td><a href="examples.html#page-4">หน้า 4</a> · <a href="examples.html#page-9">9</a></td></tr>
+        <tr><td>G06-TC05</td><td>11 ต.ค. 17:29</td><td>ตัด Primary (G01 จำลอง) ระหว่าง Teller ping 192.0.2.10</td><td>เส้นทางสำรองรับ</td><td><span class="st ok">ผ่าน (จำลอง)</span> 40/40</td><td><a href="examples.html#page-21">หน้า 21</a></td></tr>
+        <tr><td>G06-TC06</td><td>11 ต.ค. 14:50 / 15:22</td><td>CE01 198.51.100.1 → Collector 198.51.100.12 TCP 514</td><td>Log ถึง · DET-01/02 Alert</td><td><span class="st ok">ผ่าน (Collector จำลอง)</span> DET-01 + DET-02 ALERT</td><td><a href="examples.html#page-20">หน้า 20</a></td></tr>
+        <tr><td>G06-TC07</td><td>—</td><td>สิทธิ์ดูข้อมูลของตน</td><td>ไม่เห็นขององค์กรอื่น</td><td><span class="st part">บางส่วน</span> Collector เป็นของทีม เก็บเฉพาะ log G06</td><td><a href="#log">หัวข้อ 9</a></td></tr>
+        <tr><td>G06-TC08</td><td>11 ต.ค.</td><td>คืน Baseline หลังทุกการทดสอบ</td><td>Route / บริการกลับ</td><td><span class="st ok">ผ่าน</span> failover คืนทุกครั้ง + restore ผ่าน</td><td><a href="examples.html#page-24">หน้า 24</a></td></tr>
+      </tbody>
+    </table>
+    <p class="note">ลำดับเดโมต่อหน้า TA พร้อมคำสั่งและผลที่ต้องเห็น: <a href="tests.html">tests.html</a></p>
+  </div>
+
+  <!-- ===================== Log ===================== -->
+  <h2 id="log">9. Log Registry + Alert + สิทธิ์ข้อมูล</h2>
+  <div class="card">
+    <div class="table-wrap"><table>
+      <thead><tr><th>Group</th><th>Observed source</th><th>Collector</th><th>Transport</th><th>Owner</th></tr></thead>
+      <tbody>
+        <tr><td>G06</td><td class="mono">198.51.100.1 (CE01 Loopback1)</td><td class="mono">198.51.100.12 (แทน G04 192.0.2.58)</td><td>TCP 514</td><td>ทีม G06</td></tr>
+        <tr><td>G06</td><td class="mono">198.51.100.2 (CE02 Loopback1)</td><td class="mono">198.51.100.12</td><td>TCP 514</td><td>ทีม G06</td></tr>
+      </tbody>
+    </table></div>
+    <div class="rec">
+      <p><b>DET-01</b> Failed Login ≥5 / 5 นาที → <b>ALERT</b> 15:22 · device 198.51.100.1 · source 10.6.4.10 · user labadmin · 5 ครั้ง</p>
+      <p><b>DET-02</b> Management Deny ≥3 / 2 นาที → <b>ALERT</b> 14:50 · device 198.51.100.1 · source 10.6.0.101 · 17 packets (MGMT-SOURCES)</p>
+      <p>ตัวตรวจ: <code>g06-det</code> บน Collector อ่าน <code>/var/log/g06-network.log</code> · เวลาทุกเครื่องตรงกันด้วย NTP (<code>*~198.51.100.12</code>)</p>
+      <p><b>สิทธิ์ข้อมูล:</b> Collector เป็นของ G06 รับเฉพาะ log จาก Loopback1 ของ G06 · ไฟล์ log อ่านได้เฉพาะผู้ดูแลเครื่อง · ยังไม่ได้ทดสอบกับ Collector กลาง G04</p>
+    </div>
+  </div>
+
+  <!-- ===================== Incident ===================== -->
+  <h2 id="incident">10. Incident Record</h2>
+  <div class="card">
+    <div class="rec">
+      <p><b>INC-G06-001</b> · 11 ต.ค. 2026 ~12:15 · พบบริการ ATM ใช้งานไม่ได้ และเครื่อง ATM หลุดการดูแลระยะไกล</p>
+      <p>จาก IP 10.6.2.100 / 10.6.2.101 ไป Internet (TCP 443, UDP 53) · DNS: ส่งไป 192.0.2.42 ไม่ได้คำตอบ · Local Service: ping Gateway 10.6.2.1 ได้</p>
+      <p>หลักฐาน: Console MLS01 เต็มไปด้วย <code>%SEC-6-IPACCESSLOGP: list ATM-IN denied … 10.6.2.100 -> …(443)</code> · ตาราง MAC พบ ATM 2 การ์ดอยู่ VLAN30 ทั้งบน MLS01 และ MLS02</p>
+      <p>สาเหตุ: การ์ดแลปได้ default gateway จาก DHCP จึงแย่ง default route ของเครื่อง ทราฟฟิกออกเน็ตวิ่งเข้าแลปแล้วถูก ATM-IN ปฏิเสธ (ACL ทำงานถูก)</p>
+      <p>แก้: ถอดสายฝั่ง MLS02 (อาจารย์ให้ต่อ PC กับ MLS01 อย่างเดียว) · ตั้ง InterfaceMetric 500 ให้การ์ดแลปก่อนเสียบ · เพิ่ม route เฉพาะวงแลป · ผลหลังแก้: ATM ได้ 10.6.2.100 และทดสอบ ACL ได้ตามแบบ</p>
+      <p>แนบ Route/Log: ACL counter ATM-IN · log IPACCESSLOGP · MAC table MLS01/MLS02 · ขอทีม: ไม่ต้องขอทีมอื่น (จุดส่งมอบอยู่ในเครือข่าย G06) · สรุปสาเหตุหลังมีหลักฐานจาก log + route ของเครื่อง</p>
+    </div>
+    <div class="rec">
+      <p><b>INC-G06-002</b> · 11 ต.ค. 2026 ~14:30 · Config ของ CR-01 (ฝั่ง MLS01) ถูกวางลง SW01 โดยผิดเครื่อง (สาย Console อยู่แถวล่าง 14 แทนแถวบน 14) และถูก write memory</p>
+      <p>ผลกระทบ: ไม่มีบริการขัดข้อง (SW01 ไม่มี ip routing จึงไม่มี SVI ใหม่ทำงาน) · ตรวจพบทันทีจาก prompt <code>SW01#</code></p>
+      <p>แก้: ถอน VLAN31 / ACL / DHCP pool / Po1 / Gi1/0/11 ออก → <code>show archive config differences flash:G06-pre-cr01.cfg system:running-config</code> = <b>No changes</b> → write memory · VLAN110 และ ping R01 ปกติ</p>
+      <p>ป้องกัน: สคริปต์ส่งคำสั่งตรวจ hostname ก่อนวางทุกครั้ง · ระบุแถวแผง (บน/ล่าง) ทุกครั้งที่สั่งย้ายสาย · ขอทีม: — (ภายใน G06)</p>
+    </div>
+  </div>
+
+  <!-- ===================== Change ===================== -->
+  <h2 id="change">11. Change Record</h2>
+  <div class="card">
+    <p style="margin-top:0"><b>CR-01 เพิ่ม ATM Subnet พร้อม Application Policy</b> — VLAN31 ATM-NEW 10.6.6.0/24 · VRRP 31 (MLS01 pri 110) · DHCP · trunk Po1 · ACL ATM-NEW-IN · Before / Scope / Impact / Approval / Implementation / Verification / Rollback / Result ครบ: <a href="progress.html#cr01">แบบฟอร์ม CR-01</a> · <a href="docs/CR01-VLAN31-ATM-NEW.txt" download>สคริปต์</a></p>
+    <p class="note">ช่อง Approval รอผู้สอนลงชื่อ: <span class="fill">&nbsp;</span> เวลา <span class="fill" style="min-width:80px">&nbsp;</span></p>
+  </div>
+
+  <!-- ===================== Contribution ===================== -->
+  <h2 id="contrib">12. Contribution</h2>
+  <div class="card table-wrap">
+    <table>
+      <thead><tr><th>สมาชิก</th><th>เครื่อง / งานที่รับผิดชอบ</th><th>สัดส่วน</th></tr></thead>
+      <tbody>
+        <tr><td><span class="fill">&nbsp;</span></td><td>MLS01 (DHCP, VRRP หลัก, ACL)</td><td><span class="fill" style="min-width:50px">&nbsp;</span></td></tr>
+        <tr><td><span class="fill">&nbsp;</span></td><td>MLS02 (VRRP สำรอง, ACL)</td><td><span class="fill" style="min-width:50px">&nbsp;</span></td></tr>
+        <tr><td><span class="fill">&nbsp;</span></td><td>CE01 (WAN หลัก, iBGP, Log)</td><td><span class="fill" style="min-width:50px">&nbsp;</span></td></tr>
+        <tr><td><span class="fill">&nbsp;</span></td><td>CE02 (WAN สำรอง, iBGP, Log)</td><td><span class="fill" style="min-width:50px">&nbsp;</span></td></tr>
+        <tr><td><span class="fill">&nbsp;</span></td><td>R01 + SW01 (สาขา)</td><td><span class="fill" style="min-width:50px">&nbsp;</span></td></tr>
+        <tr><td><span class="fill">&nbsp;</span></td><td>Server / PC / เอกสาร / Test Register</td><td><span class="fill" style="min-width:50px">&nbsp;</span></td></tr>
+      </tbody>
+    </table>
+    <p class="note">ให้ทีมกรอกชื่อและสัดส่วนเอง</p>
+  </div>
+
+  <!-- ===================== Known Issues ===================== -->
+  <h2 id="known">13. Known Issues</h2>
+  <div class="card">
+    <ul>
+      <li><b>ไม่มี ISP G01/G02 จริง</b> → WAN ทั้ง 3 จุดจำลองด้วย Loopback101 (IP ตามทะเบียน + 192.0.2.10 เป็นอินเทอร์เน็ต) · eBGP / Exact Prefix Filter / GRE T1–T2 / Private Route สาขา ผ่านแค่ใน EVE-NG · สคริปต์ U3–U5 พร้อมวาง · ต้องรัน <code>SIM-OFF</code> ก่อนต่อ ISP จริง</li>
+      <li><b>NAT (Step 07B)</b>: config ลงแล้ว แต่ IOS-XE ทิ้งแพ็กเก็ตที่ route เข้า Loopback ก่อนถึง NAT จึงพิสูจน์การแปลงได้เมื่อมี WAN จริงเท่านั้น</li>
+      <li><b>C9200L ไม่มี HSRP</b> → ใช้ VRRPv3 (ชุด HSRP สำหรับ C9300 เก็บไว้และผ่าน Rack 7 ต.ค.)</li>
+      <li><b>Collector / NTP</b> อยู่บน Server DMZ ชั่วคราวแทน G04 (ในระบบจริงไม่ควรวางงานภายในใน DMZ)</li>
+      <li><b>Hostname บนเครื่อง</b> ยังเป็นชื่อสั้น (CE01 …) ส่วนผังใช้ชื่อตามใบงาน (G06-HQ-CE01 …)</li>
+      <li><b>Branch Single WAN</b> เป็นจุดเดียวตามใบงาน: WAN ขาด → ไม่มีทางออก แต่บริการในสาขาใช้ได้ (ทดสอบแล้ว)</li>
+      <li>ตัวอย่างใบงานขัดกันเอง: DMZ 10.6.5.0/24 vs 198.51.100.8/29 (เลือก /29) · Branch LAN /24 vs /20 (เลือก /20 ตามทะเบียน)</li>
+    </ul>
+  </div>
+
+  <!-- ===================== Packet Flow ===================== -->
+  <h2 id="flow">15. Packet Flow + Design Decision (เตรียมตอบรายบุคคล)</h2>
+  <div class="card">
+    <h3 style="margin-top:0">ATM → Transaction App (10.6.2.100 → 10.6.1.10 TCP 8443)</h3>
+    <ol>
+      <li>ATM ปลายทางคนละวง → ส่งไป Gateway 10.6.2.1 (VIP VRRP 30 = MLS01 MASTER) · ARP ได้ MAC เสมือน 0000.5e00.011e</li>
+      <li>MLS01 รับเข้า Vlan30 → ตรวจ <b>ATM-IN</b> ขาเข้า: บรรทัด 40 permit tcp → host 10.6.1.10 eq 8443 ✅</li>
+      <li>Route ภายใน MLS (connected Vlan20) → ส่งออก Gi1/0/6 → App ตอบกลับ</li>
+      <li><b>Return Path</b>: App → GW 10.6.1.1 (MLS01) → Vlan30 → ATM · ขาออก Vlan30 ไม่มี ACL จึงไม่ถูกตัด · ไม่มี NAT (ภายในองค์กร)</li>
+      <li>ถ้า ATM ขอ 8080 / Teller / Admin / DB → ตกบรรทัด 50–90 → MLS ตอบ ICMP unreachable + log</li>
+    </ol>
+    <h3>DNS Request แยกจาก Application Flow</h3>
+    <p>Client ถามชื่อก่อน: UDP/TCP 53 ไป 192.0.2.10 (ATM-IN บรรทัด 10/20 อนุญาตเฉพาะ DNS) → ได้ IP แล้วจึงเปิด Flow บริการจริงแยกอีกเส้น · DNS ตอบได้ ≠ บริการใช้ได้ ต้องตรวจทั้งสองทาง (ตอนนี้ DNS จริงอยู่ที่ G01/G03 ซึ่งยังไม่มี)</p>
+    <h3>Teller → Internet / Partner (เมื่อมี ISP)</h3>
+    <p>Teller → MLS01 → default O*E2 จาก CE01 (metric 1) → CE01 eBGP default (LP 200) → G01 · ที่ CE01 ทำ <b>PAT</b> ด้วย Loopback1 198.51.100.1 (NAT-ELIGIBLE: ไม่ NAT เมื่อปลายทางเป็น 10.6.0.0/16) · Return กลับเข้า CE01 ตัวเดิมเพราะ Public /28 ประกาศจาก CE01 · G01 ขาด → default ย้ายไป CE02 (ทดสอบแบบจำลองแล้ว 40/40) — Connection เดิมที่ผ่าน NAT ของ CE01 อาจหลุด ต้องเปิดใหม่</p>
+    <h3>HQ ↔ Branch (เมื่อมี ISP)</h3>
+    <p>HQ → CE01 (static 10.6.16.0/20 → Tunnel1, redistribute เข้า OSPF metric 20) → GRE ห่อด้วย 198.51.100.1 → 198.51.100.161 ผ่าน WAN → R01 · Tunnel1 ล่ม → CE02/Tunnel2 (metric 100) · Branch WAN ขาด = ทุก Tunnel ขาด (Single WAN)</p>
+    <h3>Design Decision</h3>
+    <ul>
+      <li><b>VRRPv3 แทน HSRP</b> เพราะ C9200L ไม่รองรับ HSRP · priority 110/100 + preempt ให้ MLS01 เป็นหลักทุก VLAN</li>
+      <li><b>DMZ 198.51.100.8/29</b> (Public) แยกจาก Private · Server DMZ ไม่ต้อง NAT · Database รับเฉพาะ App</li>
+      <li><b>ACL ขาเข้า SVI ของ ATM</b> (กรองใกล้ต้นทาง) + <b>ACL ขาออก Vlan40</b> ปกป้อง Database จากทุกวง</li>
+      <li><b>เพิ่มบรรทัด DHCP / VRRP / ICMP</b> ใน ATM-IN เพราะ deny any ท้าย ACL จะตัด control-plane ที่ Gateway ต้องใช้</li>
+      <li><b>Default จาก CE01 metric 1 / CE02 metric 50</b> + local-pref 200/100 ใน BGP → ทางหลัก/สำรองชัดเจนทั้ง OSPF และ BGP</li>
+    </ul>
+  </div>
+
+  <!-- ===================== Checklist ===================== -->
+  <h2 id="checklist">14. เทียบเกณฑ์ตรวจ (ExamLab Scoring Checklist · G06_NBK)</h2>
+  <div class="card table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>เกณฑ์</th><th class="n">เต็ม</th><th>สถานะ</th><th>หลักฐาน</th></tr></thead>
+      <tbody>
+        <tr><td>D01</td><td>Diagram และ Interface Map ตรงระบบจริง</td><td class="n">—</td><td><span class="st ok">พร้อม</span></td><td><a href="#asbuilt">As-built</a> · <a href="#ifmap">Interface Registry</a> · CDP หน้า 6</td></tr>
+        <tr><td>D02</td><td>IP/ASN Registry ไม่ซ้ำและอยู่ใน Block</td><td class="n">3</td><td><span class="st ok">พร้อม</span></td><td><a href="#ipreg">Registry</a></td></tr>
+        <tr><td>D03</td><td>Requirement / Partner / Policy ครบ</td><td class="n">3</td><td><span class="st part">Partner รอ ISP</span></td><td><a href="#security">Flow Matrix</a></td></tr>
+        <tr><td>L01</td><td>VLAN / Trunk / Port-channel ถูกต้อง</td><td class="n">4</td><td><span class="st ok">ผ่าน</span></td><td><a href="examples.html#page-10">หน้า 10</a></td></tr>
+        <tr><td>L02</td><td>Gateway / OSPF และ Private Route ถูกต้อง</td><td class="n">4</td><td><span class="st part">Gateway+OSPF ผ่าน · Private Route รอ Tunnel</span></td><td><a href="examples.html#page-13">หน้า 13</a></td></tr>
+        <tr><td>L03</td><td>Management ภายในและ Local Service ใช้งานได้</td><td class="n">2</td><td><span class="st ok">ผ่าน</span></td><td>TC04 · DMZ · App · DB · Server สาขา</td></tr>
+        <tr><td>B01</td><td>eBGP และ Prefix ที่อนุมัติทำงาน</td><td class="n">5</td><td><span class="st part">จำลอง (Loopback) · EVE ผ่าน</span></td><td><a href="examples.html#page-14">หน้า 14</a></td></tr>
+        <tr><td>B02</td><td>Exact Prefix Filter และป้องกัน Transit ผิดสิทธิ์</td><td class="n">5</td><td><span class="st part">config พร้อม · EVE ผ่าน</span></td><td><a href="#routing">Routing Policy</a></td></tr>
+        <tr><td>…</td><td>ข้ออื่นในชีต (ถึง DET-02 Management Deny)</td><td class="n"></td><td>—</td><td><a href="#log">Log/DET</a> · <a href="#failover">Failover</a> · <a href="#change">CR</a></td></tr>
+      </tbody>
+    </table>
+    <p class="note">เกณฑ์จากไฟล์ ExamLab_Scoring_Checklist ชีต G06_NBK (เห็นถึงแถว 14) · ส่วนที่เหลือของชีตยังไม่ได้เทียบ</p>
+  </div>
+
+  <p class="note" style="margin-top:24px">หน้านี้ไม่มีรหัสผ่านหรือ hash · ตัวเลขและเวลามาจาก log ทดสอบของทีม · หลักฐานเป็นภาพอยู่ใต้หน้าใบงานที่ <a href="examples.html">examples.html</a></p>
+</main>
+
+<script src="data/devices.js?v=20261011-submit1"></script>
+<script>
+(() => {
+  const D = window.G06_DEVICES, Z = window.G06_ZONES, set = "vrrp";
+  const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const pick = (v) => (v && typeof v === "object" && !Array.isArray(v) ? v[set] : v);
+  const ios = { CE01: "17.15.03a", CE02: "17.15.03a", R01: "17.15.03a", MLS01: "17.15.3", MLS02: "17.15.3", SW01: "17.15.3" };
+  document.getElementById("devRows").innerHTML = Object.entries(D).map(([id, d]) =>
+    "<tr><td>" + esc(d.hostname || id) + "</td><td class=\"mono\">" + esc(id) + "</td><td>" + esc(pick(d.model)) + " · " + ios[id] + "</td><td class=\"mono\">" + esc(d.loopback) + "</td><td>" + esc(String(pick(d.console)).split(" ")[0]) + "</td><td>" + esc(d.role) + "</td></tr>").join("");
+  document.getElementById("ifRows").innerHTML = Object.entries(D).flatMap(([id, d]) => d.cables[set].map((r) =>
+    "<tr><td>" + esc(id) + "</td><td class=\"mono\">" + esc(r[0]) + "</td><td>" + esc(r[1]) + "</td><td>" + esc(r[2]) + "</td><td>" + esc(r[3]) + "</td><td class=\"mono\">" + esc(r[4]) + "</td></tr>")).join("");
+  document.getElementById("zoneRows").innerHTML = Z.map((z) => "<tr>" + z.map((v, i) => "<td" + (i === 2 || i === 3 ? " class=\"mono\"" : "") + ">" + esc(v) + "</td>").join("") + "</tr>").join("");
+  const theme = document.getElementById("themeToggle");
+  const paint = () => { const dark = document.documentElement.dataset.theme === "dark"; theme.textContent = dark ? "☀ Light" : "☾ Dark"; };
+  theme.addEventListener("click", () => { const dark = document.documentElement.dataset.theme !== "dark"; document.documentElement.dataset.theme = dark ? "dark" : "light"; try { localStorage.setItem("g06-config-site-theme", dark ? "dark" : "light"); } catch (e) {} paint(); });
+  paint();
+})();
+</script>
+</body>
+</html>
