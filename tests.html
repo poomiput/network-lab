@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="th" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>G06 ทดสอบต่อหน้า TA</title>
+<meta name="description" content="G06 NBK — ลำดับทดสอบด้วยมือให้ TA ดู: พิมพ์อะไร ที่เครื่องไหน และต้องเห็นอะไร">
+<script>
+try {
+  if (localStorage.getItem("g06-config-site-theme") === "dark") document.documentElement.dataset.theme = "dark";
+} catch (e) {}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Thai:wght@400;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="style.css?v=20261011-tests1">
+<style>
+  .pg { max-width: 1080px; margin: 0 auto; padding: 18px 20px 40px; }
+  .pg h2 { font-size: 19px; margin: 30px 0 10px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; margin: 0 0 14px; }
+  .pg code { background: var(--code-bg); padding: 1px 5px; border-radius: 5px; font-size: 12.5px; }
+  .navlink { color: var(--accent); text-decoration: none; border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px; background: var(--panel); }
+  .navlink:hover { border-color: var(--accent); }
+  .st { display: inline-block; white-space: nowrap; font-size: 12px; padding: 1px 8px; border-radius: 999px; font-weight: 600; }
+  .st.ok { background: var(--ok-bg); color: var(--ok-ink); }
+  .st.part { background: var(--warn-bg); color: var(--warn-ink); }
+  .st.no { background: var(--code-bg); color: var(--muted); border: 1px solid var(--line); }
+  .st.ref { background: var(--code-bg); color: var(--accent); border: 1px solid var(--line); }
+  .t-head { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; }
+  .t-head h3 { margin: 0; font-size: 16.5px; }
+  .t-num { font-weight: 600; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .why { color: var(--muted); font-size: 13.5px; margin: 6px 0 0; }
+  .where { font-size: 13.5px; margin: 8px 0 0; }
+  .steps { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 10px; }
+  .step { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .step-h { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 12px; background: var(--code-bg); font-size: 13.5px; }
+  .step-h b { font-weight: 600; }
+  .step pre { margin: 0; padding: 9px 12px; overflow-x: auto; font-size: 12.5px; line-height: 1.55; }
+  .see { border-top: 1px dashed var(--line); padding: 8px 12px; font-size: 13.5px; }
+  .see b { color: var(--ok-ink); }
+  .see.bad b { color: #b42318; }
+  .copy { flex: none; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 8px; padding: 4px 11px; font: inherit; font-size: 12.5px; cursor: pointer; }
+  .copy:hover { border-color: var(--accent); }
+  .copy.done { background: var(--ok-bg); color: var(--ok-ink); border-color: transparent; }
+  .note { color: var(--muted); font-size: 13px; }
+  .prep td:first-child { white-space: nowrap; font-weight: 600; }
+  .warnbox { background: var(--warn-bg); color: var(--warn-ink); border-radius: 10px; padding: 10px 12px; font-size: 13.5px; margin: 10px 0 0; }
+  .warnbox p { margin: 3px 0; }
+  .toc { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; }
+  .toc a { font-size: 13px; text-decoration: none; color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; background: var(--panel); }
+  .toc a:hover { border-color: var(--accent); }
+  @media print { .copy, .top-controls, .toc { display: none; } .card, .step { break-inside: avoid; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <h1>G06 NBK · ทดสอบต่อหน้า TA</h1>
+    <p class="sub">พิมพ์อะไร ที่เครื่องไหน ต้องเห็นอะไร · เรียงตามลำดับเดโม · อัปเดต 11 ต.ค. 2026</p>
+  </div>
+  <div class="top-controls">
+    <a class="navlink" href="index.html">← Config Map</a>
+    <a class="navlink" href="progress.html">ความคืบหน้า</a>
+    <button type="button" class="theme-toggle" id="themeToggle" aria-label="เปลี่ยนเป็น Dark theme">☾ Dark</button>
+  </div>
+</header>
+
+<main class="pg">
+  <section class="card" aria-label="เตรียมก่อนเริ่ม">
+    <h2 style="margin-top:0">เตรียมก่อนเริ่ม (ชุด C9200L · VRRP)</h2>
+    <div class="table-wrap">
+      <table class="prep">
+        <thead><tr><th>เครื่อง</th><th>เสียบที่แผง</th><th>IP</th><th>ใช้ทดสอบ</th></tr></thead>
+        <tbody>
+          <tr><td>PC Teller</td><td>แถวบน ช่อง 19 (MLS01 Gi1/0/5, VLAN10)</td><td class="mono">DHCP 10.6.0.100+</td><td>ข้อ 3, 4, 5, 7, 8</td></tr>
+          <tr><td>PC ATM</td><td>แถวบน ช่อง 21 (Gi1/0/7, VLAN30)</td><td class="mono">DHCP 10.6.2.100+</td><td>ข้อ 6</td></tr>
+          <tr><td>PC Admin</td><td>แถวบน ช่อง 23 (Gi1/0/9, VLAN50)</td><td class="mono">10.6.4.10/24</td><td>ข้อ 5</td></tr>
+          <tr><td>Server Ubuntu</td><td>แถวบน ช่อง 24 (Gi1/0/10, VLAN60 DMZ)</td><td class="mono">198.51.100.12/29</td><td>ข้อ 7</td></tr>
+          <tr><td>Console</td><td>แถวบน 1 = CE01 · บน 14 = MLS01 · ล่าง 2 = MLS02 · บน 7 = R01</td><td>—</td><td>ข้อ 1, 2, 6, 8, 9</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="warnbox">
+      <p><b>PC ต่อแค่ MLS01</b> (อาจารย์กำหนด) · การ์ดแลปของ PC ต้องตั้ง metric 500 ก่อนเสียบ ไม่งั้นเน็ต/remote หลุด</p>
+      <p>คำสั่ง <code>show</code> และ <code>ping</code> บนอุปกรณ์ทำที่ <code>&gt;</code> ได้ · ข้อ 8 (failover) ต้อง <code>enable</code> — คนในทีมพิมพ์รหัสเอง</p>
+      <p>ถ้าใช้ชุด C9300 · HSRP: เปลี่ยน <code>show vrrp brief</code> เป็น <code>show standby brief</code> (Active/Standby แทน MASTER/BACKUP) ที่เหลือเหมือนกัน</p>
+    </div>
+    <nav class="toc" id="toc" aria-label="ไปยังข้อทดสอบ"></nav>
+  </section>
+
+  <div id="tests"></div>
+
+  <h2>ยังทดสอบไม่ได้ (รอ ISP G01 / G02)</h2>
+  <div class="card table-wrap">
+    <table>
+      <thead><tr><th>Test</th><th>เรื่อง</th><th>ต้องมีก่อน</th></tr></thead>
+      <tbody>
+        <tr><td>TC02</td><td>eBGP + Exact Prefix Filter (รับแค่ Default ส่งแค่ /28)</td><td>สาย WAN ไป G01/G02 + เลือกพอร์ต WAN ของ CE</td></tr>
+        <tr><td>TC03</td><td>บริการข้ามประเทศ / Clearing G08</td><td>ISP + กลุ่มคู่ค้า</td></tr>
+        <tr><td>TC05</td><td>ตัด WAN หลัก → ใช้ WAN สำรอง</td><td>WAN ทั้งสองเส้น</td></tr>
+        <tr><td>TC06–07</td><td>Syslog / DET-01/02 / สิทธิ์ข้อมูล</td><td>Collector G04 192.0.2.58 ผ่าน ISP</td></tr>
+        <tr><td>05A/B · 07B</td><td>GRE T1/T2 ไปสาขา · NAT</td><td>WAN ก่อน (Tunnel endpoint ต้องถึงกันผ่าน ISP)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">ไม่มีรหัสผ่านในหน้านี้ · ผล “ผ่าน” อ้างอิงหลักฐานการทดสอบของทีม · ตอนเดโมให้กรอกผลจริงลง Test Register ไม่ใช้ผลในหน้านี้แทน</p>
+</main>
+
+<script>
+(() => {
+  // [title, worksheet refs, status [cls, text], why, where, steps[[label, commands, expect, bad?]]]
+  const TESTS = [
+    ["Core: OSPF + iBGP", ["TC01", "Step 03", "Step 04B"], ["ok", "ผ่าน 11 ต.ค."],
+      "CE01 เห็น MLS ทั้งสองตัวผ่าน OSPF และคุยกับ CE02 ด้วย iBGP ผ่าน Loopback0",
+      "อุปกรณ์ CE01 (Console แถวบน 1) — ทำที่ > ได้",
+      [["ดูเพื่อนบ้าน OSPF", "show ip ospf neighbor", "10.6.255.11 และ 10.6.255.12 เป็น FULL"],
+       ["ดู iBGP", "show ip bgp summary", "แถว 10.6.255.2 คอลัมน์สุดท้ายเป็นตัวเลข (ไม่ใช่ Idle/Active) = Established"],
+       ["ดูเส้นทางเข้า VLAN", "show ip route ospf", "เห็น 10.6.0.0/24 … 10.6.4.0/24 และ 198.51.100.8/29 มี 2 ทาง (ผ่าน MLS01 และ MLS02)"]]],
+    ["LACP + Gateway สำรอง (VRRP)", ["Step 02A"], ["ok", "ผ่าน 11 ต.ค."],
+      "สาย MLS↔MLS 2 เส้นรวมเป็น Po1 · MLS01 เป็น Gateway หลักทุก VLAN, MLS02 รอรับแทน",
+      "MLS01 (Console แถวบน 14) แล้วสลับไป MLS02 (แถวล่าง 2)",
+      [["MLS01: ดู Po1", "show etherchannel summary | begin Group", "Po1(SU) และ Gi1/0/3(P) Gi1/0/4(P)"],
+       ["MLS01: ดู VRRP", "show vrrp brief", "ทุก VLAN 10–60 = MASTER, Pri 110"],
+       ["MLS02: ดู VRRP", "show vrrp brief", "ทุก VLAN = BACKUP, Master addr = 10.6.x.2 / 198.51.100.9"]]],
+    ["DHCP ให้ Teller", ["Step 02B"], ["ok", "ผ่าน 11 ต.ค."],
+      "MLS01 แจก IP ให้ VLAN10/30 โดยเว้น .1–.99 ไว้ให้ Gateway และเครื่อง static",
+      "PC Teller (Command Prompt) และ MLS01",
+      [["PC Teller", "ipconfig", "การ์ดแลปได้ 10.6.0.100 ขึ้นไป · Default Gateway 10.6.0.1"],
+       ["MLS01", "show ip dhcp binding", "เห็น IP ของ Teller (และ ATM 10.6.2.x) พร้อม MAC"]]],
+    ["ping ข้าม VLAN และ Loopback", ["TC01"], ["ok", "ผ่าน 11 ต.ค."],
+      "Gateway + OSPF ทำงาน: Teller ไปถึงทุกวงที่อนุญาต",
+      "PC Teller (Command Prompt)",
+      [["Gateway ตัวเอง", "ping 10.6.0.1", "Reply 4/4"],
+       ["ไป Admin (VLAN50)", "ping 10.6.4.10", "Reply 4/4"],
+       ["ไป CE01 Loopback0", "ping 10.6.255.1", "Reply 4/4"],
+       ["ไป Server DMZ", "ping 198.51.100.12", "Reply 4/4"]]],
+    ["SSH: Admin เข้าได้ Teller ถูกปฏิเสธ", ["TC04", "Step 01"], ["ok", "ผ่าน 8 + 11 ต.ค."],
+      "ACL MGMT-SOURCES ที่ line vty ยอมแค่วง Management 10.6.4.0/24",
+      "PC Admin และ PC Teller (Command Prompt) แล้วดู counter ที่ CE01",
+      [["PC Admin", "ssh labadmin@10.6.255.1", "ขึ้นให้ใส่ password → ใส่รหัสทีม → ได้ prompt ของ CE01 (พิมพ์ exit ออก)"],
+       ["PC Teller", "ssh labadmin@10.6.255.1", "Connection refused / ถูกตัด — ไม่มีให้ใส่ password", true],
+       ["CE01: ดู counter", "show access-lists MGMT-SOURCES", "10 permit … (มี matches) และ 20 deny any log (มี matches)"]]],
+    ["ATM ถูกจำกัดด้วย ACL ATM-IN", ["Step 06"], ["part", "ผ่าน 11 ต.ค. (ฝั่งบล็อก)"],
+      "ATM ห้ามเข้า Teller / Management / Database / DMZ แต่ยังได้ DHCP และ ping Gateway ได้",
+      "PC ATM (Command Prompt) และ MLS01",
+      [["Gateway ตัวเอง (ต้องได้)", "ping 10.6.2.1", "Reply 4/4"],
+       ["ไป Teller (ต้องไม่ได้)", "ping 10.6.0.101", "Reply from 10.6.2.2: Destination net unreachable = MLS01 บล็อก", true],
+       ["ไป Admin (ต้องไม่ได้)", "ping 10.6.4.10", "Destination net unreachable / timed out", true],
+       ["ไปเว็บ DMZ (ต้องไม่ได้)", "curl -m 5 http://198.51.100.12:8080/", "เชื่อมต่อไม่ได้ / timeout (ATM ได้แค่ App 10.6.1.10:8443)", true],
+       ["MLS01: ดู counter", "show access-lists ATM-IN", "บรรทัด 50 / 60 / 90 มี matches เพิ่ม · บรรทัด 5 (DHCP) มี matches"]]],
+    ["เว็บ DMZ บน Ubuntu (nginx)", ["Step 07"], ["ok", "ผ่าน 11 ต.ค."],
+      "Server ใน DMZ 198.51.100.12 ให้บริการ HTTP 8080 · Teller เปิดได้โดยไม่ผ่าน NAT",
+      "PC Teller (เบราว์เซอร์) และ Server Ubuntu (Terminal)",
+      [["PC Teller: เปิดในเบราว์เซอร์", "http://198.51.100.12:8080/", "หน้าเว็บขึ้น G06 NBK application OK"],
+       ["Server: IP การ์ดแลป", "ip -4 addr show ens37", "inet 198.51.100.12/29"],
+       ["Server: nginx ฟังพอร์ต", "ss -lnt | grep 8080", "LISTEN … 198.51.100.12:8080"],
+       ["Server: ดูว่าใครเข้า", "sudo tail -3 /var/log/nginx/access.log", "IP ต้นทาง = 10.6.0.10x ของ Teller (ไม่ถูก NAT) · สถานะ 200"]]],
+    ["Gateway failover (ปิด MLS01 ชั่วคราว)", ["Step 09", "TC05 บางส่วน", "TC08"], ["ok", "ผ่าน 8 ต.ค. (79/80)"],
+      "ปิด Vlan10 บน MLS01 → MLS02 รับ VIP 10.6.0.1 แทน → เปิดคืน MLS01 กลับเป็นหลัก (preempt) · ห้าม write memory ระหว่างทดสอบ",
+      "PC Teller + MLS01 (ต้อง enable) + MLS02",
+      [["1. PC Teller: ping ค้างไว้", "ping -t 10.6.255.1", "Reply ต่อเนื่อง (ปล่อยไว้)"],
+       ["2. MLS01: ปิด Gateway VLAN10", "configure terminal\ninterface Vlan10\n shutdown\nend", "Teller หลุด 1–3 ครั้งแล้วกลับมา Reply"],
+       ["3. MLS02: ดูว่ารับแทน", "show vrrp brief | include Vl10", "Vl10 = MASTER"],
+       ["4. MLS01: เปิดคืน", "configure terminal\ninterface Vlan10\n no shutdown\nend", "ไม่กี่วินาที MLS01 Vl10 กลับเป็น MASTER (show vrrp brief)"],
+       ["5. PC Teller", "Ctrl+C", "ดูสรุป Lost เท่าไร (8 ต.ค. ได้ 79/80) → คืนสภาพครบ = TC08"]]],
+    ["สาขา: R01 ↔ SW01", ["TC01 สาขา"], ["ok", "ผ่าน 11 ต.ค."],
+      "Gateway สาขา 10.6.16.1/20 คุยกับสวิตช์สาขา VLAN110",
+      "R01 (Console แถวบน 7)",
+      [["ดูสาย", "show cdp neighbors", "เห็น SW01 ที่ Gig 0/0/0 → Gig 1/0/1"],
+       ["ping สวิตช์สาขา", "ping 10.6.16.2", "!!!!! (5/5)"]]],
+  ];
+  const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  let html = "", toc = "", id = 0;
+  TESTS.forEach(([title, refs, status, why, where, steps], i) => {
+    const anchor = "t" + (i + 1);
+    toc += '<a href="#' + anchor + '">' + (i + 1) + ". " + esc(title) + "</a>";
+    html += '<section class="card" id="' + anchor + '"><div class="t-head"><span class="t-num">' + (i + 1) + '.</span><h3>' + esc(title) + "</h3>" +
+      refs.map((r) => '<span class="st ref">' + esc(r) + "</span>").join("") + '<span class="st ' + status[0] + '">' + esc(status[1]) + "</span></div>" +
+      '<p class="why">' + esc(why) + '</p><p class="where"><b>ทำที่:</b> ' + esc(where) + '</p><ol class="steps">' +
+      steps.map(([label, cmd, expect, bad]) => '<li class="step"><div class="step-h"><b>' + esc(label) + '</b><button type="button" class="copy" data-copy="' + (id++) + '">Copy</button></div><pre>' + esc(cmd) + '</pre><div class="see' + (bad ? " bad" : "") + '"><b>' + (bad ? "ต้องไม่ผ่าน:" : "ต้องเห็น:") + "</b> " + esc(expect) + "</div></li>").join("") +
+      "</ol></section>";
+  });
+  document.getElementById("tests").innerHTML = html;
+  document.getElementById("toc").innerHTML = toc;
+  const cmds = TESTS.flatMap((t) => t[5].map((s) => s[1]));
+  const fallback = (text) => {
+    const ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select(); let ok = false; try { ok = document.execCommand("copy"); } catch (e) {} ta.remove(); return ok;
+  };
+  document.querySelectorAll("[data-copy]").forEach((btn) => btn.addEventListener("click", () => {
+    const text = cmds[Number(btn.dataset.copy)];
+    const done = () => { btn.textContent = "Copied ✓"; btn.classList.add("done"); setTimeout(() => { btn.textContent = "Copy"; btn.classList.remove("done"); }, 1500); };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, () => fallback(text) && done());
+    else if (fallback(text)) done();
+  }));
+  const theme = document.getElementById("themeToggle");
+  const paint = () => { const dark = document.documentElement.dataset.theme === "dark"; theme.textContent = dark ? "☀ Light" : "☾ Dark"; theme.setAttribute("aria-label", dark ? "เปลี่ยนเป็น Light theme" : "เปลี่ยนเป็น Dark theme"); };
+  theme.addEventListener("click", () => {
+    const dark = document.documentElement.dataset.theme !== "dark";
+    document.documentElement.dataset.theme = dark ? "dark" : "light";
+    try { localStorage.setItem("g06-config-site-theme", dark ? "dark" : "light"); } catch (e) {}
+    paint();
+  });
+  paint();
+})();
+</script>
+</body>
+</html>
