@@ -21,3 +21,13 @@
 .g06-shot figcaption { margin: 5px 2px 0; color: #5b6577; font-size: 12px; }
 .g06-raw summary { cursor: pointer; color: #1d4ed8; font-size: 12px; margin: 2px 2px 0; }
 .g06-raw pre { margin: 4px 0 0; padding: 8px 10px; overflow-x: auto; font-size: 12px; background: #f1f4f8; border-radius: 6px; }
+.g06-summary { margin: 0 0 30px; padding: 18px 20px; background: #fff; border-top: 4px solid #1d4ed8; box-shadow: 0 1px 3px #26344512; font-size: 13.5px; color: #1b2430; }
+.g06-sum-top { display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; align-items: center; }
+.g06-big { font-size: 48px; font-weight: 600; line-height: 1; color: #1d4ed8; font-variant-numeric: tabular-nums; }
+.g06-sum-top b { font-size: 16px; } .g06-sum-top p { margin: 4px 0 0; color: #536173; font-size: 12.5px; }
+.g06-rubric { width: 100%; margin-top: 14px; border-collapse: collapse; font-size: 13px; }
+.g06-rubric th, .g06-rubric td { padding: 6px 8px; border-bottom: 1px solid #e3e8ee; text-align: left; vertical-align: top; }
+.g06-rubric th { color: #5b6577; font-weight: 600; font-size: 12px; }
+.g06-rubric td:nth-child(2), .g06-rubric td:nth-child(3), .g06-rubric th:nth-child(2), .g06-rubric th:nth-child(3) { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.g06-rubric .g06-total td { font-weight: 600; border-bottom: 0; }
+@media (max-width: 500px) { .g06-sum-top { grid-template-columns: 1fr; } .g06-big { font-size: 38px; } }

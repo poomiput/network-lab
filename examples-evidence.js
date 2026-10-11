@@ -189,4 +189,32 @@
     const sub = el("div", "g06-submit"); sub.append(el("b", null, "ต้องแคป/ส่ง: "), document.createTextNode(d.submit.join(" · "))); box.append(sub);
     page.querySelector(".paper").after(box);
   });
+
+  // สรุปรวมด้านบนเอกสาร: เฉลี่ย % ของหน้าที่ต้องส่ง + ประเมินตามหัวข้อคะแนนกลุ่ม (ข้อ 6 ของใบงาน)
+  const scored = Object.values(E).filter((d) => d.pct != null);
+  const avg = Math.round(scored.reduce((a, d) => a + d.pct, 0) / scored.length);
+  const RUBRIC = [
+    ["Design / Registry", 10, 9, "ทะเบียน IP/VLAN/Interface ครบ · เหลือจัดรูป As-built"],
+    ["LAN / Underlay", 10, 10, "VLAN · LACP · VRRP/HSRP · DHCP · OSPF ผ่าน Rack"],
+    ["BGP / WAN", 15, 5, "iBGP ผ่าน · ISP จำลอง + failover ผ่าน · eBGP/GRE จริงรอ ISP"],
+    ["Security Policy", 10, 8, "ATM-IN · MGMT-SOURCES · ATM-NEW-IN ผ่าน · DATABASE-OUT รอ"],
+    ["Cyber Security", 10, 7, "Log + NTP + DET-01/02 กับ Collector จำลอง · G04 จริงรอ"],
+    ["Recovery / Incident / Change", 10, 7, "Failover · CR-01 · Backup ผ่าน · Restore + Incident record รอ"],
+    ["Evidence / Documentation", 5, 4, "หลักฐานทุกหน้า · Test Register ฉบับส่งรอกรอก"],
+  ];
+  const got = RUBRIC.reduce((a, r) => a + r[2], 0), full = RUBRIC.reduce((a, r) => a + r[1], 0);
+  const sum = el("section", "g06-summary"); sum.setAttribute("aria-label", "สรุปความคืบหน้าของสิ่งที่ต้องส่ง");
+  const top = el("div", "g06-sum-top");
+  top.append(el("div", "g06-big", avg + "%"));
+  const txt = el("div");
+  txt.append(el("b", null, "ทำแล้ว " + avg + "% ของสิ่งที่ใบงานให้ส่ง"),
+    el("p", null, "เฉลี่ยจาก " + scored.length + " หน้าที่มีงาน (ไม่นับหน้า 1 และ 25 ที่เป็นกติกา/อ้างอิง) · ประเมินตามหัวข้อคะแนนกลุ่ม ≈ " + got + " / " + full + " (" + Math.round(got / full * 100) + "%) · ตัวเลขทีมประเมินเอง ไม่ใช่คะแนนจากผู้สอน · อัปเดต 11 ต.ค. 2026"));
+  top.append(txt); sum.append(top);
+  const tbl = el("table", "g06-rubric");
+  const head = el("tr"); ["หัวข้อคะแนน (ข้อ 6)", "เต็ม", "ประเมิน", "สถานะ"].forEach((h) => head.append(el("th", null, h)));
+  tbl.append(head);
+  RUBRIC.forEach(([n, f, g, note]) => { const tr = el("tr"); tr.append(el("td", null, n), el("td", null, String(f)), el("td", null, String(g)), el("td", null, note)); tbl.append(tr); });
+  const tot = el("tr", "g06-total"); tot.append(el("td", null, "รวมคะแนนกลุ่ม"), el("td", null, String(full)), el("td", null, String(got)), el("td", null, "ที่หายส่วนใหญ่ = BGP/WAN รอ ISP จริง")); tbl.append(tot);
+  sum.append(tbl);
+  const doc = document.getElementById("exam-document"); if (doc) doc.prepend(sum);
 })();
