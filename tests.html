@@ -56,7 +56,7 @@ try {
 <header class="top">
   <div class="brand">
     <h1>G06 NBK · ทดสอบต่อหน้า TA</h1>
-    <p class="sub">พิมพ์อะไร ที่เครื่องไหน ต้องเห็นอะไร · เรียงตามลำดับเดโม · อัปเดต 11 ต.ค. 2026 (14:30)</p>
+    <p class="sub">พิมพ์อะไร ที่เครื่องไหน ต้องเห็นอะไร · เรียงตามลำดับเดโม · อัปเดต 11 ต.ค. 2026 (17:45)</p>
   </div>
   <div class="top-controls">
     <a class="navlink" href="index.html">← Config Map</a>
@@ -185,14 +185,15 @@ try {
        ["ดูทาง", "traceroute 192.0.2.10 numeric", "hop 1 = 10.6.16.1 (R01)"]]],
     ["Change Request: VLAN31 ATM-NEW", ["Step 10", "CR-01"], ["ok", "ผ่าน 11 ต.ค."],
       "ATM วงใหม่ 10.6.6.0/24 ใช้กฎเดียวกับ ATM เดิม · ทดสอบโดยย้ายพอร์ต PC ATM เข้า VLAN31 ชั่วคราว แล้วย้ายกลับ (ห้าม write memory ระหว่างทดสอบ)",
-      "MLS01 (enable) + PC ATM",
+      "MLS01 (ต้อง enable ก่อน ไม่งั้นขั้นย้ายพอร์ตไม่ติด) + PC ATM · ถ้ายังอยู่ VLAN30 แล้ว ping 10.6.6.1 = unreachable (ACL ATM-IN บล็อก — ถูกต้อง)",
       [["MLS01: Gateway ใหม่", "show vrrp brief | include Vl31", "Vl31 MASTER pri 110 · VIP 10.6.6.1"],
        ["MLS01: ย้ายพอร์ต ATM ชั่วคราว", "configure terminal\ninterface GigabitEthernet1/0/7\n switchport access vlan 31\nend", "Access Mode VLAN 31"],
-       ["PC ATM: ขอ IP ใหม่", "ipconfig /release\nipconfig /renew", "ได้ 10.6.6.100 gw 10.6.6.1"],
+       ["PC ATM: ขอ IP ใหม่ (ระบุเฉพาะการ์ดแลป ห้ามปล่อยการ์ดเน็ต)", "ipconfig /release \"Ethernet 2\"\nipconfig /renew \"Ethernet 2\"\nroute add 10.6.0.0 mask 255.255.0.0 10.6.6.1 metric 1", "ได้ 10.6.6.100 gw 10.6.6.1 · route ชั่วคราวไปวงแลปผ่าน 10.6.6.1 (ชื่อการ์ดดูจาก ipconfig — การ์ดที่ได้ 10.6.x)"],
        ["PC ATM: Gateway (ต้องได้)", "ping 10.6.6.1", "Reply"],
        ["PC ATM: ไป Teller (ต้องไม่ได้)", "ping 10.6.0.101", "Reply from 10.6.6.2: Destination net unreachable", true],
        ["MLS01: counter", "show access-lists ATM-NEW-IN", "บรรทัด 50 / 60 มี matches"],
-       ["MLS01: ย้ายกลับ", "configure terminal\ninterface GigabitEthernet1/0/7\n switchport access vlan 30\nend", "PC ATM ipconfig /renew → กลับเป็น 10.6.2.x"]]],
+       ["MLS01: ย้ายกลับ", "configure terminal\ninterface GigabitEthernet1/0/7\n switchport access vlan 30\nend", "Access Mode VLAN 30"],
+       ["PC ATM: กลับวงเดิม", "route delete 10.6.0.0 mask 255.255.0.0 10.6.6.1\nipconfig /release \"Ethernet 2\"\nipconfig /renew \"Ethernet 2\"", "กลับเป็น 10.6.2.x · ห้าม write memory ระหว่างทดสอบ"]]],
   ];
   const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   let html = "", toc = "", id = 0;
