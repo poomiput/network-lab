@@ -183,6 +183,16 @@ try {
       "SW01 (Console แถวล่าง 14) — ทำที่ > ได้",
       [["ping อินเทอร์เน็ตจำลอง", "ping 192.0.2.10", "!!!!! (5/5)"],
        ["ดูทาง", "traceroute 192.0.2.10 numeric", "hop 1 = 10.6.16.1 (R01)"]]],
+    ["Change Request: VLAN31 ATM-NEW", ["Step 10", "CR-01"], ["ok", "ผ่าน 11 ต.ค."],
+      "ATM วงใหม่ 10.6.6.0/24 ใช้กฎเดียวกับ ATM เดิม · ทดสอบโดยย้ายพอร์ต PC ATM เข้า VLAN31 ชั่วคราว แล้วย้ายกลับ (ห้าม write memory ระหว่างทดสอบ)",
+      "MLS01 (enable) + PC ATM",
+      [["MLS01: Gateway ใหม่", "show vrrp brief | include Vl31", "Vl31 MASTER pri 110 · VIP 10.6.6.1"],
+       ["MLS01: ย้ายพอร์ต ATM ชั่วคราว", "configure terminal\ninterface GigabitEthernet1/0/7\n switchport access vlan 31\nend", "Access Mode VLAN 31"],
+       ["PC ATM: ขอ IP ใหม่", "ipconfig /release\nipconfig /renew", "ได้ 10.6.6.100 gw 10.6.6.1"],
+       ["PC ATM: Gateway (ต้องได้)", "ping 10.6.6.1", "Reply"],
+       ["PC ATM: ไป Teller (ต้องไม่ได้)", "ping 10.6.0.101", "Reply from 10.6.6.2: Destination net unreachable", true],
+       ["MLS01: counter", "show access-lists ATM-NEW-IN", "บรรทัด 50 / 60 มี matches"],
+       ["MLS01: ย้ายกลับ", "configure terminal\ninterface GigabitEthernet1/0/7\n switchport access vlan 30\nend", "PC ATM ipconfig /renew → กลับเป็น 10.6.2.x"]]],
   ];
   const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   let html = "", toc = "", id = 0;

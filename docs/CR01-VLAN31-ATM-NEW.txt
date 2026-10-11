@@ -1,0 +1,135 @@
+! ===================================================================
+! G06 Change Request CR-01 (ใบงาน Step 10) — ชุด C9200L · VRRP   ผ่านบน Rack 11 ต.ค. ✅ (Apply + Verify; Rollback ยังไม่ได้รันจริง)
+! ภารกิจ: เพิ่ม ATM Subnet พร้อม Application Policy
+!   VLAN31 ATM-NEW · 10.6.6.0/24 · VIP 10.6.6.1 · MLS01 .2 (pri 110) / MLS02 .3 (pri 100)
+!   DHCP บน MLS01 (.100+) · ACL ATM-NEW-IN = นโยบายเดียวกับ ATM-IN (ATM → App 10.6.1.10:8443 เท่านั้น)
+!   พอร์ตใหม่: Gi1/0/11 ที่หน้าสวิตช์ (ไม่มีช่องบนแผง)
+! ทำต้อง enable · ทำ MLS01 และ MLS02 ได้พร้อมกัน · ลำดับในแต่ละเครื่อง: BEFORE → APPLY → VERIFY
+! ===================================================================
+!
+! ----- BEFORE (Step 00): สำรองก่อนเปลี่ยน — ทั้ง MLS01 และ MLS02 -----
+! (ถาม Destination filename ให้กด Enter)
+copy running-config flash:G06-pre-cr01.cfg
+show vlan brief | include ^31
+show ip route 10.6.6.0
+! ต้องเห็น: ยังไม่มี VLAN31 / % Network not in table
+!
+! ----- APPLY MLS01: VLAN31 + Gateway หลัก + DHCP + Policy -----
+configure terminal
+vlan 31
+ name ATM-NEW
+exit
+interface Port-channel1
+ switchport trunk allowed vlan add 31
+exit
+ip access-list extended ATM-NEW-IN
+ 5 permit udp any eq bootpc any eq bootps
+ 6 permit 112 10.6.6.0 0.0.0.255 host 224.0.0.18
+ 7 permit icmp 10.6.6.0 0.0.0.255 10.6.6.0 0.0.0.255
+ 10 permit udp 10.6.6.0 0.0.0.255 host 192.0.2.10 eq domain
+ 20 permit tcp 10.6.6.0 0.0.0.255 host 192.0.2.10 eq domain
+ 30 permit udp 10.6.6.0 0.0.0.255 host 192.0.2.26 eq ntp
+ 40 permit tcp 10.6.6.0 0.0.0.255 host 10.6.1.10 eq 8443
+ 50 deny ip 10.6.6.0 0.0.0.255 10.6.4.0 0.0.0.255 log
+ 60 deny ip 10.6.6.0 0.0.0.255 10.6.0.0 0.0.0.255 log
+ 70 deny ip 10.6.6.0 0.0.0.255 10.6.3.0 0.0.0.255 log
+ 90 deny ip any any log
+exit
+interface Vlan31
+ description ATM-NEW GW | VIP 10.6.6.1 | MLS01 .2 pri 110
+ ip address 10.6.6.2 255.255.255.0
+ vrrp 31 address-family ipv4
+  address 10.6.6.1 primary
+  priority 110
+  exit-vrrp
+ ip ospf 10 area 0
+ ip access-group ATM-NEW-IN in
+ no shutdown
+exit
+ip dhcp excluded-address 10.6.6.1 10.6.6.99
+ip dhcp pool G06-ATM-NEW
+ network 10.6.6.0 255.255.255.0
+ default-router 10.6.6.1
+ dns-server 192.0.2.10 192.0.2.42
+exit
+interface GigabitEthernet1/0/11
+ description ACCESS port11 (switch front) | VLAN31 ATM-NEW client (DHCP)
+ switchport mode access
+ switchport access vlan 31
+ spanning-tree portfast
+ no shutdown
+end
+write memory
+!
+! ----- APPLY MLS02: VLAN31 + Gateway สำรอง + Policy (ไม่มี DHCP) -----
+configure terminal
+vlan 31
+ name ATM-NEW
+exit
+interface Port-channel1
+ switchport trunk allowed vlan add 31
+exit
+ip access-list extended ATM-NEW-IN
+ 5 permit udp any eq bootpc any eq bootps
+ 6 permit 112 10.6.6.0 0.0.0.255 host 224.0.0.18
+ 7 permit icmp 10.6.6.0 0.0.0.255 10.6.6.0 0.0.0.255
+ 10 permit udp 10.6.6.0 0.0.0.255 host 192.0.2.10 eq domain
+ 20 permit tcp 10.6.6.0 0.0.0.255 host 192.0.2.10 eq domain
+ 30 permit udp 10.6.6.0 0.0.0.255 host 192.0.2.26 eq ntp
+ 40 permit tcp 10.6.6.0 0.0.0.255 host 10.6.1.10 eq 8443
+ 50 deny ip 10.6.6.0 0.0.0.255 10.6.4.0 0.0.0.255 log
+ 60 deny ip 10.6.6.0 0.0.0.255 10.6.0.0 0.0.0.255 log
+ 70 deny ip 10.6.6.0 0.0.0.255 10.6.3.0 0.0.0.255 log
+ 90 deny ip any any log
+exit
+interface Vlan31
+ description ATM-NEW GW | VIP 10.6.6.1 | MLS02 .3 pri 100
+ ip address 10.6.6.3 255.255.255.0
+ vrrp 31 address-family ipv4
+  address 10.6.6.1 primary
+  priority 100
+  exit-vrrp
+ ip ospf 10 area 0
+ ip access-group ATM-NEW-IN in
+ no shutdown
+exit
+interface GigabitEthernet1/0/11
+ description ACCESS port11 (switch front) | VLAN31 ATM-NEW client (DHCP)
+ switchport mode access
+ switchport access vlan 31
+ spanning-tree portfast
+ no shutdown
+end
+write memory
+!
+! ----- VERIFY (ทำหลังทั้งสองเครื่องเสร็จ) -----
+! MLS01: show vrrp brief | include Vl31             -> MASTER pri 110
+! MLS02: show vrrp brief | include Vl31             -> BACKUP, Master 10.6.6.2
+! MLS01: show interfaces trunk | include Po1        -> allowed 10,20,30,31,40,50,60
+! CE01 : show ip route 10.6.6.0                     -> O via 10.6.240.2 และ 10.6.240.6
+! PC ทดสอบ (เสียบ Gi1/0/11 หรือย้าย Gi1/0/7 เข้า VLAN31 ชั่วคราว):
+!        ipconfig /renew -> 10.6.6.100+ gw 10.6.6.1 · ping 10.6.6.1 ได้
+!        ping 10.6.0.101 (Teller) -> Destination net unreachable (ATM-NEW-IN บรรทัด 60)
+! MLS01: show access-lists ATM-NEW-IN               -> counter บรรทัด 5 / 60 ขึ้น
+! Regression: Teller ยัง ping 10.6.255.1 ได้ · VLAN10–60 VRRP เหมือนเดิม
+!
+! ----- ROLLBACK TRIGGER -----
+! VRRP VLAN อื่นเปลี่ยนสถานะ / Po1 ไม่ใช่ (SU) / OSPF neighbor หลุด / Teller หรือ ATM เดิมใช้งานไม่ได้
+!
+! ----- ROLLBACK STEPS (MLS01 แล้ว MLS02; MLS02 ข้ามบรรทัด dhcp) -----
+configure terminal
+interface GigabitEthernet1/0/11
+ no switchport access vlan
+ shutdown
+exit
+no interface Vlan31
+no ip access-list extended ATM-NEW-IN
+no ip dhcp pool G06-ATM-NEW
+no ip dhcp excluded-address 10.6.6.1 10.6.6.99
+interface Port-channel1
+ switchport trunk allowed vlan remove 31
+exit
+no vlan 31
+end
+write memory
+! ตรวจหลัง rollback: show vlan brief | include ^31 (ว่าง) · show vrrp brief (เหลือ 10–60 เหมือน BEFORE)
