@@ -184,12 +184,77 @@ window.G06_CONFIGS = {
      ]
     },
     {
+     "title": "SIM-NAT: NAT ให้ Client ออก \"ISP จำลอง\" (Step 07B) — outside = Loopback101",
+     "kind": "config",
+     "status": "untested",
+     "notes": [
+      "ทดสอบได้แค่ว่าเกิดการแปลง (show ip nat translations) · ไม่มี reply เพราะไม่มีเครื่องจริงหลัง ISP"
+     ],
+     "commands": [
+      "configure terminal",
+      "ip access-list extended NAT-ELIGIBLE",
+      " deny ip 10.6.0.0 0.0.15.255 10.6.0.0 0.0.255.255",
+      " permit ip 10.6.0.0 0.0.15.255 any",
+      "exit",
+      "route-map CLIENT-NAT permit 10",
+      " match ip address NAT-ELIGIBLE",
+      "exit",
+      "interface GigabitEthernet0/0/0",
+      " ip nat inside",
+      "interface GigabitEthernet0/0/1",
+      " ip nat inside",
+      "interface Loopback101",
+      " ip nat outside",
+      "exit",
+      "ip nat inside source route-map CLIENT-NAT interface Loopback1 overload",
+      "end",
+      "write memory"
+     ],
+     "verify": [
+      "PC Teller ping 192.0.2.99 (ไม่ตอบ = ปกติ) -> show ip nat translations",
+      "-> icmp 198.51.100.1:x  10.6.0.10x:x  192.0.2.99 · Teller ping 10.6.x / DMZ ต้องไม่ถูก NAT"
+     ]
+    },
+    {
+     "title": "SIM-LOG: NTP + Syslog ไป Server DMZ แทน G04 (Step 08)",
+     "kind": "config",
+     "status": "untested",
+     "notes": [
+      "Server Ubuntu 198.51.100.12 = NTP (chrony) + Collector (rsyslog TCP 514 -> /var/log/g06-network.log)"
+     ],
+     "commands": [
+      "configure terminal",
+      "ntp server 198.51.100.12 prefer",
+      "ntp source Loopback1",
+      "logging buffered 65536 informational",
+      "logging trap informational",
+      "logging source-interface Loopback1",
+      "logging host 198.51.100.12 transport tcp port 514",
+      "login on-failure log",
+      "login on-success log",
+      "end",
+      "write memory"
+     ],
+     "verify": [
+      "show ntp associations (* = sync, รอ 5-10 นาที) / show logging | include 198.51.100.12",
+      "Server: sudo tail /var/log/g06-network.log -> เห็น log จาก 198.51.100.1"
+     ]
+    },
+    {
      "title": "SIM-OFF: ลบของจำลอง (ทำก่อนลง WAN จริง)",
      "kind": "config",
      "status": "untested",
      "notes": [],
      "commands": [
       "configure terminal",
+      "interface GigabitEthernet0/0/0",
+      " no ip nat inside",
+      "interface GigabitEthernet0/0/1",
+      " no ip nat inside",
+      "exit",
+      "no ip nat inside source route-map CLIENT-NAT interface Loopback1 overload",
+      "no ntp server 198.51.100.12",
+      "no logging host 198.51.100.12 transport tcp port 514",
       "no ip route 0.0.0.0 0.0.0.0 172.31.1.25",
       "no interface Loopback101",
       "no interface Loopback102",
@@ -520,12 +585,77 @@ window.G06_CONFIGS = {
      ]
     },
     {
+     "title": "SIM-NAT: NAT ให้ Client ออก \"ISP จำลอง\" (Step 07B) — outside = Loopback101",
+     "kind": "config",
+     "status": "untested",
+     "notes": [
+      "ทดสอบได้แค่ว่าเกิดการแปลง (show ip nat translations) · ไม่มี reply เพราะไม่มีเครื่องจริงหลัง ISP"
+     ],
+     "commands": [
+      "configure terminal",
+      "ip access-list extended NAT-ELIGIBLE",
+      " deny ip 10.6.0.0 0.0.15.255 10.6.0.0 0.0.255.255",
+      " permit ip 10.6.0.0 0.0.15.255 any",
+      "exit",
+      "route-map CLIENT-NAT permit 10",
+      " match ip address NAT-ELIGIBLE",
+      "exit",
+      "interface GigabitEthernet0/0/0",
+      " ip nat inside",
+      "interface GigabitEthernet0/0/1",
+      " ip nat inside",
+      "interface Loopback101",
+      " ip nat outside",
+      "exit",
+      "ip nat inside source route-map CLIENT-NAT interface Loopback1 overload",
+      "end",
+      "write memory"
+     ],
+     "verify": [
+      "PC Teller ping 192.0.2.99 (ไม่ตอบ = ปกติ) -> show ip nat translations",
+      "-> icmp 198.51.100.2:x  10.6.0.10x:x  192.0.2.99 · Teller ping 10.6.x / DMZ ต้องไม่ถูก NAT"
+     ]
+    },
+    {
+     "title": "SIM-LOG: NTP + Syslog ไป Server DMZ แทน G04 (Step 08)",
+     "kind": "config",
+     "status": "untested",
+     "notes": [
+      "Server Ubuntu 198.51.100.12 = NTP (chrony) + Collector (rsyslog TCP 514 -> /var/log/g06-network.log)"
+     ],
+     "commands": [
+      "configure terminal",
+      "ntp server 198.51.100.12 prefer",
+      "ntp source Loopback1",
+      "logging buffered 65536 informational",
+      "logging trap informational",
+      "logging source-interface Loopback1",
+      "logging host 198.51.100.12 transport tcp port 514",
+      "login on-failure log",
+      "login on-success log",
+      "end",
+      "write memory"
+     ],
+     "verify": [
+      "show ntp associations (* = sync, รอ 5-10 นาที) / show logging | include 198.51.100.12",
+      "Server: sudo tail /var/log/g06-network.log -> เห็น log จาก 198.51.100.2"
+     ]
+    },
+    {
      "title": "SIM-OFF: ลบของจำลอง (ทำก่อนลง WAN จริง)",
      "kind": "config",
      "status": "untested",
      "notes": [],
      "commands": [
       "configure terminal",
+      "interface GigabitEthernet0/0/0",
+      " no ip nat inside",
+      "interface GigabitEthernet0/0/1",
+      " no ip nat inside",
+      "exit",
+      "no ip nat inside source route-map CLIENT-NAT interface Loopback1 overload",
+      "no ntp server 198.51.100.12",
+      "no logging host 198.51.100.12 transport tcp port 514",
       "no ip route 0.0.0.0 0.0.0.0 172.31.2.25",
       "no interface Loopback101",
       "no interface Loopback102",
@@ -1992,12 +2122,77 @@ window.G06_CONFIGS = {
      ]
     },
     {
+     "title": "SIM-NAT: NAT ให้ Client ออก \"ISP จำลอง\" (Step 07B) — outside = Loopback101",
+     "kind": "config",
+     "status": "untested",
+     "notes": [
+      "ทดสอบได้แค่ว่าเกิดการแปลง (show ip nat translations) · ไม่มี reply เพราะไม่มีเครื่องจริงหลัง ISP"
+     ],
+     "commands": [
+      "configure terminal",
+      "ip access-list extended NAT-ELIGIBLE",
+      " deny ip 10.6.0.0 0.0.15.255 10.6.0.0 0.0.255.255",
+      " permit ip 10.6.0.0 0.0.15.255 any",
+      "exit",
+      "route-map CLIENT-NAT permit 10",
+      " match ip address NAT-ELIGIBLE",
+      "exit",
+      "interface GigabitEthernet0/0/0",
+      " ip nat inside",
+      "interface GigabitEthernet0/0/1",
+      " ip nat inside",
+      "interface Loopback101",
+      " ip nat outside",
+      "exit",
+      "ip nat inside source route-map CLIENT-NAT interface Loopback1 overload",
+      "end",
+      "write memory"
+     ],
+     "verify": [
+      "PC Teller ping 192.0.2.99 (ไม่ตอบ = ปกติ) -> show ip nat translations",
+      "-> icmp 198.51.100.1:x  10.6.0.10x:x  192.0.2.99 · Teller ping 10.6.x / DMZ ต้องไม่ถูก NAT"
+     ]
+    },
+    {
+     "title": "SIM-LOG: NTP + Syslog ไป Server DMZ แทน G04 (Step 08)",
+     "kind": "config",
+     "status": "untested",
+     "notes": [
+      "Server Ubuntu 198.51.100.12 = NTP (chrony) + Collector (rsyslog TCP 514 -> /var/log/g06-network.log)"
+     ],
+     "commands": [
+      "configure terminal",
+      "ntp server 198.51.100.12 prefer",
+      "ntp source Loopback1",
+      "logging buffered 65536 informational",
+      "logging trap informational",
+      "logging source-interface Loopback1",
+      "logging host 198.51.100.12 transport tcp port 514",
+      "login on-failure log",
+      "login on-success log",
+      "end",
+      "write memory"
+     ],
+     "verify": [
+      "show ntp associations (* = sync, รอ 5-10 นาที) / show logging | include 198.51.100.12",
+      "Server: sudo tail /var/log/g06-network.log -> เห็น log จาก 198.51.100.1"
+     ]
+    },
+    {
      "title": "SIM-OFF: ลบของจำลอง (ทำก่อนลง WAN จริง)",
      "kind": "config",
      "status": "untested",
      "notes": [],
      "commands": [
       "configure terminal",
+      "interface GigabitEthernet0/0/0",
+      " no ip nat inside",
+      "interface GigabitEthernet0/0/1",
+      " no ip nat inside",
+      "exit",
+      "no ip nat inside source route-map CLIENT-NAT interface Loopback1 overload",
+      "no ntp server 198.51.100.12",
+      "no logging host 198.51.100.12 transport tcp port 514",
       "no ip route 0.0.0.0 0.0.0.0 172.31.1.25",
       "no interface Loopback101",
       "no interface Loopback102",
@@ -2329,12 +2524,77 @@ window.G06_CONFIGS = {
      ]
     },
     {
+     "title": "SIM-NAT: NAT ให้ Client ออก \"ISP จำลอง\" (Step 07B) — outside = Loopback101",
+     "kind": "config",
+     "status": "untested",
+     "notes": [
+      "ทดสอบได้แค่ว่าเกิดการแปลง (show ip nat translations) · ไม่มี reply เพราะไม่มีเครื่องจริงหลัง ISP"
+     ],
+     "commands": [
+      "configure terminal",
+      "ip access-list extended NAT-ELIGIBLE",
+      " deny ip 10.6.0.0 0.0.15.255 10.6.0.0 0.0.255.255",
+      " permit ip 10.6.0.0 0.0.15.255 any",
+      "exit",
+      "route-map CLIENT-NAT permit 10",
+      " match ip address NAT-ELIGIBLE",
+      "exit",
+      "interface GigabitEthernet0/0/0",
+      " ip nat inside",
+      "interface GigabitEthernet0/0/1",
+      " ip nat inside",
+      "interface Loopback101",
+      " ip nat outside",
+      "exit",
+      "ip nat inside source route-map CLIENT-NAT interface Loopback1 overload",
+      "end",
+      "write memory"
+     ],
+     "verify": [
+      "PC Teller ping 192.0.2.99 (ไม่ตอบ = ปกติ) -> show ip nat translations",
+      "-> icmp 198.51.100.2:x  10.6.0.10x:x  192.0.2.99 · Teller ping 10.6.x / DMZ ต้องไม่ถูก NAT"
+     ]
+    },
+    {
+     "title": "SIM-LOG: NTP + Syslog ไป Server DMZ แทน G04 (Step 08)",
+     "kind": "config",
+     "status": "untested",
+     "notes": [
+      "Server Ubuntu 198.51.100.12 = NTP (chrony) + Collector (rsyslog TCP 514 -> /var/log/g06-network.log)"
+     ],
+     "commands": [
+      "configure terminal",
+      "ntp server 198.51.100.12 prefer",
+      "ntp source Loopback1",
+      "logging buffered 65536 informational",
+      "logging trap informational",
+      "logging source-interface Loopback1",
+      "logging host 198.51.100.12 transport tcp port 514",
+      "login on-failure log",
+      "login on-success log",
+      "end",
+      "write memory"
+     ],
+     "verify": [
+      "show ntp associations (* = sync, รอ 5-10 นาที) / show logging | include 198.51.100.12",
+      "Server: sudo tail /var/log/g06-network.log -> เห็น log จาก 198.51.100.2"
+     ]
+    },
+    {
      "title": "SIM-OFF: ลบของจำลอง (ทำก่อนลง WAN จริง)",
      "kind": "config",
      "status": "untested",
      "notes": [],
      "commands": [
       "configure terminal",
+      "interface GigabitEthernet0/0/0",
+      " no ip nat inside",
+      "interface GigabitEthernet0/0/1",
+      " no ip nat inside",
+      "exit",
+      "no ip nat inside source route-map CLIENT-NAT interface Loopback1 overload",
+      "no ntp server 198.51.100.12",
+      "no logging host 198.51.100.12 transport tcp port 514",
       "no ip route 0.0.0.0 0.0.0.0 172.31.2.25",
       "no interface Loopback101",
       "no interface Loopback102",

@@ -1,0 +1,18 @@
+/* ---------- ผลของ G06 ใต้แต่ละหน้า (examples-evidence.js) ---------- */
+.g06-result { margin: 14px 0 0; padding: 16px 18px; background: #fff; border-left: 4px solid #1d4ed8; box-shadow: 0 1px 3px #26344512; font-size: 13.5px; line-height: 1.6; color: #1b2430; }
+.g06-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-bottom: 8px; }
+.g06-head b { font-size: 14.5px; }
+.g06-label { color: #536173; }
+.g06-meter { flex: 1 1 120px; max-width: 220px; height: 8px; border-radius: 999px; background: #e6eaf0; overflow: hidden; }
+.g06-meter i { display: block; height: 100%; background: #1d4ed8; border-radius: 999px; }
+.g06-pct { font-weight: 600; font-variant-numeric: tabular-nums; padding: 1px 9px; border-radius: 999px; font-size: 12.5px; }
+.g06-pct.full { background: #e3f4ea; color: #17703f; }
+.g06-pct.part { background: #fff3d6; color: #8a5a00; }
+.g06-pct.low { background: #eef1f5; color: #5b6577; }
+.g06-did { margin: 0 0 8px; padding-left: 20px; }
+.g06-did li { margin: 2px 0; }
+.g06-out { margin: 8px 0 0; border: 1px solid #dce2e8; border-radius: 8px; overflow: hidden; }
+.g06-out figcaption { padding: 5px 10px; background: #f1f4f8; color: #455265; font-size: 12px; font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; }
+.g06-out pre { margin: 0; padding: 8px 10px; overflow-x: auto; font-size: 12px; line-height: 1.5; background: #0f1720; color: #d7e3f0; }
+.g06-submit { margin-top: 10px; padding: 7px 10px; border-radius: 8px; background: #eef4ff; color: #1e3a8a; font-size: 12.5px; }
+@media (max-width: 500px) { .g06-result { padding: 12px; } }
