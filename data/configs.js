@@ -1090,7 +1090,7 @@ window.G06_CONFIGS = {
      "notes": [
       "ATM ใช้ได้แค่ App 10.6.1.10:8443 + DNS/NTP ของ collector; ห้ามเข้า Teller/Management/Database",
       "บรรทัด 5-7 จำเป็นบน Rack: ไม่งั้น ATM ขอ DHCP ไม่ได้ และ HSRP hello ของ MLS อีกตัวโดนบล็อกจน Active ทั้งคู่",
-      "Database รับเฉพาะ App Server; เติม <DB_PORT> ก่อน (ดูหัวส่วนนี้)"
+      "Database รับเฉพาะ App Server · ทีมเลือก DB = TCP 3306 (MySQL) — ผ่านบน Rack 11 ต.ค.: App ✅ / Teller, Admin, ATM ถูกบล็อก"
      ],
      "commands": [
       "configure terminal",
@@ -1111,7 +1111,7 @@ window.G06_CONFIGS = {
       " ip access-group ATM-IN in",
       "exit",
       "ip access-list extended DATABASE-OUT",
-      " 10 permit tcp host 10.6.1.10 host 10.6.3.10 eq <DB_PORT>",
+      " 10 permit tcp host 10.6.1.10 host 10.6.3.10 eq 3306",
       " 90 deny ip any 10.6.3.0 0.0.0.255 log",
       "exit",
       "interface Vlan40",
@@ -1169,7 +1169,7 @@ window.G06_CONFIGS = {
    "untestedIntro": [
     "สถานะ: ทุก BLOCK ด้านล่าง = ยังไม่ได้ลง Rack จริง / ยังไม่ทดสอบ (เขียนจากโจทย์ + ชุดที่ผ่านใน EVE)",
     "ค่าที่ต้องเติมก่อนวาง:",
-    "  <DB_PORT>         = พอร์ต TCP ของฐานข้อมูลที่ใช้จริง เช่น 3306 (MySQL) / 1433 (SQL Server) / 5432 (PostgreSQL)",
+    "  DB port = 3306 (ทีมเลือก MySQL; เปลี่ยนได้ถ้าอาจารย์กำหนดเอง)",
     "  <รหัสที่ทีมตั้งเอง> = รหัสผู้ดูแล (ตั้งเอง ห้ามเขียนรหัสจริงลงไฟล์ที่แชร์)",
     "  (<-> ใน description คือลูกศรธรรมดา ไม่ต้องแทน)",
     "ถ้าลืมแทนค่า เครื่องจะขึ้น % Invalid input ที่บรรทัดนั้น (ไม่เสียหาย แค่บรรทัดนั้นไม่ทำงาน) ให้แทนแล้ววางใหม่"
@@ -1444,7 +1444,7 @@ window.G06_CONFIGS = {
      "notes": [
       "ATM ใช้ได้แค่ App 10.6.1.10:8443 + DNS/NTP ของ collector; ห้ามเข้า Teller/Management/Database",
       "บรรทัด 5-7 จำเป็นบน Rack: ไม่งั้น ATM ขอ DHCP ไม่ได้ และ HSRP hello ของ MLS อีกตัวโดนบล็อกจน Active ทั้งคู่",
-      "Database รับเฉพาะ App Server; เติม <DB_PORT> ก่อน (ดูหัวส่วนนี้)"
+      "Database รับเฉพาะ App Server · ทีมเลือก DB = TCP 3306 (MySQL) — ผ่านบน Rack 11 ต.ค.: App ✅ / Teller, Admin, ATM ถูกบล็อก"
      ],
      "commands": [
       "configure terminal",
@@ -1465,7 +1465,7 @@ window.G06_CONFIGS = {
       " ip access-group ATM-IN in",
       "exit",
       "ip access-list extended DATABASE-OUT",
-      " 10 permit tcp host 10.6.1.10 host 10.6.3.10 eq <DB_PORT>",
+      " 10 permit tcp host 10.6.1.10 host 10.6.3.10 eq 3306",
       " 90 deny ip any 10.6.3.0 0.0.0.255 log",
       "exit",
       "interface Vlan40",
@@ -1523,7 +1523,7 @@ window.G06_CONFIGS = {
    "untestedIntro": [
     "สถานะ: ทุก BLOCK ด้านล่าง = ยังไม่ได้ลง Rack จริง / ยังไม่ทดสอบ (เขียนจากโจทย์ + ชุดที่ผ่านใน EVE)",
     "ค่าที่ต้องเติมก่อนวาง:",
-    "  <DB_PORT>         = พอร์ต TCP ของฐานข้อมูลที่ใช้จริง เช่น 3306 (MySQL) / 1433 (SQL Server) / 5432 (PostgreSQL)",
+    "  DB port = 3306 (ทีมเลือก MySQL; เปลี่ยนได้ถ้าอาจารย์กำหนดเอง)",
     "  <รหัสที่ทีมตั้งเอง> = รหัสผู้ดูแล (ตั้งเอง ห้ามเขียนรหัสจริงลงไฟล์ที่แชร์)",
     "  (<-> ใน description คือลูกศรธรรมดา ไม่ต้องแทน)",
     "ถ้าลืมแทนค่า เครื่องจะขึ้น % Invalid input ที่บรรทัดนั้น (ไม่เสียหาย แค่บรรทัดนั้นไม่ทำงาน) ให้แทนแล้ววางใหม่"
@@ -3020,7 +3020,7 @@ window.G06_CONFIGS = {
      ]
     },
     {
-     "title": "U1: กฎระหว่างโซน ATM / Database (Step 06) — ATM-IN ผ่านบน Rack C9200L 8 ต.ค. ✅ / DATABASE-OUT [ยังไม่ทดสอบ]",
+     "title": "U1: กฎระหว่างโซน ATM / Database (Step 06) — ATM-IN ผ่านบน Rack 8 ต.ค. ✅ / DATABASE-OUT ผ่านบน Rack 11 ต.ค. ✅",
      "kind": "config",
      "status": "passed",
      "notes": [
@@ -3028,7 +3028,7 @@ window.G06_CONFIGS = {
       "พิสูจน์บรรทัด 6: ถอดออกบน MLS02 แล้ว Vl30 BACKUP->MASTER (Master ซ้อน), ใส่คืนแล้ว MASTER->BACKUP ทันที",
       "ATM ใช้ได้แค่ App 10.6.1.10:8443 + DNS/NTP ของ collector; ห้ามเข้า Teller/Management/Database",
       "บรรทัด 5-7 จำเป็นบน Rack: ไม่งั้น ATM ขอ DHCP ไม่ได้ และ VRRP advertisement (IP protocol 112 ไป 224.0.0.18) ของ MLS อีกตัวโดนบล็อกจน Master ทั้งคู่",
-      "Database รับเฉพาะ App Server; เติม <DB_PORT> ก่อน (ดูหัวส่วนนี้)"
+      "Database รับเฉพาะ App Server · ทีมเลือก DB = TCP 3306 (MySQL) — ผ่านบน Rack 11 ต.ค.: App ✅ / Teller, Admin, ATM ถูกบล็อก"
      ],
      "commands": [
       "configure terminal",
@@ -3049,7 +3049,7 @@ window.G06_CONFIGS = {
       " ip access-group ATM-IN in",
       "exit",
       "ip access-list extended DATABASE-OUT",
-      " 10 permit tcp host 10.6.1.10 host 10.6.3.10 eq <DB_PORT>",
+      " 10 permit tcp host 10.6.1.10 host 10.6.3.10 eq 3306",
       " 90 deny ip any 10.6.3.0 0.0.0.255 log",
       "exit",
       "interface Vlan40",
@@ -3107,7 +3107,7 @@ window.G06_CONFIGS = {
    "untestedIntro": [
     "สถานะ: ทุก BLOCK ด้านล่าง = ยังไม่ได้ลง Rack จริง / ยังไม่ทดสอบ (เขียนจากโจทย์ + ชุดที่ผ่านใน EVE)",
     "ค่าที่ต้องเติมก่อนวาง:",
-    "  <DB_PORT>         = พอร์ต TCP ของฐานข้อมูลที่ใช้จริง เช่น 3306 (MySQL) / 1433 (SQL Server) / 5432 (PostgreSQL)",
+    "  DB port = 3306 (ทีมเลือก MySQL; เปลี่ยนได้ถ้าอาจารย์กำหนดเอง)",
     "  <รหัสที่ทีมตั้งเอง> = รหัสผู้ดูแล (ตั้งเอง ห้ามเขียนรหัสจริงลงไฟล์ที่แชร์)",
     "  (<-> ใน description คือลูกศรธรรมดา ไม่ต้องแทน)",
     "ถ้าลืมแทนค่า เครื่องจะขึ้น % Invalid input ที่บรรทัดนั้น (ไม่เสียหาย แค่บรรทัดนั้นไม่ทำงาน) ให้แทนแล้ววางใหม่"
@@ -3382,7 +3382,7 @@ window.G06_CONFIGS = {
      ]
     },
     {
-     "title": "U1: กฎระหว่างโซน ATM / Database (Step 06) — ATM-IN ผ่านบน Rack C9200L 8 ต.ค. ✅ / DATABASE-OUT [ยังไม่ทดสอบ]",
+     "title": "U1: กฎระหว่างโซน ATM / Database (Step 06) — ATM-IN ผ่านบน Rack 8 ต.ค. ✅ / DATABASE-OUT ผ่านบน Rack 11 ต.ค. ✅",
      "kind": "config",
      "status": "passed",
      "notes": [
@@ -3390,7 +3390,7 @@ window.G06_CONFIGS = {
       "พิสูจน์บรรทัด 6: ถอดออกบน MLS02 แล้ว Vl30 BACKUP->MASTER (Master ซ้อน), ใส่คืนแล้ว MASTER->BACKUP ทันที",
       "ATM ใช้ได้แค่ App 10.6.1.10:8443 + DNS/NTP ของ collector; ห้ามเข้า Teller/Management/Database",
       "บรรทัด 5-7 จำเป็นบน Rack: ไม่งั้น ATM ขอ DHCP ไม่ได้ และ VRRP advertisement (IP protocol 112 ไป 224.0.0.18) ของ MLS อีกตัวโดนบล็อกจน Master ทั้งคู่",
-      "Database รับเฉพาะ App Server; เติม <DB_PORT> ก่อน (ดูหัวส่วนนี้)"
+      "Database รับเฉพาะ App Server · ทีมเลือก DB = TCP 3306 (MySQL) — ผ่านบน Rack 11 ต.ค.: App ✅ / Teller, Admin, ATM ถูกบล็อก"
      ],
      "commands": [
       "configure terminal",
@@ -3411,7 +3411,7 @@ window.G06_CONFIGS = {
       " ip access-group ATM-IN in",
       "exit",
       "ip access-list extended DATABASE-OUT",
-      " 10 permit tcp host 10.6.1.10 host 10.6.3.10 eq <DB_PORT>",
+      " 10 permit tcp host 10.6.1.10 host 10.6.3.10 eq 3306",
       " 90 deny ip any 10.6.3.0 0.0.0.255 log",
       "exit",
       "interface Vlan40",
@@ -3469,7 +3469,7 @@ window.G06_CONFIGS = {
    "untestedIntro": [
     "สถานะ: ทุก BLOCK ด้านล่าง = ยังไม่ได้ลง Rack จริง / ยังไม่ทดสอบ (เขียนจากโจทย์ + ชุดที่ผ่านใน EVE)",
     "ค่าที่ต้องเติมก่อนวาง:",
-    "  <DB_PORT>         = พอร์ต TCP ของฐานข้อมูลที่ใช้จริง เช่น 3306 (MySQL) / 1433 (SQL Server) / 5432 (PostgreSQL)",
+    "  DB port = 3306 (ทีมเลือก MySQL; เปลี่ยนได้ถ้าอาจารย์กำหนดเอง)",
     "  <รหัสที่ทีมตั้งเอง> = รหัสผู้ดูแล (ตั้งเอง ห้ามเขียนรหัสจริงลงไฟล์ที่แชร์)",
     "  (<-> ใน description คือลูกศรธรรมดา ไม่ต้องแทน)",
     "ถ้าลืมแทนค่า เครื่องจะขึ้น % Invalid input ที่บรรทัดนั้น (ไม่เสียหาย แค่บรรทัดนั้นไม่ทำงาน) ให้แทนแล้ววางใหม่"

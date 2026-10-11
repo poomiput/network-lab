@@ -88,15 +88,15 @@ try {
 
   <!-- ===================== สรุป ===================== -->
   <section class="card hero" aria-label="สรุปความคืบหน้า">
-    <div class="big">69<small>%</small></div>
+    <div class="big">71<small>%</small></div>
     <div class="bars">
       <div class="bar-row">
-        <div class="bar-lbl"><span>ทั้งใบงาน (16 Step ในข้อ 9)</span><b>69%</b></div>
-        <div class="bar" role="progressbar" aria-valuenow="69" aria-valuemin="0" aria-valuemax="100"><i style="width:69%"></i></div>
+        <div class="bar-lbl"><span>ทั้งใบงาน (16 Step ในข้อ 9)</span><b>71%</b></div>
+        <div class="bar" role="progressbar" aria-valuenow="71" aria-valuemin="0" aria-valuemax="100"><i style="width:71%"></i></div>
       </div>
       <div class="bar-row">
-        <div class="bar-lbl"><span>ส่วนที่ทำได้โดยไม่ต้องมี ISP (LAN · Security · Server · Backup · Change)</span><b>92%</b></div>
-        <div class="bar alt" role="progressbar" aria-valuenow="92" aria-valuemin="0" aria-valuemax="100"><i style="width:92%"></i></div>
+        <div class="bar-lbl"><span>ส่วนที่ทำได้โดยไม่ต้องมี ISP (LAN · Security · Server · Backup · Change)</span><b>94%</b></div>
+        <div class="bar alt" role="progressbar" aria-valuenow="94" aria-valuemin="0" aria-valuemax="100"><i style="width:94%"></i></div>
       </div>
     </div>
     <p class="rule">วิธีคิด: ทำ 16 Step ของใบงาน (Step 00–11) แต่ละ Step มีน้ำหนักเท่ากัน · ผ่านบน Rack จริง = เต็ม · ทำบน Rack บางส่วน = ครึ่ง/สามส่วนสี่ · ผ่านแค่ใน EVE-NG = หนึ่งในสี่ · ยังไม่ทำ = 0 — ตัวเลขนี้นับเฉพาะของที่<b>ทดสอบแล้วมีหลักฐาน</b> ไม่นับคำสั่งที่เขียนรอไว้</p>
@@ -238,7 +238,7 @@ try {
     </li>
 
     <li>
-      <span class="pct now">69%</span>
+      <span class="pct now">71%</span>
       <div class="card">
         <h3>วันนี้: ตรวจ Rack + ทดสอบ PC + ย้าย Server เป็น Ubuntu</h3>
         <p class="when">11 ต.ค. 2026 · ตอนนี้</p>
@@ -279,14 +279,14 @@ try {
         <tr><td>04B</td><td>iBGP ระหว่าง CE + Branch WAN</td><td><span class="st part">บางส่วน</span></td><td>iBGP Established บน Rack · Branch WAN (R01 ↔ G01) ยังไม่มี ISP</td><td class="n">0.5</td></tr>
         <tr><td>05A</td><td>GRE Tunnel T1 / T2</td><td><span class="st eve">EVE เท่านั้น</span></td><td>Tunnel up + failover T1→T2 ใน EVE · Rack ต้องมี WAN ก่อน (endpoint ต้องถึงกันผ่าน ISP)</td><td class="n">0.25</td></tr>
         <tr><td>05B</td><td>Private Route บน Overlay</td><td><span class="st eve">EVE เท่านั้น</span></td><td>Static + redistribute (metric 20 / 100) ใน EVE · Rack รอ Tunnel</td><td class="n">0.25</td></tr>
-        <tr><td>06</td><td>ACL ระหว่าง Zone</td><td><span class="st part">เกือบครบ</span></td><td>ATM-IN ผ่านและพิสูจน์บรรทัดสำคัญแล้ว · MGMT-SOURCES ผ่าน · DATABASE-OUT เขียนไว้แต่ยังไม่ทดสอบ (ต้องรู้พอร์ต DB)</td><td class="n">0.75</td></tr>
+        <tr><td>06</td><td>ACL ระหว่าง Zone</td><td><span class="st ok">ผ่าน Rack</span></td><td>ATM-IN (ATM → App 8443 ผ่าน, ที่อื่นบล็อก) · MGMT-SOURCES · ATM-NEW-IN · <b>DATABASE-OUT</b>: DB รับเฉพาะ App :3306, Teller/Admin/ATM ถูกบล็อก (11 ต.ค.)</td><td class="n">1</td></tr>
         <tr><td>07</td><td>Public Application บน Server</td><td><span class="st ok">ผ่าน Rack</span></td><td>nginx บน <b>Ubuntu 26.04</b> ตามใบงาน (11 ต.ค.) · 198.51.100.12:8080 · Teller HTTP 200 · ATM ถูกบล็อก</td><td class="n">1</td></tr>
         <tr><td>07B</td><td>NAT ให้ Private Client</td><td><span class="st no">ยังไม่ผ่าน</span></td><td>ลองใน EVE แล้วยังพิสูจน์ไม่ได้ · Rack ต้องมี WAN</td><td class="n">0.1</td></tr>
         <tr><td>08</td><td>NTP, Syslog, หลักฐาน Cyber</td><td><span class="st part">เกือบครบ</span></td><td>Collector + NTP จำลองบน Server DMZ (11 ต.ค.) · log จาก Loopback1 TCP 514 · DET-01 + DET-02 ALERT · เหลือส่งเข้า G04 จริง</td><td class="n">0.75</td></tr>
         <tr><td>09</td><td>Verify, Failover, วัดเวลาฟื้น</td><td><span class="st part">เกือบครบ</span></td><td>Gateway failover ผ่านบน Rack (70/70, 79/80) · WAN failover แบบ ISP จำลองบน Rack ping ไม่หาย (11 ต.ค.) · eBGP failover จริงรอ ISP</td><td class="n">0.75</td></tr>
         <tr><td>10</td><td>Change Request (เพิ่ม ATM Subnet)</td><td><span class="st part">เกือบครบ</span></td><td>CR-01 VLAN31 ATM-NEW ลง + ทดสอบบน Rack แล้ว (11 ต.ค.) · เหลือ: อาจารย์อนุมัติในแบบฟอร์ม และทดสอบ rollback จริง</td><td class="n">0.75</td></tr>
         <tr><td>11</td><td>Backup, Rollback, ส่งมอบ</td><td><span class="st ok">ผ่าน Rack</span></td><td><code>flash:G06-accepted.cfg</code> ครบ 6 เครื่อง + สำเนานอกเครื่อง · <b>Restore ผ่าน</b>: <code>configure replace</code> บน CE02 → Rollback Done, OSPF/iBGP ไม่หลุด (11 ต.ค.)</td><td class="n">1</td></tr>
-        <tr><td colspan="4" style="text-align:right">รวม (เต็ม 16)</td><td class="n"><b>11.1 = 69%</b></td></tr>
+        <tr><td colspan="4" style="text-align:right">รวม (เต็ม 16)</td><td class="n"><b>11.35 = 71%</b></td></tr>
       </tbody>
     </table>
   </div>
@@ -314,8 +314,7 @@ try {
   <div class="card">
     <h3>ทำได้เลย ไม่ต้องรอ ISP <span class="note">(รวม +5%)</span></h3>
     <ol class="todo">
-            <li><b>ACL DATABASE-OUT</b> + PC Database 10.6.3.10 · ให้ Database รับแค่ Application Server <span class="gain">+1.6%</span></li>
-      <li><b>CR-01 ส่วนที่เหลือ:</b> ให้อาจารย์เซ็นอนุมัติ + ทดสอบ rollback จริง <span class="gain">+1.6%</span></li>
+                  <li><b>CR-01 ส่วนที่เหลือ:</b> ให้อาจารย์เซ็นอนุมัติ + ทดสอบ rollback จริง <span class="gain">+1.6%</span></li>
             <li>เปลี่ยน hostname บนเครื่องจริงเป็น G06-HQ-CE01 … ให้ตรงผังใบงาน (ไม่เพิ่ม % แต่ As-built จะตรง)</li>
     </ol>
     <h3 style="margin-top:18px">ต้องรอ ISP (G01 / G02) <span class="note">(รวม +27%)</span></h3>
